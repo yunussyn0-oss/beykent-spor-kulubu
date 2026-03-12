@@ -18,6 +18,12 @@ public class AntrenorController : Controller
 
     // ========== GİRİŞ İŞLEMLERİ ==========
 
+    // Ana sayfa artık direkt buraya yönlendiriyor
+    public IActionResult Index()
+    {
+        return RedirectToAction("Giris");
+    }
+
     public IActionResult Giris(int? salonId)
     {
         // Eğer zaten giriş yapmışsa panele yönlendir
