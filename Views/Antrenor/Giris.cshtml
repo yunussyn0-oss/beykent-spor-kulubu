@@ -8,7 +8,7 @@
     <div class="row justify-content-center">
         <div class="col-md-6 col-lg-5">
             <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
-                <!-- Üst Gradient Banner (Salon Adıyla) -->
+                <!-- Üst Gradient Banner -->
                 <div class="bg-gradient-primary text-white text-center py-5 px-4">
                     <i class="bi bi-person-badge-fill display-1 mb-3"></i>
                     <h2 class="fw-bold mb-0">Antrenör Girişi</h2>
@@ -26,6 +26,15 @@
 
                 <!-- Giriş Formu -->
                 <div class="card-body p-5">
+                    @if (TempData["Hata"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            @TempData["Hata"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    
                     @if (ViewBag.Hata != null)
                     {
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -35,28 +44,42 @@
                         </div>
                     }
 
+                    @if (TempData["Basarili"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            @TempData["Basarili"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
                     <form asp-action="Giris" method="post">
+                        @Html.AntiForgeryToken()
                         <input type="hidden" name="salonId" value="@salonId" />
                         
                         <div class="mb-4">
-                            <label class="form-label fw-bold text-muted small text-uppercase">E-posta Adresi</label>
+                            <label class="form-label fw-bold text-muted small text-uppercase">
+                                <i class="bi bi-envelope-fill me-2"></i>E-posta Adresi
+                            </label>
                             <div class="input-group input-group-lg">
                                 <span class="input-group-text bg-light border-0">
                                     <i class="bi bi-envelope-fill text-primary"></i>
                                 </span>
                                 <input type="email" name="email" class="form-control border-0 border-bottom rounded-0 ps-0" 
-                                       placeholder="ornek@beykentspor.com" required />
+                                       placeholder="ornek@beykentspor.com" value="burhan@beykentspor.com" required />
                             </div>
                         </div>
 
                         <div class="mb-5">
-                            <label class="form-label fw-bold text-muted small text-uppercase">Şifre</label>
+                            <label class="form-label fw-bold text-muted small text-uppercase">
+                                <i class="bi bi-lock-fill me-2"></i>Şifre
+                            </label>
                             <div class="input-group input-group-lg">
                                 <span class="input-group-text bg-light border-0">
                                     <i class="bi bi-lock-fill text-primary"></i>
                                 </span>
                                 <input type="password" name="sifre" class="form-control border-0 border-bottom rounded-0 ps-0" 
-                                       placeholder="••••••••" required />
+                                       placeholder="••••••••" value="123456" required />
                             </div>
                         </div>
 
@@ -86,6 +109,25 @@
                 <a href="/" class="text-decoration-none text-muted">
                     <i class="bi bi-arrow-left me-1"></i>Ana Sayfaya Dön
                 </a>
+            </div>
+
+            <!-- Test Bilgileri -->
+            <div class="card mt-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="fw-bold mb-2"><i class="bi bi-info-circle me-2"></i>Test Giriş Bilgileri</h6>
+                    <div class="row small">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Tam Yetki:</strong></p>
+                            <p class="mb-1">burhan@beykentspor.com / 123456</p>
+                            <p class="mb-1">ertan@beykentspor.com / 123456</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Yakuplu:</strong></p>
+                            <p class="mb-1">ozgur@beykentspor.com / 123456</p>
+                            <p class="mb-1">eftelya@beykentspor.com / 123456</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

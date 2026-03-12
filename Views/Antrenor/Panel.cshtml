@@ -53,6 +53,66 @@
         </div>
     </div>
 
+    <!-- Hızlı İşlem Kartları -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <a href="/Antrenor/Yoklama" class="text-decoration-none">
+                <div class="card shadow-sm hover-card border-0">
+                    <div class="card-body text-center p-4">
+                        <div class="bg-success bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
+                            <i class="bi bi-check2-circle text-success fs-1"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Yoklama Al</h5>
+                        <p class="text-muted small mb-0">Antrenman yoklaması</p>
+                        <span class="badge bg-success mt-3">Bugün Al</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="/Antrenor/VeliMesaj" class="text-decoration-none">
+                <div class="card shadow-sm hover-card border-0">
+                    <div class="card-body text-center p-4">
+                        <div class="bg-info bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
+                            <i class="bi bi-chat-dots text-info fs-1"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Veli Mesaj</h5>
+                        <p class="text-muted small mb-0">Toplu WhatsApp/SMS</p>
+                        <span class="badge bg-info mt-3">@ViewBag.SporcuSayisi Veli</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="/Antrenor/Istatistikler" class="text-decoration-none">
+                <div class="card shadow-sm hover-card border-0">
+                    <div class="card-body text-center p-4">
+                        <div class="bg-warning bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
+                            <i class="bi bi-bar-chart-line text-warning fs-1"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">İstatistikler</h5>
+                        <p class="text-muted small mb-0">Katılım raporları</p>
+                        <span class="badge bg-warning text-dark mt-3">Detaylar</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="/Antrenor/GecmisYoklamalar" class="text-decoration-none">
+                <div class="card shadow-sm hover-card border-0">
+                    <div class="card-body text-center p-4">
+                        <div class="bg-secondary bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
+                            <i class="bi bi-clock-history text-secondary fs-1"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Geçmiş Yoklamalar</h5>
+                        <p class="text-muted small mb-0">Önceki kayıtlar</p>
+                        <span class="badge bg-secondary mt-3">Arşiv</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
     <!-- Filtreleme Kartı -->
     <div class="row mb-4">
         <div class="col-12">
@@ -100,67 +160,7 @@
         </div>
     </div>
 
-    <!-- Hızlı İşlem Kartları -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-3">
-            <a href="/Antrenor/Yoklama" class="text-decoration-none">
-                <div class="card shadow-sm hover-card border-0">
-                    <div class="card-body text-center p-4">
-                        <div class="bg-success bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
-                            <i class="bi bi-check2-circle text-success fs-1"></i>
-                        </div>
-                        <h5 class="fw-bold mb-2">Yoklama Al</h5>
-                        <p class="text-muted small mb-0">Antrenman yoklaması</p>
-                        <span class="badge bg-success mt-3">Bugün Al</span>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-3">
-            <a href="/Antrenor/VeliMesaj" class="text-decoration-none">
-                <div class="card shadow-sm hover-card border-0">
-                    <div class="card-body text-center p-4">
-                        <div class="bg-info bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
-                            <i class="bi bi-chat-dots text-info fs-1"></i>
-                        </div>
-                        <h5 class="fw-bold mb-2">Veli Mesaj</h5>
-                        <p class="text-muted small mb-0">Toplu mesaj gönder</p>
-                        <span class="badge bg-info mt-3">@ViewBag.SporcuSayisi Veli</span>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-3">
-            <a href="/Antrenor/Istatistikler" class="text-decoration-none">
-                <div class="card shadow-sm hover-card border-0">
-                    <div class="card-body text-center p-4">
-                        <div class="bg-warning bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
-                            <i class="bi bi-bar-chart-line text-warning fs-1"></i>
-                        </div>
-                        <h5 class="fw-bold mb-2">İstatistikler</h5>
-                        <p class="text-muted small mb-0">Katılım raporları</p>
-                        <span class="badge bg-warning text-dark mt-3">Detaylar</span>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-3">
-            <a href="/Antrenor/GecmisYoklamalar" class="text-decoration-none">
-                <div class="card shadow-sm hover-card border-0">
-                    <div class="card-body text-center p-4">
-                        <div class="bg-secondary bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
-                            <i class="bi bi-clock-history text-secondary fs-1"></i>
-                        </div>
-                        <h5 class="fw-bold mb-2">Geçmiş Yoklamalar</h5>
-                        <p class="text-muted small mb-0">Önceki kayıtlar</p>
-                        <span class="badge bg-secondary mt-3">Arşiv</span>
-                    </div>
-                </div>
-            </a>
-        </div>
-    </div>
-
-    <!-- Sporcu Listesi -->
+    <!-- Sporcu Listesi (WhatsApp ve SMS Butonlu) -->
     <div class="row">
         <div class="col-12">
             <div class="card shadow-sm border-0">
@@ -194,7 +194,7 @@
                                         <th>Grup</th>
                                         <th>Veli Adı</th>
                                         <th>Veli Telefon</th>
-                                        <th width="220">İşlemler</th>
+                                        <th width="200">İşlemler</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -256,7 +256,7 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                <div class="d-flex gap-1 flex-wrap">
+                                                <div class="btn-group" role="group">
                                                     <!-- Detaylı Veli İletişim Sayfası -->
                                                     <a asp-action="VeliDetay" asp-route-id="@uye.Id" 
                                                        class="btn btn-sm btn-info" 
@@ -272,7 +272,7 @@
                                                         <i class="bi bi-whatsapp"></i>
                                                     </a>
                                                     
-                                                    <!-- Hızlı SMS -->
+                                                    <!-- Hızlı SMS (Mesaj önceden doldurulmuş) -->
                                                     <a href="sms:@uye.VeliTelefon?body=Sayın @uye.VeliAdSoyad, @uye.AdSoyad hakkında bilgilendirme yapmak istiyorum." 
                                                        class="btn btn-sm btn-primary" 
                                                        title="SMS">
@@ -322,16 +322,29 @@
     .badge {
         font-weight: 500;
     }
+    .btn-group .btn {
+        border-radius: 0;
+    }
+    .btn-group .btn:first-child {
+        border-top-left-radius: 5px;
+        border-bottom-left-radius: 5px;
+    }
+    .btn-group .btn:last-child {
+        border-top-right-radius: 5px;
+        border-bottom-right-radius: 5px;
+    }
 </style>
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
+            // Sayfa yüklendiğinde seçili değerleri al
             var seciliSalonId = '@ViewBag.SecilenSalonId';
             var seciliTakimId = '@ViewBag.SecilenTakimId';
             var seciliGrupId = '@ViewBag.SecilenGrupId';
 
+            // Takımları getir (Salon seçilince)
             function takimlariGetir(salonId, seciliTakimId) {
                 if (salonId) {
                     $('#takimFilter').empty().append('<option value="">Yükleniyor...</option>');
@@ -349,12 +362,15 @@
                                 takimSelect.append(option);
                             });
                             
+                            // Takım seçiliyse grupları da getir
                             if (seciliTakimId) {
                                 gruplariGetir(seciliTakimId, seciliGrupId);
                             }
                         } else {
                             takimSelect.append('<option value="">Bu salonda takım yok</option>');
                         }
+                    }).fail(function() {
+                        $('#takimFilter').empty().append('<option value="">Hata oluştu</option>');
                     });
                 } else {
                     $('#takimFilter').empty().append('<option value="">Tüm Takımlar</option>');
@@ -362,6 +378,7 @@
                 }
             }
 
+            // Grupları getir (Takım seçilince)
             function gruplariGetir(takimId, seciliGrupId) {
                 if (takimId) {
                     $('#grupFilter').empty().append('<option value="">Yükleniyor...</option>');
@@ -380,12 +397,15 @@
                         } else {
                             grupSelect.append('<option value="">Bu takımda grup yok</option>');
                         }
+                    }).fail(function() {
+                        $('#grupFilter').empty().append('<option value="">Hata oluştu</option>');
                     });
                 } else {
                     $('#grupFilter').empty().append('<option value="">Tüm Gruplar</option>');
                 }
             }
 
+            // Salon değişince takımları getir
             $('#salonFilter').change(function() {
                 var salonId = $(this).val();
                 $('#takimFilter').empty().append('<option value="">Tüm Takımlar</option>');
@@ -396,6 +416,7 @@
                 }
             });
 
+            // Takım değişince grupları getir
             $('#takimFilter').change(function() {
                 var takimId = $(this).val();
                 $('#grupFilter').empty().append('<option value="">Tüm Gruplar</option>');
@@ -405,10 +426,12 @@
                 }
             });
 
+            // Sayfa yüklendiğinde seçili salon varsa takımları getir
             if (seciliSalonId && seciliSalonId !== '') {
                 $('#salonFilter').val(seciliSalonId);
                 takimlariGetir(seciliSalonId, seciliTakimId);
                 
+                // Seçili takım varsa onu ayarla
                 if (seciliTakimId && seciliTakimId !== '') {
                     setTimeout(function() {
                         $('#takimFilter').val(seciliTakimId).trigger('change');
@@ -416,9 +439,11 @@
                 }
             }
 
+            // Telefon kopyalama işlevi
             $('.copy-phone').click(function() {
                 var phone = $(this).data('phone');
                 navigator.clipboard.writeText(phone).then(function() {
+                    // Toast bildirimi göster
                     var toast = document.createElement('div');
                     toast.className = 'position-fixed bottom-0 end-0 m-3';
                     toast.innerHTML = '<div class="alert alert-success alert-dismissible fade show">' +

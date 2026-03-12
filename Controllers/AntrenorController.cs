@@ -20,11 +20,13 @@ public class AntrenorController : Controller
 
     public IActionResult Giris(int? salonId)
     {
+        // Eğer zaten giriş yapmışsa panele yönlendir
         if (HttpContext.Session.GetInt32("AntrenorId") != null)
         {
             return RedirectToAction("Panel");
         }
 
+        // Hangi salondan gelindiğini ViewBag'e aktar
         ViewBag.GirisSalonId = salonId;
         
         // Salon bilgisini al
@@ -42,24 +44,32 @@ public class AntrenorController : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Giris(string email, string sifre, int? salonId)
     {
+        // Boş alan kontrolü
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(sifre))
         {
             ViewBag.Hata = "E-posta ve şifre boş bırakılamaz!";
             ViewBag.GirisSalonId = salonId;
+            var salon1 = _context.SporSalonlari.FirstOrDefault(s => s.Id == salonId);
+            ViewBag.GirisSalonAdi = salon1?.Ad ?? "Spor Salonu";
             return View();
         }
 
+        // Antrenörü veritabanında ara
         var antrenor = await _context.Antrenorler
             .Include(a => a.AntrenorTakimlar!)
                 .ThenInclude(at => at.SporSalonu)
             .FirstOrDefaultAsync(a => a.Email == email && a.Sifre == sifre);
 
+        // Antrenör bulunamadıysa
         if (antrenor == null)
         {
             ViewBag.Hata = "E-posta veya şifre hatalı!";
             ViewBag.GirisSalonId = salonId;
+            var salon2 = _context.SporSalonlari.FirstOrDefault(s => s.Id == salonId);
+            ViewBag.GirisSalonAdi = salon2?.Ad ?? "Spor Salonu";
             return View();
         }
 
@@ -80,10 +90,13 @@ public class AntrenorController : Controller
             {
                 ViewBag.Hata = "Bu salona giriş yetkiniz bulunmuyor!";
                 ViewBag.GirisSalonId = salonId;
+                var salon3 = _context.SporSalonlari.FirstOrDefault(s => s.Id == salonId);
+                ViewBag.GirisSalonAdi = salon3?.Ad ?? "Spor Salonu";
                 return View();
             }
         }
 
+        // Session'a kaydet
         HttpContext.Session.SetInt32("AntrenorId", antrenor.Id);
         HttpContext.Session.SetString("AntrenorAdi", antrenor.AdSoyad);
         HttpContext.Session.SetString("AntrenorEmail", antrenor.Email);
@@ -107,17 +120,23 @@ public class AntrenorController : Controller
 
     public async Task<IActionResult> Panel(int? salonId, int? takimId, int? grupId)
     {
+        // Oturum kontrolü
         var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
         if (antrenorId == null)
+        {
             return RedirectToAction("Giris");
+        }
 
+        // Antrenör bilgilerini getir
         var antrenor = await _context.Antrenorler
             .Include(a => a.AntrenorTakimlar!)
                 .ThenInclude(at => at.SporSalonu)
             .FirstOrDefaultAsync(a => a.Id == antrenorId);
 
         if (antrenor == null)
+        {
             return RedirectToAction("Giris");
+        }
 
         // Tam yetki kontrolü (Burhan ve Ertan)
         bool tamYetki = antrenor.AdSoyad.Contains("Burhan") || antrenor.AdSoyad.Contains("Ertan");
@@ -154,13 +173,19 @@ public class AntrenorController : Controller
 
         // Filtreleme
         if (salonId.HasValue && salonId > 0)
+        {
             query = query.Where(u => u.SporSalonuId == salonId);
+        }
         
         if (takimId.HasValue && takimId > 0)
+        {
             query = query.Where(u => u.TakimId == takimId);
+        }
         
         if (grupId.HasValue && grupId > 0)
+        {
             query = query.Where(u => u.GrupId == grupId);
+        }
 
         var sporcular = await query.OrderBy(u => u.AdSoyad).ToListAsync();
 
@@ -180,6 +205,17 @@ public class AntrenorController : Controller
 
         var salonlar = await salonQuery.ToListAsync();
         ViewBag.SporSalonlari = new SelectList(salonlar, "Id", "Ad", salonId);
+        
+        // Seçili salon adını bul
+        if (salonId.HasValue && salonId > 0)
+        {
+            var seciliSalon = salonlar.FirstOrDefault(s => s.Id == salonId);
+            ViewBag.SecilenSalonAdi = seciliSalon?.Ad ?? "Seçili Salon";
+        }
+        else
+        {
+            ViewBag.SecilenSalonAdi = "Tüm Salonlar";
+        }
         
         if (salonId.HasValue && salonId > 0)
         {
@@ -255,10 +291,13 @@ public class AntrenorController : Controller
     {
         var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
         if (antrenorId == null)
+        {
             return RedirectToAction("Giris");
+        }
 
         var seciliTarih = tarih ?? DateTime.Now.Date;
 
+        // Tüm takımları getir
         ViewBag.TumTakimlar = new SelectList(await _context.Takimlar.ToListAsync(), "Id", "Ad", takimId);
         
         if (takimId.HasValue && takimId > 0)
@@ -271,6 +310,7 @@ public class AntrenorController : Controller
             );
         }
 
+        // Sporcuları getir
         var query = _context.Uyeler
             .Include(u => u.SporSalonu)
             .Include(u => u.Brans)
@@ -279,13 +319,18 @@ public class AntrenorController : Controller
             .AsQueryable();
 
         if (takimId.HasValue && takimId > 0)
+        {
             query = query.Where(u => u.TakimId == takimId);
+        }
         
         if (grupId.HasValue && grupId > 0)
+        {
             query = query.Where(u => u.GrupId == grupId);
+        }
 
         var sporcular = await query.OrderBy(u => u.AdSoyad).ToListAsync();
 
+        // Bugünün yoklamalarını getir
         var yoklamalar = await _context.Yoklamalar
             .Where(y => y.AntrenorId == antrenorId && y.Tarih.Date == seciliTarih.Date)
             .ToDictionaryAsync(y => y.UyeId);
@@ -305,8 +350,11 @@ public class AntrenorController : Controller
     {
         var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
         if (antrenorId == null)
+        {
             return RedirectToAction("Giris");
+        }
 
+        // Önce o günün eski yoklamalarını sil
         var eskiYoklamalar = await _context.Yoklamalar
             .Where(y => y.AntrenorId == antrenorId && y.Tarih.Date == tarih.Date)
             .ToListAsync();
@@ -316,6 +364,7 @@ public class AntrenorController : Controller
             _context.Yoklamalar.RemoveRange(eskiYoklamalar);
         }
 
+        // Yeni yoklamaları ekle
         foreach (var y in yoklamalar.Where(y => !string.IsNullOrEmpty(y.Durum)))
         {
             y.AntrenorId = antrenorId.Value;
@@ -329,13 +378,15 @@ public class AntrenorController : Controller
         return RedirectToAction("Yoklama", new { tarih = tarih, takimId = takimId, grupId = grupId });
     }
 
-    // ========== VELİ İLETİŞİM SAYFALARI ==========
+    // ========== VELİ DETAY SAYFASI ==========
 
     public async Task<IActionResult> VeliDetay(int id)
     {
         var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
         if (antrenorId == null)
+        {
             return RedirectToAction("Giris");
+        }
 
         var uye = await _context.Uyeler
             .Include(u => u.SporSalonu)
@@ -345,17 +396,24 @@ public class AntrenorController : Controller
             .FirstOrDefaultAsync(u => u.Id == id);
 
         if (uye == null)
+        {
             return NotFound();
+        }
 
         return View(uye);
     }
+
+    // ========== VELİ MESAJ SAYFASI ==========
 
     public async Task<IActionResult> VeliMesaj(int? takimId, int? grupId)
     {
         var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
         if (antrenorId == null)
+        {
             return RedirectToAction("Giris");
+        }
 
+        // Tüm takımları getir
         ViewBag.TumTakimlar = new SelectList(await _context.Takimlar.ToListAsync(), "Id", "Ad", takimId);
         
         if (takimId.HasValue && takimId > 0)
@@ -368,6 +426,7 @@ public class AntrenorController : Controller
             );
         }
 
+        // Sporcuları getir
         var query = _context.Uyeler
             .Include(u => u.SporSalonu)
             .Include(u => u.Brans)
@@ -376,10 +435,14 @@ public class AntrenorController : Controller
             .AsQueryable();
 
         if (takimId.HasValue && takimId > 0)
+        {
             query = query.Where(u => u.TakimId == takimId);
+        }
         
         if (grupId.HasValue && grupId > 0)
+        {
             query = query.Where(u => u.GrupId == grupId);
+        }
 
         var sporcular = await query.OrderBy(u => u.AdSoyad).ToListAsync();
 
@@ -396,8 +459,11 @@ public class AntrenorController : Controller
     {
         var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
         if (antrenorId == null)
+        {
             return RedirectToAction("Giris");
+        }
 
+        // Tüm takımları getir
         ViewBag.TumTakimlar = new SelectList(await _context.Takimlar.ToListAsync(), "Id", "Ad", takimId);
         
         if (takimId.HasValue && takimId > 0)
@@ -410,15 +476,20 @@ public class AntrenorController : Controller
             );
         }
 
+        // İstatistikler
         var query = _context.Uyeler
             .Include(u => u.Aidatlar)
             .AsQueryable();
 
         if (takimId.HasValue && takimId > 0)
+        {
             query = query.Where(u => u.TakimId == takimId);
+        }
         
         if (grupId.HasValue && grupId > 0)
+        {
             query = query.Where(u => u.GrupId == grupId);
+        }
 
         var uyeler = await query.ToListAsync();
 
@@ -436,18 +507,25 @@ public class AntrenorController : Controller
     {
         var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
         if (antrenorId == null)
+        {
             return RedirectToAction("Giris");
+        }
 
         var query = _context.Yoklamalar
             .Where(y => y.AntrenorId == antrenorId)
             .Include(y => y.Uye)
             .AsQueryable();
 
+        // Tarih filtresi
         if (baslangic.HasValue)
+        {
             query = query.Where(y => y.Tarih.Date >= baslangic.Value.Date);
+        }
         
         if (bitis.HasValue)
+        {
             query = query.Where(y => y.Tarih.Date <= bitis.Value.Date);
+        }
 
         var yoklamalar = await query
             .OrderByDescending(y => y.Tarih)
@@ -533,35 +611,38 @@ public class AntrenorController : Controller
         var atamalar = new List<AntrenorTakim>();
 
         // Özgür (Yakuplu)
-        var ozgur = antrenorler.First(a => a.AdSoyad == "Özgür");
-        if (yakuplu != null)
+        var ozgur = antrenorler.FirstOrDefault(a => a.AdSoyad == "Özgür");
+        if (ozgur != null && yakuplu != null)
         {
             atamalar.Add(new AntrenorTakim { AntrenorId = ozgur.Id, SporSalonuId = yakuplu.Id, AtanmaTarihi = DateTime.Now });
         }
 
         // Eftelya (Yakuplu)
-        var eftelya = antrenorler.First(a => a.AdSoyad == "Eftelya");
-        if (yakuplu != null)
+        var eftelya = antrenorler.FirstOrDefault(a => a.AdSoyad == "Eftelya");
+        if (eftelya != null && yakuplu != null)
         {
             atamalar.Add(new AntrenorTakim { AntrenorId = eftelya.Id, SporSalonuId = yakuplu.Id, AtanmaTarihi = DateTime.Now });
         }
 
         // Sezer (Emlak Konut)
-        var sezer = antrenorler.First(a => a.AdSoyad == "Sezer");
-        if (emlakKonut != null)
+        var sezer = antrenorler.FirstOrDefault(a => a.AdSoyad == "Sezer");
+        if (sezer != null && emlakKonut != null)
         {
             atamalar.Add(new AntrenorTakim { AntrenorId = sezer.Id, SporSalonuId = emlakKonut.Id, AtanmaTarihi = DateTime.Now });
         }
 
         // Nesrin (Neşe Sever)
-        var nesrin = antrenorler.First(a => a.AdSoyad == "Nesrin");
-        if (neseSever != null)
+        var nesrin = antrenorler.FirstOrDefault(a => a.AdSoyad == "Nesrin");
+        if (nesrin != null && neseSever != null)
         {
             atamalar.Add(new AntrenorTakim { AntrenorId = nesrin.Id, SporSalonuId = neseSever.Id, AtanmaTarihi = DateTime.Now });
         }
 
-        await _context.AntrenorTakimlar.AddRangeAsync(atamalar);
-        await _context.SaveChangesAsync();
+        if (atamalar.Any())
+        {
+            await _context.AntrenorTakimlar.AddRangeAsync(atamalar);
+            await _context.SaveChangesAsync();
+        }
 
         return Content(@"
             <div style='font-family: Arial; padding: 20px;'>
@@ -598,8 +679,16 @@ public class AntrenorController : Controller
         var antrenorler = await _context.Antrenorler.ToListAsync();
         var atamalar = await _context.AntrenorTakimlar.ToListAsync();
         
-        _context.AntrenorTakimlar.RemoveRange(atamalar);
-        _context.Antrenorler.RemoveRange(antrenorler);
+        if (atamalar.Any())
+        {
+            _context.AntrenorTakimlar.RemoveRange(atamalar);
+        }
+        
+        if (antrenorler.Any())
+        {
+            _context.Antrenorler.RemoveRange(antrenorler);
+        }
+        
         await _context.SaveChangesAsync();
         
         return Content($"✅ {antrenorler.Count} antrenör ve {atamalar.Count} atama silindi.");

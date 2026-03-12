@@ -9,8 +9,7 @@ public class Uye
 {
     public int Id { get; set; }
     
-    // ========== KİŞİSEL BİLGİLER ==========
-    
+    // Kişisel Bilgiler
     [Display(Name = "Ad Soyad")]
     [Required(ErrorMessage = "Ad Soyad zorunludur")]
     public string AdSoyad { get; set; } = string.Empty;
@@ -23,7 +22,7 @@ public class Uye
     public DateTime DogumTarihi { get; set; }
     
     [Display(Name = "Branş")]
-    public string Branş { get; set; } = string.Empty; // "Voleybol", "Basketbol", "Atletik Performans"
+    public string Branş { get; set; } = string.Empty;
     
     [Display(Name = "Kayıt Tarihi")]
     [DataType(DataType.Date)]
@@ -37,37 +36,30 @@ public class Uye
     [DataType(DataType.Date)]
     public DateTime? SonAidatOdemeTarihi { get; set; }
     
-    // ========== VELİ BİLGİLERİ ==========
-    
+    // Veli Bilgileri
     [Display(Name = "Veli Ad Soyad")]
     public string VeliAdSoyad { get; set; } = string.Empty;
     
     [Display(Name = "Veli Telefon")]
     public string VeliTelefon { get; set; } = string.Empty;
     
-    // ========== SPOR SALONU ==========
-    
+    // Spor Salonu
     public int? SporSalonuId { get; set; }
     public SporSalonu? SporSalonu { get; set; }
     
-    // ========== BRANŞ (YENİ) ==========
-    
-   //public int? BransId { get; set; }
-   // public Brans? Brans { get; set; }
+    // Branş
     public int? BransId { get; set; }
-public Brans? Brans { get; set; }
-    // ========== TAKIM ==========
+    public Brans? Brans { get; set; }
     
+    // Takım
     public int? TakimId { get; set; }
     public Takim? Takim { get; set; }
     
-    // ========== GRUP ==========
-    
+    // Grup
     public int? GrupId { get; set; }
     public Grup? Grup { get; set; }
     
-    // ========== KIYAFET BİLGİLERİ ==========
-    
+    // Kıyafet
     [Display(Name = "Kıyafet Verildi mi?")]
     public bool KiyafetVerildiMi { get; set; }
     
@@ -78,10 +70,21 @@ public Brans? Brans { get; set; }
     [Display(Name = "Kıyafet Notları")]
     public string? KiyafetNotlari { get; set; }
     
-    // ========== AİDATLAR ==========
-    
+    // Aidatlar
     public ICollection<Aidat>? Aidatlar { get; set; }
     
+    // KALAN BORÇ (Hesaplanan alan)
     [NotMapped]
-    public decimal ToplamBorc => Aidatlar?.Where(a => !a.OdendiMi).Sum(a => a.Tutar) ?? 0;
+    public decimal KalanBorc
+    {
+        get
+        {
+            if (Aidatlar == null || !Aidatlar.Any())
+                return 0;
+            return Aidatlar.Where(a => !a.OdendiMi).Sum(a => a.Tutar);
+        }
+    }
+    
+    [NotMapped]
+    public decimal ToplamBorc => KalanBorc;
 }
