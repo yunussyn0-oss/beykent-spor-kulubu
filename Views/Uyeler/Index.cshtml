@@ -2,9 +2,14 @@
 
 @{
     ViewData["Title"] = "Üye Listesi";
+    var secilenSalonId = ViewBag.SecilenSalonId?.ToString() ?? "";
+    var secilenBransId = ViewBag.SecilenBransId?.ToString() ?? "";
+    var secilenTakimId = ViewBag.SecilenTakimId?.ToString() ?? "";
+    var secilenGrupId = ViewBag.SecilenGrupId?.ToString() ?? "";
+    var salonlar = ViewBag.SporSalonlari as IEnumerable<SelectListItem>;
 }
 
-<div class="container mt-4">
+<div class="container-fluid mt-4">
     <!-- Başlık ve Butonlar -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -12,7 +17,26 @@
                 <i class="bi bi-people-fill text-primary me-2"></i>
                 Üye Listesi
             </h2>
-            <p class="text-muted small mb-0">Toplam @Model.Count() kayıtlı sporcu</p>
+            <p class="text-muted small mb-0">
+                <i class="bi bi-info-circle me-1"></i>
+                Toplam <strong>@Model.Count()</strong> kayıtlı sporcu
+                @if (ViewBag.SecilenSalonId != null)
+                {
+                    var salonAdi = "-";
+                    if (salonlar != null)
+                    {
+                        foreach (var s in salonlar)
+                        {
+                            if (s.Value == secilenSalonId)
+                            {
+                                salonAdi = s.Text;
+                                break;
+                            }
+                        }
+                    }
+                    <span> - <span class="badge bg-primary">@salonAdi</span></span>
+                }
+            </p>
         </div>
         <div class="d-flex gap-2">
             <a asp-action="Ekle" class="btn btn-primary">
@@ -21,14 +45,20 @@
             <a asp-action="BorcluUyeler" class="btn btn-warning">
                 <i class="bi bi-exclamation-triangle me-1"></i>Borçlu Üyeler
             </a>
-            <a asp-action="OrnekVeriEkle" class="btn btn-success">
-                <i class="bi bi-database-fill me-1"></i>Örnek Veri Ekle
+            <!-- EXCEL AKTAR BUTONU (Aktif filtreleri korur) -->
+            <a asp-controller="Excel" asp-action="UyeleriExcelAktar" 
+               asp-route-salonId="@ViewBag.SecilenSalonId" 
+               asp-route-bransId="@ViewBag.SecilenBransId" 
+               asp-route-takimId="@ViewBag.SecilenTakimId" 
+               asp-route-grupId="@ViewBag.SecilenGrupId" 
+               class="btn btn-success">
+                <i class="bi bi-file-earmark-excel me-1"></i>Excel Aktar
             </a>
         </div>
     </div>
 
     <!-- Filtreleme Kartı -->
-    <div class="card shadow-sm mb-4 border-0">
+    <div class="card shadow-sm border-0 mb-4">
         <div class="card-header bg-white py-3">
             <h5 class="fw-bold mb-0">
                 <i class="bi bi-funnel text-primary me-2"></i>
@@ -78,14 +108,6 @@
     </div>
 
     <!-- Aktif Filtre Bilgisi -->
-    @{
-        var secilenSalonId = ViewBag.SecilenSalonId?.ToString() ?? "";
-        var secilenBransId = ViewBag.SecilenBransId?.ToString() ?? "";
-        var secilenTakimId = ViewBag.SecilenTakimId?.ToString() ?? "";
-        var secilenGrupId = ViewBag.SecilenGrupId?.ToString() ?? "";
-        var salonlar = ViewBag.SporSalonlari as IEnumerable<SelectListItem>;
-    }
-
     @if (!string.IsNullOrEmpty(secilenSalonId) || !string.IsNullOrEmpty(secilenBransId) || !string.IsNullOrEmpty(secilenTakimId) || !string.IsNullOrEmpty(secilenGrupId))
     {
         <div class="alert alert-info d-flex justify-content-between align-items-center mb-4">
@@ -131,7 +153,7 @@
     <div class="card shadow-sm border-0">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover table-bordered mb-0">
+                <table class="table table-hover align-middle mb-0">
                     <thead class="table-dark">
                         <tr>
                             <th width="50">#</th>
@@ -145,6 +167,8 @@
                             <th>Aidat</th>
                             <th>Son Ödeme</th>
                             <th>Kıyafet</th>
+                            <th>Veli Adı</th>
+                            <th>Veli Telefon</th>
                             <th width="120">İşlemler</th>
                         </tr>
                     </thead>
@@ -157,7 +181,12 @@
                             rowIndex++;
                             <tr>
                                 <td class="fw-bold">@rowIndex</td>
-                                <td>@uye.AdSoyad</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-person-circle text-primary me-2"></i>
+                                        <span class="fw-bold">@uye.AdSoyad</span>
+                                    </div>
+                                </td>
                                 <td>@uye.Telefon</td>
                                 <td>@uye.DogumTarihi.ToShortDateString()</td>
                                 <td>
@@ -219,6 +248,12 @@
                                         </span>
                                     }
                                 </td>
+                                <td>@uye.VeliAdSoyad</td>
+                                <td>
+                                    <span class="badge bg-info">
+                                        <i class="bi bi-telephone me-1"></i>@uye.VeliTelefon
+                                    </span>
+                                </td>
                                 <td>
                                     <div class="btn-group" role="group">
                                         <a asp-action="Detay" asp-route-id="@uye.Id" class="btn btn-sm btn-outline-info" title="Detay">
@@ -267,6 +302,10 @@
             // Branşları getir (Salon seçilince)
             function branslariGetir(salonId, seciliBransId) {
                 if (salonId) {
+                    $('#bransFilter').empty().append('<option value="">Yükleniyor...</option>');
+                    $('#takimFilter').empty().append('<option value="">Tüm Takımlar</option>');
+                    $('#grupFilter').empty().append('<option value="">Tüm Gruplar</option>');
+                    
                     $.getJSON('/Uyeler/BranslariGetir', { salonId: salonId }, function(data) {
                         var bransSelect = $('#bransFilter');
                         bransSelect.empty().append('<option value="">Tüm Branşlar</option>');
@@ -291,12 +330,17 @@
                     });
                 } else {
                     $('#bransFilter').empty().append('<option value="">Tüm Branşlar</option>');
+                    $('#takimFilter').empty().append('<option value="">Tüm Takımlar</option>');
+                    $('#grupFilter').empty().append('<option value="">Tüm Gruplar</option>');
                 }
             }
 
             // Takımları getir (Branş seçilince)
             function takimlariGetir(bransId, seciliTakimId) {
                 if (bransId) {
+                    $('#takimFilter').empty().append('<option value="">Yükleniyor...</option>');
+                    $('#grupFilter').empty().append('<option value="">Tüm Gruplar</option>');
+                    
                     $.getJSON('/Uyeler/TakimlariGetir', { bransId: bransId }, function(data) {
                         var takimSelect = $('#takimFilter');
                         takimSelect.empty().append('<option value="">Tüm Takımlar</option>');
@@ -327,6 +371,8 @@
             // Grupları getir (Takım seçilince)
             function gruplariGetir(takimId, seciliGrupId) {
                 if (takimId) {
+                    $('#grupFilter').empty().append('<option value="">Yükleniyor...</option>');
+                    
                     $.getJSON('/Uyeler/GruplariGetir', { takimId: takimId }, function(data) {
                         var grupSelect = $('#grupFilter');
                         grupSelect.empty().append('<option value="">Tüm Gruplar</option>');
@@ -352,40 +398,19 @@
             // Salon değişince branşları getir
             $('#salonFilter').change(function() {
                 var salonId = $(this).val();
-                $('#bransFilter').empty().append('<option value="">Yükleniyor...</option>');
-                $('#takimFilter').empty().append('<option value="">Tüm Takımlar</option>');
-                $('#grupFilter').empty().append('<option value="">Tüm Gruplar</option>');
-                
-                if (salonId) {
-                    branslariGetir(salonId, null);
-                } else {
-                    $('#bransFilter').empty().append('<option value="">Tüm Branşlar</option>');
-                }
+                branslariGetir(salonId, null);
             });
 
             // Branş değişince takımları getir
             $('#bransFilter').change(function() {
                 var bransId = $(this).val();
-                $('#takimFilter').empty().append('<option value="">Yükleniyor...</option>');
-                $('#grupFilter').empty().append('<option value="">Tüm Gruplar</option>');
-                
-                if (bransId) {
-                    takimlariGetir(bransId, null);
-                } else {
-                    $('#takimFilter').empty().append('<option value="">Tüm Takımlar</option>');
-                }
+                takimlariGetir(bransId, null);
             });
 
             // Takım değişince grupları getir
             $('#takimFilter').change(function() {
                 var takimId = $(this).val();
-                $('#grupFilter').empty().append('<option value="">Yükleniyor...</option>');
-                
-                if (takimId) {
-                    gruplariGetir(takimId, null);
-                } else {
-                    $('#grupFilter').empty().append('<option value="">Tüm Gruplar</option>');
-                }
+                gruplariGetir(takimId, null);
             });
 
             // Sayfa yüklendiğinde seçili salon varsa branşları getir

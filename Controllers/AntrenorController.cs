@@ -59,6 +59,7 @@ public class AntrenorController : Controller
     }
 
     // ========== ANA PANEL (Yetkili) ==========
+
     public async Task<IActionResult> Panel(int? salonId, int? takimId, int? grupId)
     {
         var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
@@ -88,13 +89,21 @@ public class AntrenorController : Controller
         // Tam yetkisi yoksa sadece kendi salonunu görsün
         if (!tamYetki && antrenor.AntrenorTakimlar != null && antrenor.AntrenorTakimlar.Any())
         {
-            var yetkiliSalonIds = antrenor.AntrenorTakimlar.Select(at => at.SporSalonuId).Distinct().ToList();
-            query = query.Where(u => u.SporSalonuId.HasValue && yetkiliSalonIds.Contains(u.SporSalonuId.Value));
+            var yetkiliSalonIds = antrenor.AntrenorTakimlar
+                .Where(at => at.SporSalonuId.HasValue)
+                .Select(at => at.SporSalonuId!.Value)
+                .Distinct()
+                .ToList();
             
-            // Eğer filtrede salon seçilmemişse, yetkili olduğu salonu varsayılan seç
-            if (!salonId.HasValue && yetkiliSalonIds.Count == 1)
+            if (yetkiliSalonIds.Any())
             {
-                salonId = yetkiliSalonIds.First();
+                query = query.Where(u => u.SporSalonuId.HasValue && yetkiliSalonIds.Contains(u.SporSalonuId.Value));
+                
+                // Eğer filtrede salon seçilmemişse, yetkili olduğu salonu varsayılan seç
+                if (!salonId.HasValue && yetkiliSalonIds.Count == 1)
+                {
+                    salonId = yetkiliSalonIds.First();
+                }
             }
         }
 
@@ -114,7 +123,8 @@ public class AntrenorController : Controller
         var salonlar = tamYetki 
             ? await _context.SporSalonlari.ToListAsync()
             : await _context.SporSalonlari
-                .Where(s => antrenor.AntrenorTakimlar.Select(at => at.SporSalonuId).Contains(s.Id))
+                .Where(s => antrenor.AntrenorTakimlar != null && 
+                       antrenor.AntrenorTakimlar.Any(at => at.SporSalonuId == s.Id))
                 .ToListAsync();
 
         ViewBag.SporSalonlari = new SelectList(salonlar, "Id", "Ad", salonId);
@@ -163,9 +173,9 @@ public class AntrenorController : Controller
                 .ToListAsync();
             return Json(takimlar);
         }
-        catch
+        catch (Exception ex)
         {
-            return Json(new List<object>());
+            return Json(new { error = ex.Message });
         }
     }
 
@@ -181,9 +191,9 @@ public class AntrenorController : Controller
                 .ToListAsync();
             return Json(gruplar);
         }
-        catch
+        catch (Exception ex)
         {
-            return Json(new List<object>());
+            return Json(new { error = ex.Message });
         }
     }
 
@@ -245,6 +255,7 @@ public class AntrenorController : Controller
         if (antrenorId == null)
             return RedirectToAction("Giris");
 
+        // Önce o günün eski yoklamalarını sil
         var eskiYoklamalar = await _context.Yoklamalar
             .Where(y => y.AntrenorId == antrenorId && y.Tarih.Date == tarih.Date)
             .ToListAsync();
@@ -254,6 +265,7 @@ public class AntrenorController : Controller
             _context.Yoklamalar.RemoveRange(eskiYoklamalar);
         }
 
+        // Yeni yoklamaları ekle (sadece durumu boş olmayanları)
         foreach (var y in yoklamalar.Where(y => !string.IsNullOrEmpty(y.Durum)))
         {
             y.AntrenorId = antrenorId.Value;
@@ -267,7 +279,7 @@ public class AntrenorController : Controller
         return RedirectToAction("Yoklama", new { tarih = tarih, takimId = takimId, grupId = grupId });
     }
 
-    // ========== VELİ İLETİŞİM SAYFASI ==========
+    // ========== VELİ İLETİŞİM SAYFALARI ==========
 
     public async Task<IActionResult> VeliDetay(int id)
     {
@@ -381,6 +393,7 @@ public class AntrenorController : Controller
             .Include(y => y.Uye)
             .AsQueryable();
 
+        // Tarih filtresi
         if (baslangic.HasValue)
             query = query.Where(y => y.Tarih.Date >= baslangic.Value.Date);
         
@@ -407,8 +420,24 @@ public class AntrenorController : Controller
         {
             var antrenorler = new List<Antrenor>
             {
-                new Antrenor { AdSoyad = "Burhan Şayan", Email = "burhan@beykentspor.com", Sifre = "123456", Telefon = "0532 111 22 33", Uzmanlik = "Tam Yetki", KayitTarihi = DateTime.Now },
-                new Antrenor { AdSoyad = "Ertan Tuncel", Email = "ertan@beykentspor.com", Sifre = "123456", Telefon = "0533 444 55 66", Uzmanlik = "Tam Yetki", KayitTarihi = DateTime.Now }
+                new Antrenor 
+                { 
+                    AdSoyad = "Burhan Şayan", 
+                    Email = "burhan@beykentspor.com", 
+                    Telefon = "0532 111 22 33",
+                    Uzmanlik = "Tam Yetki",
+                    Sifre = "123456",
+                    KayitTarihi = DateTime.Now
+                },
+                new Antrenor 
+                { 
+                    AdSoyad = "Ertan Tuncel", 
+                    Email = "ertan@beykentspor.com", 
+                    Telefon = "0533 444 55 66",
+                    Uzmanlik = "Tam Yetki",
+                    Sifre = "123456",
+                    KayitTarihi = DateTime.Now
+                }
             };
 
             await _context.Antrenorler.AddRangeAsync(antrenorler);

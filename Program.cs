@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SporKulubu.Data;
 using SporKulubu.Models;
+using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,12 +28,19 @@ using (var scope = app.Services.CreateScope())
     
     try
     {
+        // Veritabanı dosyasının yolunu kontrol et
+        var dbPath = Path.Combine(Directory.GetCurrentDirectory(), "sporkulubu.db");
+        Console.WriteLine($"Veritabanı yolu: {dbPath}");
+        
         // Veritabanı yoksa oluştur
         context.Database.EnsureCreated();
+        Console.WriteLine("✅ Veritabanı oluşturuldu veya zaten mevcut.");
         
         // Eğer salonlar tablosu boşsa, örnek verileri ekle
         if (!context.SporSalonlari.Any())
         {
+            Console.WriteLine("📌 Örnek veriler ekleniyor...");
+
             // 1. SPOR SALONLARI
             var salonlar = new List<SporSalonu>
             {
@@ -157,6 +165,7 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         Console.WriteLine($"❌ Hata oluştu: {ex.Message}");
+        Console.WriteLine($"Detay: {ex.InnerException?.Message}");
     }
 }
 // ========== VERİTABANI KURULUMU SONU ==========
