@@ -17586,6 +17586,11 @@
       "FileKind": "mvc"
     },
     {
+      "FilePath": "c:\\Users\\ASUS\\OneDrive\\Masaüstü\\SporKulubu\\SporKulubu\\Views\\Yazici\\Yazdir.cshtml",
+      "TargetPath": "Views\\Yazici\\Yazdir.cshtml",
+      "FileKind": "mvc"
+    },
+    {
       "FilePath": "c:\\Users\\ASUS\\OneDrive\\Masaüstü\\SporKulubu\\SporKulubu\\Views\\Aidat\\Gecmis.cshtml",
       "TargetPath": "Views\\Aidat\\Gecmis.cshtml",
       "FileKind": "mvc"

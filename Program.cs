@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using SporKulubu.Data;
 using SporKulubu.Models;
 using System.IO;
@@ -7,6 +8,21 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Authentication ekleyelim (COOKIE tabanlı)
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Antrenor/Giris";
+        options.LogoutPath = "/Antrenor/Logout";
+        options.AccessDeniedPath = "/Antrenor/AccessDenied";
+        options.ExpireTimeSpan = TimeSpan.FromDays(7);
+        options.SlidingExpiration = true;
+        options.Cookie.HttpOnly = true;
+        options.Cookie.IsEssential = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+    });
+
 builder.Services.AddDbContext<UygulamaDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -155,6 +171,44 @@ using (var scope = app.Services.CreateScope())
                 Console.WriteLine("✅ Atletik Performans branşı eklendi.");
             }
 
+            // 7. ÖRNEK ANTRENÖR EKLEYELİM (DÜZELTİLDİ - Email kullanıldı, Yetki kaldırıldı)
+            if (!context.Antrenorler.Any())
+            {
+                var antrenorler = new List<Antrenor>
+                {
+                    new Antrenor 
+                    { 
+                        Email = "admin@beykent.com", 
+                        Sifre = "123456", 
+                        AdSoyad = "Admin Antrenör",
+                        Telefon = "0555 111 2233",
+                        Uzmanlik = "Baş Antrenör",
+                        KayitTarihi = DateTime.Now
+                    },
+                    new Antrenor 
+                    { 
+                        Email = "ahmet@beykent.com", 
+                        Sifre = "123456", 
+                        AdSoyad = "Ahmet Yılmaz",
+                        Telefon = "0555 222 3344",
+                        Uzmanlik = "Voleybol Antrenörü",
+                        KayitTarihi = DateTime.Now
+                    },
+                    new Antrenor 
+                    { 
+                        Email = "mehmet@beykent.com", 
+                        Sifre = "123456", 
+                        AdSoyad = "Mehmet Demir",
+                        Telefon = "0555 333 4455",
+                        Uzmanlik = "Basketbol Antrenörü",
+                        KayitTarihi = DateTime.Now
+                    }
+                };
+                context.Antrenorler.AddRange(antrenorler);
+                context.SaveChanges();
+                Console.WriteLine("✅ Örnek antrenörler eklendi.");
+            }
+
             Console.WriteLine("🎉 Tüm örnek veriler başarıyla eklendi!");
         }
         else
@@ -179,9 +233,13 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseRouting();
-app.UseSession();
-app.UseAuthorization();
+
+// Sıralama ÇOK ÖNEMLİ! 
+app.UseSession();        // Önce session
+app.UseAuthentication(); // Sonra authentication
+app.UseAuthorization();  // En son authorization
 
 app.MapControllerRoute(
     name: "default",

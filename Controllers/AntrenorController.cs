@@ -4,6 +4,10 @@ using SporKulubu.Data;
 using SporKulubu.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Globalization;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SporKulubu.Controllers;
 
@@ -18,16 +22,21 @@ public class AntrenorController : Controller
 
     // ========== GİRİŞ İŞLEMLERİ ==========
 
-    // Ana sayfa artık direkt buraya yönlendiriyor
+    // Ana sayfa - giriş yapmışsa panele yönlendir, yoksa login'e
     public IActionResult Index()
     {
+        if (User.Identity.IsAuthenticated)
+        {
+            return RedirectToAction("Panel");
+        }
         return RedirectToAction("Giris");
     }
 
+    [HttpGet]
     public IActionResult Giris(int? salonId)
     {
-        // Eğer zaten giriş yapmışsa panele yönlendir
-        if (HttpContext.Session.GetInt32("AntrenorId") != null)
+        // Zaten giriş yapmışsa panele yönlendir
+        if (User.Identity.IsAuthenticated)
         {
             return RedirectToAction("Panel");
         }
@@ -102,10 +111,44 @@ public class AntrenorController : Controller
             }
         }
 
-        // Session'a kaydet
-        HttpContext.Session.SetInt32("AntrenorId", antrenor.Id);
-        HttpContext.Session.SetString("AntrenorAdi", antrenor.AdSoyad);
-        HttpContext.Session.SetString("AntrenorEmail", antrenor.Email);
+        // CLAIM'ler oluştur (Session yerine Cookie authentication için)
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, antrenor.Id.ToString()),
+            new Claim(ClaimTypes.Name, antrenor.AdSoyad),
+            new Claim(ClaimTypes.Email, antrenor.Email),
+            new Claim("TamYetki", tamYetki.ToString()),
+            new Claim("AntrenorId", antrenor.Id.ToString()),
+            new Claim("AntrenorAdi", antrenor.AdSoyad),
+            new Claim("AntrenorEmail", antrenor.Email)
+        };
+
+        // Yetkili olduğu salonları claim olarak ekle (opsiyonel)
+        if (antrenor.AntrenorTakimlar != null && antrenor.AntrenorTakimlar.Any())
+        {
+            var yetkiliSalonIds = antrenor.AntrenorTakimlar
+                .Where(at => at.SporSalonuId.HasValue)
+                .Select(at => at.SporSalonuId.Value.ToString())
+                .Distinct()
+                .ToList();
+            
+            claims.Add(new Claim("YetkiliSalonlar", string.Join(",", yetkiliSalonIds)));
+        }
+
+        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var authProperties = new AuthenticationProperties
+        {
+            IsPersistent = true, // Beni hatırla
+            ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7)
+        };
+
+        await HttpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            new ClaimsPrincipal(claimsIdentity),
+            authProperties);
+
+        // Session'dan tamamen kurtulmak için session'ı temizle
+        HttpContext.Session.Clear();
 
         // Eğer salonId varsa, panelde o salonu göster
         if (salonId.HasValue && salonId > 0)
@@ -116,19 +159,23 @@ public class AntrenorController : Controller
         return RedirectToAction("Panel");
     }
 
-    public IActionResult Cikis()
+    public async Task<IActionResult> Cikis()
     {
+        // Cookie'yi temizle
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        // Session'ı temizle
         HttpContext.Session.Clear();
         return RedirectToAction("Giris");
     }
 
     // ========== ANA PANEL (Yetkili) ==========
 
+    [Authorize]
     public async Task<IActionResult> Panel(int? salonId, int? takimId, int? grupId)
     {
-        // Oturum kontrolü
-        var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
-        if (antrenorId == null)
+        // Claim'lerden antrenör ID'sini al
+        var antrenorIdClaim = User.FindFirst("AntrenorId")?.Value;
+        if (string.IsNullOrEmpty(antrenorIdClaim) || !int.TryParse(antrenorIdClaim, out int antrenorId))
         {
             return RedirectToAction("Giris");
         }
@@ -144,8 +191,10 @@ public class AntrenorController : Controller
             return RedirectToAction("Giris");
         }
 
-        // Tam yetki kontrolü (Burhan ve Ertan)
-        bool tamYetki = antrenor.AdSoyad.Contains("Burhan") || antrenor.AdSoyad.Contains("Ertan");
+        // Tam yetki kontrolü (Burhan ve Ertan) - Claim'den de alabiliriz
+        bool tamYetki = User.FindFirst("TamYetki")?.Value == "True" || 
+                        antrenor.AdSoyad.Contains("Burhan") || 
+                        antrenor.AdSoyad.Contains("Ertan");
 
         // Tüm sporcuları getir (filtreleme ile)
         var query = _context.Uyeler
@@ -255,6 +304,7 @@ public class AntrenorController : Controller
 
     // ========== AJAX METOTLARI ==========
 
+    [Authorize]
     [HttpGet]
     public async Task<IActionResult> TakimlariGetir(int salonId)
     {
@@ -273,6 +323,7 @@ public class AntrenorController : Controller
         }
     }
 
+    [Authorize]
     [HttpGet]
     public async Task<IActionResult> GruplariGetir(int takimId)
     {
@@ -293,10 +344,11 @@ public class AntrenorController : Controller
 
     // ========== YOKLAMA İŞLEMLERİ ==========
 
+    [Authorize]
     public async Task<IActionResult> Yoklama(DateTime? tarih, int? takimId, int? grupId)
     {
-        var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
-        if (antrenorId == null)
+        var antrenorIdClaim = User.FindFirst("AntrenorId")?.Value;
+        if (string.IsNullOrEmpty(antrenorIdClaim) || !int.TryParse(antrenorIdClaim, out int antrenorId))
         {
             return RedirectToAction("Giris");
         }
@@ -350,12 +402,13 @@ public class AntrenorController : Controller
         return View();
     }
 
+    [Authorize]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> YoklamaKaydet(List<Yoklama> yoklamalar, DateTime tarih, int? takimId, int? grupId)
     {
-        var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
-        if (antrenorId == null)
+        var antrenorIdClaim = User.FindFirst("AntrenorId")?.Value;
+        if (string.IsNullOrEmpty(antrenorIdClaim) || !int.TryParse(antrenorIdClaim, out int antrenorId))
         {
             return RedirectToAction("Giris");
         }
@@ -373,7 +426,7 @@ public class AntrenorController : Controller
         // Yeni yoklamaları ekle
         foreach (var y in yoklamalar.Where(y => !string.IsNullOrEmpty(y.Durum)))
         {
-            y.AntrenorId = antrenorId.Value;
+            y.AntrenorId = antrenorId;
             y.Tarih = tarih.Date;
             _context.Yoklamalar.Add(y);
         }
@@ -386,14 +439,9 @@ public class AntrenorController : Controller
 
     // ========== VELİ DETAY SAYFASI ==========
 
+    [Authorize]
     public async Task<IActionResult> VeliDetay(int id)
     {
-        var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
-        if (antrenorId == null)
-        {
-            return RedirectToAction("Giris");
-        }
-
         var uye = await _context.Uyeler
             .Include(u => u.SporSalonu)
             .Include(u => u.Brans)
@@ -411,14 +459,9 @@ public class AntrenorController : Controller
 
     // ========== VELİ MESAJ SAYFASI ==========
 
+    [Authorize]
     public async Task<IActionResult> VeliMesaj(int? takimId, int? grupId)
     {
-        var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
-        if (antrenorId == null)
-        {
-            return RedirectToAction("Giris");
-        }
-
         // Tüm takımları getir
         ViewBag.TumTakimlar = new SelectList(await _context.Takimlar.ToListAsync(), "Id", "Ad", takimId);
         
@@ -461,14 +504,9 @@ public class AntrenorController : Controller
 
     // ========== İSTATİSTİKLER ==========
 
+    [Authorize]
     public async Task<IActionResult> Istatistikler(int? takimId, int? grupId)
     {
-        var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
-        if (antrenorId == null)
-        {
-            return RedirectToAction("Giris");
-        }
-
         // Tüm takımları getir
         ViewBag.TumTakimlar = new SelectList(await _context.Takimlar.ToListAsync(), "Id", "Ad", takimId);
         
@@ -509,10 +547,11 @@ public class AntrenorController : Controller
 
     // ========== GEÇMİŞ YOKLAMALAR ==========
 
+    [Authorize]
     public async Task<IActionResult> GecmisYoklamalar(DateTime? baslangic, DateTime? bitis)
     {
-        var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
-        if (antrenorId == null)
+        var antrenorIdClaim = User.FindFirst("AntrenorId")?.Value;
+        if (string.IsNullOrEmpty(antrenorIdClaim) || !int.TryParse(antrenorIdClaim, out int antrenorId))
         {
             return RedirectToAction("Giris");
         }
@@ -546,9 +585,11 @@ public class AntrenorController : Controller
     }
 
     // ========== KURULUM METOTLARI ==========
+    // Bu metotlar herkese açık olmamalı, yetki kontrolü ekleyelim
 
     public async Task<IActionResult> AntrenorleriEkle()
     {
+        // Sadece geliştirme ortamında çalışsın veya özel bir kontrol ekleyelim
         if (!_context.Antrenorler.Any())
         {
             var antrenorler = new List<Antrenor>
@@ -699,4 +740,73 @@ public class AntrenorController : Controller
         
         return Content($"✅ {antrenorler.Count} antrenör ve {atamalar.Count} atama silindi.");
     }
+    // ========== DEBUG METOTLARI ==========
+[AllowAnonymous]
+public async Task<IActionResult> DebugAntrenorler()
+{
+    var antrenorler = await _context.Antrenorler.ToListAsync();
+    string result = "<h2>📋 VERİTABANINDAKİ ANTRENÖRLER</h2>";
+    result += "<table border='1' cellpadding='5' style='border-collapse: collapse;'>";
+    result += "<tr><th>ID</th><th>Ad Soyad</th><th>Email</th><th>Şifre</th><th>Uzmanlık</th></tr>";
+    
+    foreach (var a in antrenorler)
+    {
+        result += $"<tr>";
+        result += $"<td>{a.Id}</td>";
+        result += $"<td>{a.AdSoyad}</td>";
+        result += $"<td>{a.Email}</td>";
+        result += $"<td>{a.Sifre}</td>";
+        result += $"<td>{a.Uzmanlik}</td>";
+        result += $"</tr>";
+    }
+    result += "</table>";
+    
+    result += "<hr>";
+    result += "<h3>➕ Yeni Antrenör Ekle</h3>";
+    result += "<form method='post' action='/Antrenor/DebugEkle'>";
+    result += "Ad Soyad: <input type='text' name='adSoyad' value='Test Antrenör'><br>";
+    result += "Email: <input type='email' name='email' value='test@test.com'><br>";
+    result += "Şifre: <input type='text' name='sifre' value='123456'><br>";
+    result += "Uzmanlık: <input type='text' name='uzmanlik' value='Test'><br>";
+    result += "<button type='submit'>Ekle</button>";
+    result += "</form>";
+    
+    return Content(result, "text/html");
+}
+
+[HttpPost]
+[AllowAnonymous]
+public async Task<IActionResult> DebugEkle(string adSoyad, string email, string sifre, string uzmanlik)
+{
+    var yeniAntrenor = new Antrenor
+    {
+        AdSoyad = adSoyad,
+        Email = email.Trim().ToLower(),
+        Sifre = sifre, // DÜZ METİN (ileride hash'leyeceğiz)
+        Telefon = "0555 555 5555",
+        Uzmanlik = uzmanlik,
+        KayitTarihi = DateTime.Now
+    };
+    
+    _context.Antrenorler.Add(yeniAntrenor);
+    await _context.SaveChangesAsync();
+    
+    return RedirectToAction("DebugAntrenorler");
+}
+
+[AllowAnonymous]
+public async Task<IActionResult> DebugGirisTest(string email, string sifre)
+{
+    var antrenor = await _context.Antrenorler
+        .FirstOrDefaultAsync(a => a.Email == email && a.Sifre == sifre);
+    
+    if (antrenor != null)
+    {
+        return Content($"✅ GİRİŞ BAŞARILI! ID: {antrenor.Id}, Ad: {antrenor.AdSoyad}");
+    }
+    else
+    {
+        return Content($"❌ GİRİŞ BAŞARISIZ! Email: {email}, Şifre: {sifre}");
+    }
+}
 }

@@ -15,12 +15,12 @@ public class YaziciController : Controller
         _context = context;
     }
 
-    // ========== SPORCU LİSTESİNİ YAZDIRMAYA HAZIRLA ==========
+    // ========== YAZDIRMA SAYFASI (PDF/Print dostu) ==========
     public async Task<IActionResult> Yazdir(int? salonId, int? bransId, int? takimId, int? grupId)
     {
         try
         {
-            // Sorguyu oluştur
+            // Filtrelere göre üyeleri getir
             var query = _context.Uyeler
                 .Include(u => u.SporSalonu)
                 .Include(u => u.Brans)
@@ -32,6 +32,72 @@ public class YaziciController : Controller
             // Filtreleme
             if (salonId.HasValue && salonId > 0)
                 query = query.Where(u => u.SporSalonuId == salonId);
+            
+            if (bransId.HasValue && bransId > 0)
+                query = query.Where(u => u.BransId == bransId);
+            
+            if (takimId.HasValue && takimId > 0)
+                query = query.Where(u => u.TakimId == takimId);
+            
+            if (grupId.HasValue && grupId > 0)
+                query = query.Where(u => u.GrupId == grupId);
+
+            var uyeler = await query.OrderBy(u => u.AdSoyad).ToListAsync();
+
+            // Filtre bilgilerini ViewBag'e aktar
+            if (salonId.HasValue && salonId > 0)
+            {
+                var salon = await _context.SporSalonlari.FindAsync(salonId);
+                ViewBag.FiltreBilgi = salon?.Ad ?? "";
+            }
+            
+            if (bransId.HasValue && bransId > 0)
+            {
+                var brans = await _context.Branslar.FindAsync(bransId);
+                ViewBag.FiltreBilgi += " / " + brans?.Ad;
+            }
+            
+            if (takimId.HasValue && takimId > 0)
+            {
+                var takim = await _context.Takimlar.FindAsync(takimId);
+                ViewBag.FiltreBilgi += " / " + takim?.Ad;
+            }
+            
+            if (grupId.HasValue && grupId > 0)
+            {
+                var grup = await _context.Gruplar.FindAsync(grupId);
+                ViewBag.FiltreBilgi += " / " + grup?.Ad;
+            }
+
+            ViewBag.Tarih = DateTime.Now.ToString("dd MMMM yyyy HH:mm");
+            ViewBag.ToplamKayit = uyeler.Count;
+            ViewBag.ToplamAidat = uyeler.Sum(u => u.AylikAidat);
+            ViewBag.BorcluSayisi = uyeler.Count(u => u.Aidatlar != null && u.Aidatlar.Any(a => !a.OdendiMi));
+
+            return View(uyeler);
+        }
+        catch (Exception ex)
+        {
+            TempData["Hata"] = "Yazdırma sayfası yüklenirken hata oluştu: " + ex.Message;
+            return RedirectToAction("Index", "Uyeler");
+        }
+    }
+
+    // ========== PDF İNDİR (İsteğe bağlı, ekstra) ==========
+    public async Task<IActionResult> PdfIndir(int? salonId, int? bransId, int? takimId, int? grupId)
+    {
+        try
+        {
+            // Filtrelere göre üyeleri getir
+            var query = _context.Uyeler
+                .Include(u => u.SporSalonu)
+                .Include(u => u.Brans)
+                .Include(u => u.Takim)
+                .Include(u => u.Grup)
+                .AsQueryable();
+
+            if (salonId.HasValue && salonId > 0)
+                query = query.Where(u => u.SporSalonuId == salonId);
             if (bransId.HasValue && bransId > 0)
                 query = query.Where(u => u.BransId == bransId);
             if (takimId.HasValue && takimId > 0)
@@ -41,182 +107,63 @@ public class YaziciController : Controller
 
             var uyeler = await query.OrderBy(u => u.AdSoyad).ToListAsync();
 
-            // HTML içeriği oluştur
-            var sb = new StringBuilder();
-            sb.AppendLine("<!DOCTYPE html>");
-            sb.AppendLine("<html>");
-            sb.AppendLine("<head>");
-            sb.AppendLine("<meta charset='UTF-8'>");
-            sb.AppendLine("<title>Beykent Spor Kulübü - Sporcu Listesi</title>");
-            sb.AppendLine("<style>");
-            sb.AppendLine("    body { font-family: 'Segoe UI', Arial, sans-serif; margin: 30px; color: #333; }");
-            sb.AppendLine("    .header { text-align: center; margin-bottom: 30px; }");
-            sb.AppendLine("    h1 { color: #0d6efd; margin-bottom: 5px; }");
-            sb.AppendLine("    .subtitle { color: #6c757d; font-size: 14px; margin-bottom: 20px; }");
-            sb.AppendLine("    .filters { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 25px; }");
-            sb.AppendLine("    .filters p { margin: 5px 0; }");
-            sb.AppendLine("    table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }");
-            sb.AppendLine("    th { background: #0d6efd; color: white; padding: 12px; text-align: left; }");
-            sb.AppendLine("    td { border: 1px solid #dee2e6; padding: 10px; }");
-            sb.AppendLine("    tr:nth-child(even) { background-color: #f8f9fa; }");
-            sb.AppendLine("    .total { margin-top: 20px; font-weight: bold; text-align: right; }");
-            sb.AppendLine("    .footer { margin-top: 30px; text-align: center; color: #6c757d; font-size: 12px; }");
-            sb.AppendLine("    @media print { .no-print { display: none; } }");
-            sb.AppendLine("</style>");
-            sb.AppendLine("</head>");
-            sb.AppendLine("<body>");
-            
-            // Başlık
-            sb.AppendLine("<div class='header'>");
-            sb.AppendLine("    <h1>🏐 Beykent Spor Kulübü</h1>");
-            sb.AppendLine("    <div class='subtitle'>Sporcu Listesi</div>");
-            sb.AppendLine("</div>");
+            // HTML içerik oluştur
+            StringBuilder html = new StringBuilder();
+            html.AppendLine("<!DOCTYPE html>");
+            html.AppendLine("<html>");
+            html.AppendLine("<head>");
+            html.AppendLine("<meta charset='UTF-8'>");
+            html.AppendLine("<title>Sporcu Listesi</title>");
+            html.AppendLine("<style>");
+            html.AppendLine("body { font-family: Arial, sans-serif; margin: 20px; }");
+            html.AppendLine("h1 { color: #0B2A4A; border-bottom: 2px solid #0B2A4A; padding-bottom: 10px; }");
+            html.AppendLine("table { width: 100%; border-collapse: collapse; margin-top: 20px; }");
+            html.AppendLine("th { background: #0B2A4A; color: white; padding: 10px; text-align: left; }");
+            html.AppendLine("td { padding: 8px; border-bottom: 1px solid #ddd; }");
+            html.AppendLine("tr:hover { background: #f5f5f5; }");
+            html.AppendLine(".footer { margin-top: 30px; text-align: center; color: #666; }");
+            html.AppendLine("</style>");
+            html.AppendLine("</head>");
+            html.AppendLine("<body>");
 
-            // Filtre bilgileri
-            sb.AppendLine("<div class='filters'>");
-            sb.AppendLine("    <p><strong>Rapor Tarihi:</strong> " + DateTime.Now.ToString("dd MMMM yyyy HH:mm") + "</p>");
-            sb.AppendLine("    <p><strong>Toplam Sporcu:</strong> " + uyeler.Count + "</p>");
-            
-            if (salonId.HasValue && salonId > 0)
+            html.AppendLine($"<h1>BEYKENT SPOR KULÜBÜ - SPORCU LİSTESİ</h1>");
+            html.AppendLine($"<p><strong>Tarih:</strong> {DateTime.Now:dd MMMM yyyy HH:mm}</p>");
+            html.AppendLine($"<p><strong>Toplam Sporcu:</strong> {uyeler.Count}</p>");
+            html.AppendLine($"<p><strong>Toplam Aidat:</strong> {uyeler.Sum(u => u.AylikAidat):C}</p>");
+
+            html.AppendLine("<table>");
+            html.AppendLine("<thead><tr>");
+            html.AppendLine("<th>#</th><th>Ad Soyad</th><th>Telefon</th><th>Doğum Tarihi</th><th>Salon</th><th>Branş</th><th>Takım</th><th>Grup</th><th>Aidat</th><th>Veli</th>");
+            html.AppendLine("</tr></thead><tbody>");
+
+            int sayac = 1;
+            foreach (var u in uyeler)
             {
-                var salon = await _context.SporSalonlari.FindAsync(salonId);
-                sb.AppendLine("    <p><strong>Filtre:</strong> " + (salon?.Ad ?? "Seçili Salon") + "</p>");
-            }
-            
-            sb.AppendLine("</div>");
-
-            // Tablo
-            sb.AppendLine("<table>");
-            sb.AppendLine("    <thead>");
-            sb.AppendLine("        <tr>");
-            sb.AppendLine("            <th>#</th>");
-            sb.AppendLine("            <th>Ad Soyad</th>");
-            sb.AppendLine("            <th>Telefon</th>");
-            sb.AppendLine("            <th>Doğum Tarihi</th>");
-            sb.AppendLine("            <th>Salon</th>");
-            sb.AppendLine("            <th>Branş</th>");
-            sb.AppendLine("            <th>Takım</th>");
-            sb.AppendLine("            <th>Grup</th>");
-            sb.AppendLine("            <th>Aidat</th>");
-            sb.AppendLine("            <th>Son Ödeme</th>");
-            sb.AppendLine("            <th>Kıyafet</th>");
-            sb.AppendLine("            <th>Veli Adı</th>");
-            sb.AppendLine("            <th>Veli Telefon</th>");
-            sb.AppendLine("        </tr>");
-            sb.AppendLine("    </thead>");
-            sb.AppendLine("    <tbody>");
-
-            int index = 0;
-            foreach (var uye in uyeler)
-            {
-                index++;
-                sb.AppendLine("        <tr>");
-                sb.AppendLine("            <td>" + index + "</td>");
-                sb.AppendLine("            <td><strong>" + uye.AdSoyad + "</strong></td>");
-                sb.AppendLine("            <td>" + uye.Telefon + "</td>");
-                sb.AppendLine("            <td>" + uye.DogumTarihi.ToString("dd.MM.yyyy") + "</td>");
-                sb.AppendLine("            <td>" + (uye.SporSalonu?.Ad ?? "-") + "</td>");
-                sb.AppendLine("            <td>" + (uye.Brans?.Ad ?? "-") + "</td>");
-                sb.AppendLine("            <td>" + (uye.Takim?.Ad ?? "-") + "</td>");
-                sb.AppendLine("            <td>" + (uye.Grup?.Ad ?? "-") + "</td>");
-                sb.AppendLine("            <td>" + uye.AylikAidat.ToString("C") + "</td>");
-                sb.AppendLine("            <td>" + (uye.SonAidatOdemeTarihi?.ToString("dd.MM.yyyy") ?? "-") + "</td>");
-                sb.AppendLine("            <td>" + (uye.KiyafetVerildiMi ? "Verildi" : "Verilmedi") + "</td>");
-                sb.AppendLine("            <td>" + uye.VeliAdSoyad + "</td>");
-                sb.AppendLine("            <td>" + uye.VeliTelefon + "</td>");
-                sb.AppendLine("        </tr>");
+                html.AppendLine("<tr>");
+                html.AppendLine($"<td>{sayac++}</td>");
+                html.AppendLine($"<td>{u.AdSoyad}</td>");
+                html.AppendLine($"<td>{u.Telefon}</td>");
+                html.AppendLine($"<td>{u.DogumTarihi:dd.MM.yyyy}</td>");
+                html.AppendLine($"<td>{u.SporSalonu?.Ad ?? "-"}</td>");
+                html.AppendLine($"<td>{u.Brans?.Ad ?? "-"}</td>");
+                html.AppendLine($"<td>{u.Takim?.Ad ?? "-"}</td>");
+                html.AppendLine($"<td>{u.Grup?.Ad ?? "-"}</td>");
+                html.AppendLine($"<td>{u.AylikAidat:C}</td>");
+                html.AppendLine($"<td>{u.VeliAdSoyad}</td>");
+                html.AppendLine("</tr>");
             }
 
-            sb.AppendLine("    </tbody>");
-            sb.AppendLine("</table>");
+            html.AppendLine("</tbody></table>");
+            html.AppendLine($"<div class='footer'>Beykent Spor Kulübü - Tüm hakları saklıdır.</div>");
+            html.AppendLine("</body></html>");
 
-            // Toplam bilgisi
-            sb.AppendLine("<div class='total'>");
-            sb.AppendLine("    <p>Toplam Sporcu: <strong>" + uyeler.Count + "</strong></p>");
-            sb.AppendLine("</div>");
-
-            // Footer
-            sb.AppendLine("<div class='footer'>");
-            sb.AppendLine("    <p>© " + DateTime.Now.Year + " Beykent Spor Kulübü</p>");
-            sb.AppendLine("</div>");
-
-            // Yazdır butonu
-            sb.AppendLine("<div class='no-print' style='text-align: center; margin: 20px;'>");
-            sb.AppendLine("    <button onclick='window.print()' style='background: #0d6efd; color: white; border: none; padding: 10px 30px; border-radius: 5px; font-size: 16px; cursor: pointer;'>");
-            sb.AppendLine("        🖨️ Yazdır / PDF Olarak Kaydet");
-            sb.AppendLine("    </button>");
-            sb.AppendLine("</div>");
-
-            sb.AppendLine("</body>");
-            sb.AppendLine("</html>");
-
-            return Content(sb.ToString(), "text/html");
+            byte[] bytes = Encoding.UTF8.GetBytes(html.ToString());
+            return File(bytes, "text/html", $"SporcuListesi_{DateTime.Now:yyyyMMdd_HHmmss}.html");
         }
-        catch (Exception ex)
+        catch
         {
-            TempData["Hata"] = "Yazdırma sayfası hazırlanırken bir hata oluştu: " + ex.Message;
+            TempData["Hata"] = "PDF oluşturulurken hata oluştu.";
             return RedirectToAction("Index", "Uyeler");
-        }
-    }
-
-    // ========== BORÇLU ÜYELERİ YAZDIR ==========
-    public async Task<IActionResult> BorcluYazdir()
-    {
-        try
-        {
-            var uyeler = await _context.Uyeler
-                .Include(u => u.SporSalonu)
-                .Include(u => u.Brans)
-                .Include(u => u.Takim)
-                .Include(u => u.Grup)
-                .Include(u => u.Aidatlar)
-                .Where(u => u.Aidatlar != null && u.Aidatlar.Any(a => !a.OdendiMi))
-                .OrderByDescending(u => u.Aidatlar.Where(a => !a.OdendiMi).Sum(a => a.Tutar))
-                .ToListAsync();
-
-            var sb = new StringBuilder();
-            sb.AppendLine("<!DOCTYPE html><html><head>");
-            sb.AppendLine("<meta charset='UTF-8'>");
-            sb.AppendLine("<title>Borçlu Üyeler</title>");
-            sb.AppendLine("<style>body{font-family:Arial;margin:30px} h1{color:#dc3545} table{width:100%;border-collapse:collapse} th{background:#dc3545;color:white;padding:10px} td{border:1px solid #ddd;padding:8px} .total{font-weight:bold;margin-top:20px}</style>");
-            sb.AppendLine("</head><body>");
-            
-            sb.AppendLine("<h1>Borçlu Üyeler</h1>");
-            sb.AppendLine("<p>Tarih: " + DateTime.Now.ToString("dd.MM.yyyy HH:mm") + "</p>");
-            sb.AppendLine("<p>Toplam Borçlu Üye: " + uyeler.Count + "</p>");
-            
-            sb.AppendLine("<table>");
-            sb.AppendLine("<tr><th>#</th><th>Ad Soyad</th><th>Telefon</th><th>Salon</th><th>Branş</th><th>Takım</th><th>Grup</th><th>Borç Miktarı</th><th>Veli Telefon</th></tr>");
-
-            int index = 0;
-            foreach (var uye in uyeler)
-            {
-                index++;
-                decimal borc = uye.Aidatlar?.Where(a => !a.OdendiMi).Sum(a => a.Tutar) ?? 0;
-                
-                sb.AppendLine("<tr>");
-                sb.AppendLine("<td>" + index + "</td>");
-                sb.AppendLine("<td><strong>" + uye.AdSoyad + "</strong></td>");
-                sb.AppendLine("<td>" + uye.Telefon + "</td>");
-                sb.AppendLine("<td>" + (uye.SporSalonu?.Ad ?? "-") + "</td>");
-                sb.AppendLine("<td>" + (uye.Brans?.Ad ?? "-") + "</td>");
-                sb.AppendLine("<td>" + (uye.Takim?.Ad ?? "-") + "</td>");
-                sb.AppendLine("<td>" + (uye.Grup?.Ad ?? "-") + "</td>");
-                sb.AppendLine("<td><strong style='color:#dc3545'>" + borc.ToString("C") + "</strong></td>");
-                sb.AppendLine("<td>" + uye.VeliTelefon + "</td>");
-                sb.AppendLine("</tr>");
-            }
-
-            sb.AppendLine("</table>");
-            sb.AppendLine("<div style='text-align:center;margin-top:20px'><button onclick='window.print()'>Yazdır</button></div>");
-            sb.AppendLine("</body></html>");
-
-            return Content(sb.ToString(), "text/html");
-        }
-        catch (Exception ex)
-        {
-            TempData["Hata"] = "Hata: " + ex.Message;
-            return RedirectToAction("BorcluUyeler", "Uyeler");
         }
     }
 }
