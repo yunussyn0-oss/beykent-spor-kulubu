@@ -18,36 +18,81 @@ public class AntrenorController : Controller
 
     // ========== GİRİŞ İŞLEMLERİ ==========
 
-    public IActionResult Giris()
+    public IActionResult Giris(int? salonId)
     {
         if (HttpContext.Session.GetInt32("AntrenorId") != null)
         {
             return RedirectToAction("Panel");
         }
+
+        ViewBag.GirisSalonId = salonId;
+        
+        // Salon bilgisini al
+        if (salonId.HasValue && salonId > 0)
+        {
+            var salon = _context.SporSalonlari.FirstOrDefault(s => s.Id == salonId);
+            ViewBag.GirisSalonAdi = salon?.Ad ?? "Spor Salonu";
+        }
+        else
+        {
+            ViewBag.GirisSalonAdi = "Spor Salonu";
+        }
+        
         return View();
     }
 
     [HttpPost]
-    public async Task<IActionResult> Giris(string email, string sifre)
+    public async Task<IActionResult> Giris(string email, string sifre, int? salonId)
     {
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(sifre))
         {
             ViewBag.Hata = "E-posta ve şifre boş bırakılamaz!";
+            ViewBag.GirisSalonId = salonId;
             return View();
         }
 
         var antrenor = await _context.Antrenorler
+            .Include(a => a.AntrenorTakimlar!)
+                .ThenInclude(at => at.SporSalonu)
             .FirstOrDefaultAsync(a => a.Email == email && a.Sifre == sifre);
 
         if (antrenor == null)
         {
             ViewBag.Hata = "E-posta veya şifre hatalı!";
+            ViewBag.GirisSalonId = salonId;
             return View();
+        }
+
+        // Tam yetki kontrolü (Burhan ve Ertan)
+        bool tamYetki = antrenor.AdSoyad.Contains("Burhan") || antrenor.AdSoyad.Contains("Ertan");
+
+        // Eğer belirli bir salondan gelindiyse ve antrenörün yetkisi yoksa
+        if (salonId.HasValue && salonId > 0 && !tamYetki)
+        {
+            // Antrenörün yetkili olduğu salonlar
+            var yetkiliSalonIds = antrenor.AntrenorTakimlar?
+                .Where(at => at.SporSalonuId.HasValue)
+                .Select(at => at.SporSalonuId!.Value)
+                .ToList() ?? new List<int>();
+
+            // Eğer bu salona yetkisi yoksa
+            if (!yetkiliSalonIds.Contains(salonId.Value))
+            {
+                ViewBag.Hata = "Bu salona giriş yetkiniz bulunmuyor!";
+                ViewBag.GirisSalonId = salonId;
+                return View();
+            }
         }
 
         HttpContext.Session.SetInt32("AntrenorId", antrenor.Id);
         HttpContext.Session.SetString("AntrenorAdi", antrenor.AdSoyad);
         HttpContext.Session.SetString("AntrenorEmail", antrenor.Email);
+
+        // Eğer salonId varsa, panelde o salonu göster
+        if (salonId.HasValue && salonId > 0)
+        {
+            return RedirectToAction("Panel", new { salonId = salonId });
+        }
 
         return RedirectToAction("Panel");
     }
@@ -120,13 +165,20 @@ public class AntrenorController : Controller
         var sporcular = await query.OrderBy(u => u.AdSoyad).ToListAsync();
 
         // Filtre listeleri (yetkiye göre)
-        var salonlar = tamYetki 
-            ? await _context.SporSalonlari.ToListAsync()
-            : await _context.SporSalonlari
-                .Where(s => antrenor.AntrenorTakimlar != null && 
-                       antrenor.AntrenorTakimlar.Any(at => at.SporSalonuId == s.Id))
-                .ToListAsync();
+        IQueryable<SporSalonu> salonQuery = _context.SporSalonlari;
+        
+        if (!tamYetki && antrenor.AntrenorTakimlar != null && antrenor.AntrenorTakimlar.Any())
+        {
+            var yetkiliSalonIds = antrenor.AntrenorTakimlar
+                .Where(at => at.SporSalonuId.HasValue)
+                .Select(at => at.SporSalonuId!.Value)
+                .Distinct()
+                .ToList();
+            
+            salonQuery = salonQuery.Where(s => yetkiliSalonIds.Contains(s.Id));
+        }
 
+        var salonlar = await salonQuery.ToListAsync();
         ViewBag.SporSalonlari = new SelectList(salonlar, "Id", "Ad", salonId);
         
         if (salonId.HasValue && salonId > 0)
@@ -255,7 +307,6 @@ public class AntrenorController : Controller
         if (antrenorId == null)
             return RedirectToAction("Giris");
 
-        // Önce o günün eski yoklamalarını sil
         var eskiYoklamalar = await _context.Yoklamalar
             .Where(y => y.AntrenorId == antrenorId && y.Tarih.Date == tarih.Date)
             .ToListAsync();
@@ -265,7 +316,6 @@ public class AntrenorController : Controller
             _context.Yoklamalar.RemoveRange(eskiYoklamalar);
         }
 
-        // Yeni yoklamaları ekle (sadece durumu boş olmayanları)
         foreach (var y in yoklamalar.Where(y => !string.IsNullOrEmpty(y.Durum)))
         {
             y.AntrenorId = antrenorId.Value;
@@ -393,7 +443,6 @@ public class AntrenorController : Controller
             .Include(y => y.Uye)
             .AsQueryable();
 
-        // Tarih filtresi
         if (baslangic.HasValue)
             query = query.Where(y => y.Tarih.Date >= baslangic.Value.Date);
         
@@ -454,6 +503,11 @@ public class AntrenorController : Controller
         _context.Antrenorler.RemoveRange(_context.Antrenorler);
         await _context.SaveChangesAsync();
 
+        // Salonları bul
+        var yakuplu = await _context.SporSalonlari.FirstOrDefaultAsync(s => s.Ad.Contains("Yakuplu"));
+        var emlakKonut = await _context.SporSalonlari.FirstOrDefaultAsync(s => s.Ad.Contains("Emlak"));
+        var neseSever = await _context.SporSalonlari.FirstOrDefaultAsync(s => s.Ad.Contains("Neşe"));
+
         // Yeni antrenörler
         var antrenorler = new List<Antrenor>
         {
@@ -461,20 +515,19 @@ public class AntrenorController : Controller
             new Antrenor { AdSoyad = "Burhan Şayan", Email = "burhan@beykentspor.com", Sifre = "123456", Telefon = "0532 111 22 33", Uzmanlik = "Tam Yetki", KayitTarihi = DateTime.Now },
             new Antrenor { AdSoyad = "Ertan Tuncel", Email = "ertan@beykentspor.com", Sifre = "123456", Telefon = "0533 444 55 66", Uzmanlik = "Tam Yetki", KayitTarihi = DateTime.Now },
             
-            // Yakuplu For Life (SalonId = 2)
+            // Yakuplu For Life
             new Antrenor { AdSoyad = "Özgür", Email = "ozgur@beykentspor.com", Sifre = "123456", Telefon = "0535 123 45 67", Uzmanlik = "Yakuplu For Life", KayitTarihi = DateTime.Now },
             new Antrenor { AdSoyad = "Eftelya", Email = "eftelya@beykentspor.com", Sifre = "123456", Telefon = "0536 234 56 78", Uzmanlik = "Yakuplu For Life", KayitTarihi = DateTime.Now },
             
-            // Emlak Konut (SalonId = 1)
-            new Antrenor { AdSoyad = "Sezer", Email = "sezer@beykentspor.com", Sifre = "123456", Telefon = "0537 345 67 89", Uzmanlik = "Emlak Konut", KayitTarihi = DateTime.Now }
+            // Emlak Konut
+            new Antrenor { AdSoyad = "Sezer", Email = "sezer@beykentspor.com", Sifre = "123456", Telefon = "0537 345 67 89", Uzmanlik = "Emlak Konut", KayitTarihi = DateTime.Now },
+            
+            // Neşe Sever
+            new Antrenor { AdSoyad = "Nesrin", Email = "nesrin@beykentspor.com", Sifre = "123456", Telefon = "0538 456 78 90", Uzmanlik = "Neşe Sever", KayitTarihi = DateTime.Now }
         };
 
         await _context.Antrenorler.AddRangeAsync(antrenorler);
         await _context.SaveChangesAsync();
-
-        // Salonları bul
-        var yakuplu = await _context.SporSalonlari.FirstOrDefaultAsync(s => s.Ad.Contains("Yakuplu"));
-        var emlakKonut = await _context.SporSalonlari.FirstOrDefaultAsync(s => s.Ad.Contains("Emlak"));
 
         // Atamaları yap
         var atamalar = new List<AntrenorTakim>();
@@ -500,6 +553,13 @@ public class AntrenorController : Controller
             atamalar.Add(new AntrenorTakim { AntrenorId = sezer.Id, SporSalonuId = emlakKonut.Id, AtanmaTarihi = DateTime.Now });
         }
 
+        // Nesrin (Neşe Sever)
+        var nesrin = antrenorler.First(a => a.AdSoyad == "Nesrin");
+        if (neseSever != null)
+        {
+            atamalar.Add(new AntrenorTakim { AntrenorId = nesrin.Id, SporSalonuId = neseSever.Id, AtanmaTarihi = DateTime.Now });
+        }
+
         await _context.AntrenorTakimlar.AddRangeAsync(atamalar);
         await _context.SaveChangesAsync();
 
@@ -515,6 +575,8 @@ public class AntrenorController : Controller
                 <p><strong>Eftelya</strong> - eftelya@beykentspor.com / 123456</p>
                 <h3 style='margin-top:20px;'>EMLAK KONUT:</h3>
                 <p><strong>Sezer</strong> - sezer@beykentspor.com / 123456</p>
+                <h3 style='margin-top:20px;'>NEŞE SEVER:</h3>
+                <p><strong>Nesrin</strong> - nesrin@beykentspor.com / 123456</p>
                 <p><a href='/Antrenor/Giris' style='display: inline-block; margin-top: 20px; padding: 10px 20px; background: blue; color: white; text-decoration: none; border-radius: 5px;'>Giriş Sayfasına Git</a></p>
             </div>
         ");

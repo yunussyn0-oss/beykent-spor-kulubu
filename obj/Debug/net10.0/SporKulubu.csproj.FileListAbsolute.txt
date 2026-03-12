@@ -250,3 +250,7 @@ C:\Users\ASUS\OneDrive\Masaüstü\SporKulubu\sporKulubu\obj\Debug\net10.0\refint
 C:\Users\ASUS\OneDrive\Masaüstü\SporKulubu\sporKulubu\obj\Debug\net10.0\SporKulubu.pdb
 C:\Users\ASUS\OneDrive\Masaüstü\SporKulubu\sporKulubu\obj\Debug\net10.0\SporKulubu.genruntimeconfig.cache
 C:\Users\ASUS\OneDrive\Masaüstü\SporKulubu\sporKulubu\obj\Debug\net10.0\ref\SporKulubu.dll
+C:\Users\ASUS\OneDrive\Masaüstü\SporKulubu\sporKulubu\obj\Debug\net10.0\SporKulubu.sourcelink.json
+C:\Users\ASUS\OneDrive\Masaüstü\SporKulubu\sporKulubu\bin\Debug\net10.0\EPPlus.dll
+C:\Users\ASUS\OneDrive\Masaüstü\SporKulubu\sporKulubu\bin\Debug\net10.0\EPPlus.Interfaces.dll
+C:\Users\ASUS\OneDrive\Masaüstü\SporKulubu\sporKulubu\bin\Debug\net10.0\Microsoft.IO.RecyclableMemoryStream.dll

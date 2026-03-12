@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\ASUS\\OneDrive\\Masaüstü\\SporKulubu\\SporKulubu\\SporKulubu.csproj": {}
+    "C:\\Users\\ASUS\\OneDrive\\Masaüstü\\SporKulubu\\sporKulubu\\SporKulubu.csproj": {}
   },
   "projects": {
-    "C:\\Users\\ASUS\\OneDrive\\Masaüstü\\SporKulubu\\SporKulubu\\SporKulubu.csproj": {
+    "C:\\Users\\ASUS\\OneDrive\\Masaüstü\\SporKulubu\\sporKulubu\\SporKulubu.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\ASUS\\OneDrive\\Masaüstü\\SporKulubu\\SporKulubu\\SporKulubu.csproj",
+        "projectUniqueName": "C:\\Users\\ASUS\\OneDrive\\Masaüstü\\SporKulubu\\sporKulubu\\SporKulubu.csproj",
         "projectName": "SporKulubu",
-        "projectPath": "C:\\Users\\ASUS\\OneDrive\\Masaüstü\\SporKulubu\\SporKulubu\\SporKulubu.csproj",
+        "projectPath": "C:\\Users\\ASUS\\OneDrive\\Masaüstü\\SporKulubu\\sporKulubu\\SporKulubu.csproj",
         "packagesPath": "C:\\Users\\ASUS\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\ASUS\\OneDrive\\Masaüstü\\SporKulubu\\SporKulubu\\obj\\",
+        "outputPath": "C:\\Users\\ASUS\\OneDrive\\Masaüstü\\SporKulubu\\sporKulubu\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -50,6 +50,10 @@
         "net10.0": {
           "targetAlias": "net10.0",
           "dependencies": {
+            "EPPlus": {
+              "target": "Package",
+              "version": "[8.5.0, )"
+            },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
               "version": "[10.0.3, )"

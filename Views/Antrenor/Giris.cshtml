@@ -1,16 +1,27 @@
 @{
     ViewData["Title"] = "Antrenör Girişi";
+    var salonId = ViewBag.GirisSalonId;
+    var salonAdi = ViewBag.GirisSalonAdi;
 }
 
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6 col-lg-5">
             <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
-                <!-- Üst Gradient Banner -->
+                <!-- Üst Gradient Banner (Salon Adıyla) -->
                 <div class="bg-gradient-primary text-white text-center py-5 px-4">
                     <i class="bi bi-person-badge-fill display-1 mb-3"></i>
                     <h2 class="fw-bold mb-0">Antrenör Girişi</h2>
-                    <p class="opacity-75 mb-0">Beykent Spor Kulübü</p>
+                    <p class="opacity-75 mb-0">@salonAdi</p>
+                    
+                    @if (salonId != null)
+                    {
+                        <div class="mt-3">
+                            <span class="badge bg-warning text-dark p-2">
+                                <i class="bi bi-building me-1"></i>@salonAdi
+                            </span>
+                        </div>
+                    }
                 </div>
 
                 <!-- Giriş Formu -->
@@ -25,6 +36,8 @@
                     }
 
                     <form asp-action="Giris" method="post">
+                        <input type="hidden" name="salonId" value="@salonId" />
+                        
                         <div class="mb-4">
                             <label class="form-label fw-bold text-muted small text-uppercase">E-posta Adresi</label>
                             <div class="input-group input-group-lg">
@@ -57,16 +70,22 @@
                             <i class="bi bi-shield-lock me-1"></i>
                             Yetkili antrenörler içindir.
                         </p>
+                        @if (salonId != null)
+                        {
+                            <p class="text-muted small mt-2">
+                                <i class="bi bi-building me-1"></i>
+                                <strong>@salonAdi</strong> için giriş yapıyorsunuz.
+                            </p>
+                        }
                     </div>
                 </div>
             </div>
 
-            <!-- Yardımcı Bilgi -->
+            <!-- Geri Dön Butonu -->
             <div class="text-center mt-4">
-                <p class="text-muted small">
-                    <i class="bi bi-info-circle me-1"></i>
-                    Giriş yapamıyorsanız yöneticinizle iletişime geçin.
-                </p>
+                <a href="/" class="text-decoration-none text-muted">
+                    <i class="bi bi-arrow-left me-1"></i>Ana Sayfaya Dön
+                </a>
             </div>
         </div>
     </div>
