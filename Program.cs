@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using SporKulubu.Data;
 using SporKulubu.Models;
-using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,8 +22,13 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.Cookie.SameSite = SameSiteMode.Lax;
     });
 
+// Database configuration - Render'da /tmp klasörünü kullan
+var dbPath = Environment.GetEnvironmentVariable("RENDER") != null 
+    ? "/tmp/sporkulubu.db"  // Render'da geçici dizin (yazılabilir)
+    : "sporkulubu.db";       // Lokalde normal
+
 builder.Services.AddDbContext<UygulamaDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite($"Data Source={dbPath}"));
 
 // Session services
 builder.Services.AddDistributedMemoryCache();
@@ -45,7 +49,6 @@ using (var scope = app.Services.CreateScope())
     try
     {
         // Veritabanı dosyasının yolunu kontrol et
-        var dbPath = Path.Combine(Directory.GetCurrentDirectory(), "sporkulubu.db");
         Console.WriteLine($"Veritabanı yolu: {dbPath}");
         
         // Veritabanı yoksa oluştur
@@ -68,7 +71,7 @@ using (var scope = app.Services.CreateScope())
             context.SaveChanges();
             Console.WriteLine("✅ 3 spor salonu eklendi.");
 
-            // 2. VOLEYBOL BRANŞLARI (Tüm salonlar için)
+            // 2. VOLEYBOL BRANŞLARI
             foreach (var salon in salonlar)
             {
                 var voleybol = new Brans
@@ -99,7 +102,7 @@ using (var scope = app.Services.CreateScope())
             context.SaveChanges();
             Console.WriteLine("✅ Voleybol takımları eklendi.");
 
-            // 4. VOLEYBOL GRUPLARI (A, B, C, D, E)
+            // 4. VOLEYBOL GRUPLARI
             var takimList = context.Takimlar.Where(t => t.Brans != null && t.Brans.Ad == "Voleybol").ToList();
             string[] grupHarfleri = { "A", "B", "C", "D", "E" };
             foreach (var takim in takimList)
@@ -131,7 +134,6 @@ using (var scope = app.Services.CreateScope())
                 context.SaveChanges();
                 Console.WriteLine("✅ Basketbol branşı eklendi.");
 
-                // BASKETBOL TAKIMLARI (U8, U10, U12, U14)
                 var basketbolTakimlari = new List<Takim>
                 {
                     new Takim { Ad = "U8 Takım", SporSalonuId = yakuplu.Id, BransId = basketbol.Id },
@@ -143,7 +145,6 @@ using (var scope = app.Services.CreateScope())
                 context.SaveChanges();
                 Console.WriteLine("✅ Basketbol takımları eklendi.");
 
-                // BASKETBOL GRUPLARI (A, B, C, D, E)
                 foreach (var takim in basketbolTakimlari)
                 {
                     foreach (var harf in grupHarfleri)
@@ -158,7 +159,6 @@ using (var scope = app.Services.CreateScope())
                 context.SaveChanges();
                 Console.WriteLine("✅ Basketbol grupları eklendi.");
 
-                // 6. ATLETİK PERFORMANS BRANŞI
                 var atletik = new Brans
                 {
                     Ad = "Atletik Performans",
@@ -171,36 +171,54 @@ using (var scope = app.Services.CreateScope())
                 Console.WriteLine("✅ Atletik Performans branşı eklendi.");
             }
 
-            // 7. ÖRNEK ANTRENÖR EKLEYELİM (DÜZELTİLDİ - Email kullanıldı, Yetki kaldırıldı)
+            // 6. ÖRNEK ANTRENÖRLER
             if (!context.Antrenorler.Any())
             {
                 var antrenorler = new List<Antrenor>
                 {
                     new Antrenor 
                     { 
-                        Email = "admin@beykent.com", 
+                        Email = "burhan@beykentspor.com", 
                         Sifre = "123456", 
-                        AdSoyad = "Admin Antrenör",
-                        Telefon = "0555 111 2233",
-                        Uzmanlik = "Baş Antrenör",
+                        AdSoyad = "Burhan Şayan",
+                        Telefon = "0532 111 2233",
+                        Uzmanlik = "Tam Yetki",
                         KayitTarihi = DateTime.Now
                     },
                     new Antrenor 
                     { 
-                        Email = "ahmet@beykent.com", 
+                        Email = "ertan@beykentspor.com", 
                         Sifre = "123456", 
-                        AdSoyad = "Ahmet Yılmaz",
-                        Telefon = "0555 222 3344",
-                        Uzmanlik = "Voleybol Antrenörü",
+                        AdSoyad = "Ertan Tuncel",
+                        Telefon = "0532 222 3344",
+                        Uzmanlik = "Tam Yetki",
                         KayitTarihi = DateTime.Now
                     },
                     new Antrenor 
                     { 
-                        Email = "mehmet@beykent.com", 
+                        Email = "ozgur@beykentspor.com", 
                         Sifre = "123456", 
-                        AdSoyad = "Mehmet Demir",
-                        Telefon = "0555 333 4455",
-                        Uzmanlik = "Basketbol Antrenörü",
+                        AdSoyad = "Özgür",
+                        Telefon = "0532 333 4455",
+                        Uzmanlik = "Yakuplu For Life",
+                        KayitTarihi = DateTime.Now
+                    },
+                    new Antrenor 
+                    { 
+                        Email = "sezer@beykentspor.com", 
+                        Sifre = "123456", 
+                        AdSoyad = "Sezer",
+                        Telefon = "0532 444 5566",
+                        Uzmanlik = "Emlak Konut",
+                        KayitTarihi = DateTime.Now
+                    },
+                    new Antrenor 
+                    { 
+                        Email = "nesrin@beykentspor.com", 
+                        Sifre = "123456", 
+                        AdSoyad = "Nesrin",
+                        Telefon = "0532 555 6677",
+                        Uzmanlik = "Neşe Sever",
                         KayitTarihi = DateTime.Now
                     }
                 };
@@ -218,8 +236,7 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"❌ Hata oluştu: {ex.Message}");
-        Console.WriteLine($"Detay: {ex.InnerException?.Message}");
+        Console.WriteLine($"❌ Veritabanı hatası: {ex.Message}");
     }
 }
 // ========== VERİTABANI KURULUMU SONU ==========
@@ -228,21 +245,29 @@ using (var scope = app.Services.CreateScope())
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
+    // Render'da HttpsRedirection KAPALI!
+    // app.UseHttpsRedirection();
+}
+else
+{
+    app.UseHttpsRedirection(); // Sadece development'da açık
 }
 
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
 
-// Sıralama ÇOK ÖNEMLİ! 
-app.UseSession();        // Önce session
-app.UseAuthentication(); // Sonra authentication
-app.UseAuthorization();  // En son authorization
+// Sıralama önemli!
+app.UseSession();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Antrenor}/{action=Giris}/{id?}");
+
+// PORT ayarı - Render için çok önemli!
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+app.Urls.Add($"http://0.0.0.0:{port}");
 
 app.Run();
