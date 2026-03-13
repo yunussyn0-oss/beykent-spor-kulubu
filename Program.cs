@@ -1,187 +1,214 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Hosting;
-using System;
-using System.IO;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using SporKulubu.Data;
+using SporKulubu.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddControllersWithViews();
+
+// Authentication ekleyelim (Cookie tabanlı)
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Antrenor/Giris";
+        options.LogoutPath = "/Antrenor/Cikis";
+        options.AccessDeniedPath = "/Antrenor/Giris";
+        options.ExpireTimeSpan = TimeSpan.FromDays(7);
+        options.SlidingExpiration = true;
+        options.Cookie.HttpOnly = true;
+        options.Cookie.IsEssential = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+    });
+
+// Database configuration - Render'da /tmp klasörünü kullan
+var dbPath = Environment.GetEnvironmentVariable("RENDER") != null 
+    ? "/tmp/sporkulubu.db"  // Render'da geçici dizin (yazılabilir)
+    : "sporkulubu.db";       // Lokalde normal
+
+builder.Services.AddDbContext<UygulamaDbContext>(options =>
+    options.UseSqlite($"Data Source={dbPath}"));
+
+// Session services
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
 var app = builder.Build();
 
-// Port ayarı
+// ========== VERİTABANINI OTOMATİK OLUŞTUR VE ÖRNEK VERİLERİ EKLE ==========
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<UygulamaDbContext>();
+    
+    try
+    {
+        Console.WriteLine($"Veritabanı yolu: {dbPath}");
+        context.Database.EnsureCreated();
+        Console.WriteLine("✅ Veritabanı oluşturuldu veya zaten mevcut.");
+        
+        // SADECE TABLOLAR BOŞSA VERİ EKLE
+        if (!context.SporSalonlari.Any())
+        {
+            Console.WriteLine("📌 Örnek veriler ekleniyor...");
+
+            // 1. SPOR SALONLARI
+            var salonlar = new List<SporSalonu>
+            {
+                new SporSalonu { Ad = "Emlak Konut Spor Salonu" },
+                new SporSalonu { Ad = "Yakuplu For Life Spor Salonu" },
+                new SporSalonu { Ad = "Neşe Sever Spor Salonu" }
+            };
+            context.SporSalonlari.AddRange(salonlar);
+            context.SaveChanges();
+            Console.WriteLine("✅ 3 spor salonu eklendi.");
+
+            // 2. BRANŞLAR
+            foreach (var salon in salonlar)
+            {
+                context.Branslar.Add(new Brans { Ad = "Voleybol", TakimVarMi = true, GrupVarMi = true, SporSalonuId = salon.Id });
+            }
+            context.SaveChanges();
+
+            // 3. TAKIMLAR
+            var voleybolBranslari = context.Branslar.Where(b => b.Ad == "Voleybol").ToList();
+            foreach (var brans in voleybolBranslari)
+            {
+                context.Takimlar.AddRange(new List<Takim>
+                {
+                    new Takim { Ad = "Mini Takım", SporSalonuId = brans.SporSalonuId, BransId = brans.Id },
+                    new Takim { Ad = "Midi Takım", SporSalonuId = brans.SporSalonuId, BransId = brans.Id },
+                    new Takim { Ad = "Küçük Takım", SporSalonuId = brans.SporSalonuId, BransId = brans.Id },
+                    new Takim { Ad = "Yıldız Takım", SporSalonuId = brans.SporSalonuId, BransId = brans.Id }
+                });
+            }
+            context.SaveChanges();
+
+            // 4. GRUPLAR
+            string[] grupHarfleri = { "A", "B", "C", "D", "E" };
+            foreach (var takim in context.Takimlar.Where(t => t.Brans != null && t.Brans.Ad == "Voleybol"))
+            {
+                foreach (var harf in grupHarfleri)
+                {
+                    context.Gruplar.Add(new Grup { Ad = $"{harf} Grubu", TakimId = takim.Id });
+                }
+            }
+            context.SaveChanges();
+
+            // 5. YAKUPLU'YA BASKETBOL
+            var yakuplu = context.SporSalonlari.FirstOrDefault(s => s.Ad.Contains("Yakuplu"));
+            if (yakuplu != null)
+            {
+                var basketbol = new Brans { Ad = "Basketbol", TakimVarMi = true, GrupVarMi = true, SporSalonuId = yakuplu.Id };
+                context.Branslar.Add(basketbol);
+                context.SaveChanges();
+
+                var basketbolTakimlari = new List<Takim>
+                {
+                    new Takim { Ad = "U8 Takım", SporSalonuId = yakuplu.Id, BransId = basketbol.Id },
+                    new Takim { Ad = "U10 Takım", SporSalonuId = yakuplu.Id, BransId = basketbol.Id },
+                    new Takim { Ad = "U12 Takım", SporSalonuId = yakuplu.Id, BransId = basketbol.Id },
+                    new Takim { Ad = "U14 Takım", SporSalonuId = yakuplu.Id, BransId = basketbol.Id }
+                };
+                context.Takimlar.AddRange(basketbolTakimlari);
+                context.SaveChanges();
+
+                foreach (var takim in basketbolTakimlari)
+                {
+                    foreach (var harf in grupHarfleri)
+                    {
+                        context.Gruplar.Add(new Grup { Ad = $"{harf} Grubu", TakimId = takim.Id });
+                    }
+                }
+                context.SaveChanges();
+
+                context.Branslar.Add(new Brans { Ad = "Atletik Performans", TakimVarMi = false, GrupVarMi = false, SporSalonuId = yakuplu.Id });
+                context.SaveChanges();
+            }
+
+            // 6. ANTRENÖRLER
+            var antrenorler = new List<Antrenor>
+            {
+                new Antrenor { AdSoyad = "Burhan Şayan", Email = "burhan@beykentspor.com", Sifre = "123456", Telefon = "0532 111 2233", Uzmanlik = "Tam Yetki", KayitTarihi = DateTime.Now },
+                new Antrenor { AdSoyad = "Ertan Tuncel", Email = "ertan@beykentspor.com", Sifre = "123456", Telefon = "0532 222 3344", Uzmanlik = "Tam Yetki", KayitTarihi = DateTime.Now },
+                new Antrenor { AdSoyad = "Özgür", Email = "ozgur@beykentspor.com", Sifre = "123456", Telefon = "0532 333 4455", Uzmanlik = "Yakuplu For Life", KayitTarihi = DateTime.Now },
+                new Antrenor { AdSoyad = "Sezer", Email = "sezer@beykentspor.com", Sifre = "123456", Telefon = "0532 444 5566", Uzmanlik = "Emlak Konut", KayitTarihi = DateTime.Now },
+                new Antrenor { AdSoyad = "Nesrin", Email = "nesrin@beykentspor.com", Sifre = "123456", Telefon = "0532 555 6677", Uzmanlik = "Neşe Sever", KayitTarihi = DateTime.Now }
+            };
+            context.Antrenorler.AddRange(antrenorler);
+            context.SaveChanges();
+
+            // 7. YETKİ ATAMALARI
+            var atamalar = new List<AntrenorTakim>();
+            var ozgurDb = context.Antrenorler.FirstOrDefault(a => a.Email == "ozgur@beykentspor.com");
+            var sezerDb = context.Antrenorler.FirstOrDefault(a => a.Email == "sezer@beykentspor.com");
+            var nesrinDb = context.Antrenorler.FirstOrDefault(a => a.Email == "nesrin@beykentspor.com");
+
+            if (ozgurDb != null && yakuplu != null)
+                atamalar.Add(new AntrenorTakim { AntrenorId = ozgurDb.Id, SporSalonuId = yakuplu.Id, AtanmaTarihi = DateTime.Now });
+
+            if (sezerDb != null)
+            {
+                var emlak = context.SporSalonlari.FirstOrDefault(s => s.Ad.Contains("Emlak"));
+                if (emlak != null)
+                    atamalar.Add(new AntrenorTakim { AntrenorId = sezerDb.Id, SporSalonuId = emlak.Id, AtanmaTarihi = DateTime.Now });
+            }
+
+            if (nesrinDb != null)
+            {
+                var nese = context.SporSalonlari.FirstOrDefault(s => s.Ad.Contains("Neşe"));
+                if (nese != null)
+                    atamalar.Add(new AntrenorTakim { AntrenorId = nesrinDb.Id, SporSalonuId = nese.Id, AtanmaTarihi = DateTime.Now });
+            }
+
+            if (atamalar.Any())
+            {
+                context.AntrenorTakimlar.AddRange(atamalar);
+                context.SaveChanges();
+            }
+
+            Console.WriteLine("🎉 Tüm örnek veriler başarıyla eklendi!");
+        }
+        else
+        {
+            Console.WriteLine("ℹ️ Veritabanı zaten dolu, yeni veri eklenmedi.");
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"❌ Veritabanı hatası: {ex.Message}");
+    }
+}
+
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    // Render'da HttpsRedirection KAPALI!
+    // app.UseHttpsRedirection();
+}
+else
+{
+    app.UseHttpsRedirection();
+}
+
+app.UseStaticFiles();
+app.UseRouting();
+app.UseSession();
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Antrenor}/{action=Giris}/{id?}");
+
+// PORT ayarı - Render için
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 app.Urls.Add($"http://0.0.0.0:{port}");
-
-// Ana sayfa (Login)
-app.MapGet("/", async context =>
-{
-    var hata = context.Request.Query.ContainsKey("hata") ? "E-posta veya şifre hatalı!" : "";
-    
-    context.Response.ContentType = "text/html";
-    await context.Response.WriteAsync($@"
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset='UTF-8'>
-            <title>Beykent Spor - Giriş</title>
-            <style>
-                * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-                body {{
-                    background: linear-gradient(145deg, #0B2A4A 0%, #1B3B5C 100%);
-                    font-family: 'Segoe UI', Arial, sans-serif;
-                    height: 100vh;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }}
-                .login-box {{
-                    background: white;
-                    padding: 40px;
-                    border-radius: 30px;
-                    width: 400px;
-                    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-                }}
-                .logo h1 {{ color: #0B2A4A; font-size: 28px; font-weight: 700; text-align: center; }}
-                .logo p {{ color: #6B7A8F; text-align: center; margin: 5px 0 25px; }}
-                .error {{
-                    background: #FEF2F2;
-                    color: #991B1B;
-                    padding: 12px;
-                    border-radius: 8px;
-                    margin-bottom: 20px;
-                    text-align: center;
-                }}
-                .form-group {{ margin-bottom: 20px; }}
-                .form-group input {{
-                    width: 100%;
-                    padding: 12px 15px;
-                    border: 2px solid #E5E9F0;
-                    border-radius: 12px;
-                    font-size: 15px;
-                }}
-                button {{
-                    width: 100%;
-                    padding: 14px;
-                    background: linear-gradient(145deg, #0B2A4A, #1B3B5C);
-                    color: white;
-                    border: none;
-                    border-radius: 12px;
-                    font-size: 16px;
-                    font-weight: 600;
-                    cursor: pointer;
-                }}
-                .info {{ margin-top: 25px; padding: 15px; background: #F0F4F8; border-radius: 10px; }}
-            </style>
-        </head>
-        <body>
-            <div class='login-box'>
-                <div class='logo'>
-                    <h1>⚡ BEYKENT SPOR</h1>
-                    <p>Antrenör Giriş Paneli</p>
-                </div>
-                
-                {(hata != "" ? $"<div class='error'>❌ {hata}</div>" : "")}
-                
-                <form method='post' action='/giris'>
-                    <div class='form-group'>
-                        <input type='email' name='email' placeholder='E-posta adresiniz' value='burhan@beykentspor.com' required>
-                    </div>
-                    
-                    <div class='form-group'>
-                        <input type='password' name='sifre' placeholder='Şifreniz' value='123456' required>
-                    </div>
-                    
-                    <button type='submit'>GİRİŞ YAP</button>
-                </form>
-                
-                <div class='info'>
-                    <p><strong>📋 Test Bilgileri:</strong></p>
-                    <p>• burhan@beykentspor.com / 123456</p>
-                    <p>• ertan@beykentspor.com / 123456</p>
-                    <p>• ozgur@beykentspor.com / 123456</p>
-                </div>
-            </div>
-        </body>
-        </html>
-    ");
-});
-
-// Login işlemi
-app.MapPost("/giris", async context =>
-{
-    var form = await context.Request.ReadFormAsync();
-    var email = form["email"].ToString();
-    var sifre = form["sifre"].ToString();
-    
-    // Basit kontrol
-    if ((email == "burhan@beykentspor.com" && sifre == "123456") ||
-        (email == "ertan@beykentspor.com" && sifre == "123456") ||
-        (email == "ozgur@beykentspor.com" && sifre == "123456"))
-    {
-        context.Response.Redirect("/panel");
-    }
-    else
-    {
-        context.Response.Redirect("/?hata=1");
-    }
-});
-
-// Panel sayfası
-app.MapGet("/panel", async context =>
-{
-    context.Response.ContentType = "text/html";
-    await context.Response.WriteAsync(@"
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset='UTF-8'>
-            <title>Panel - Beykent Spor</title>
-            <style>
-                body {
-                    font-family: 'Segoe UI', Arial, sans-serif;
-                    background: #f5f7fa;
-                    margin: 0;
-                    padding: 40px;
-                }
-                .container {
-                    max-width: 800px;
-                    margin: 0 auto;
-                }
-                .card {
-                    background: white;
-                    border-radius: 20px;
-                    padding: 30px;
-                    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-                }
-                h1 { color: #0B2A4A; }
-                .success {
-                    color: green;
-                    padding: 10px;
-                    background: #e8f5e8;
-                    border-radius: 10px;
-                }
-                .logout {
-                    display: inline-block;
-                    margin-top: 20px;
-                    padding: 10px 20px;
-                    background: #dc3545;
-                    color: white;
-                    text-decoration: none;
-                    border-radius: 8px;
-                }
-            </style>
-        </head>
-        <body>
-            <div class='container'>
-                <div class='card'>
-                    <h1>✅ GİRİŞ BAŞARILI!</h1>
-                    <p class='success'>Hoş geldiniz, panele erişiminiz var.</p>
-                    <p>Bu basit bir test sayfasıdır. Ana uygulama daha sonra eklenecek.</p>
-                    <a href='/' class='logout'>Çıkış Yap</a>
-                </div>
-            </div>
-        </body>
-        </html>
-    ");
-});
 
 app.Run();
