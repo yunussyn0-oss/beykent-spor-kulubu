@@ -4,7 +4,6 @@ namespace SporKulubu.Controllers;
 
 public class AntrenorController : Controller
 {
-    // KESİNLİKLE ÇALIŞACAK BASİT VERSİYON
     public IActionResult Giris()
     {
         return View();
