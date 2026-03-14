@@ -1,30 +1,667 @@
 @{
     Layout = null;
+    var hataMesaji = ViewBag.Hata ?? TempData["Hata"];
+    var basariliMesaj = TempData["Basarili"];
 }
 
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
-    <title>Giriş</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Giriş - Beykent Spor Kulübü</title>
+    
+    <!-- Bootstrap & Fonts -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* RESET & GENEL STILLER */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0B2A4A 0%, #1B3B5C 50%, #2C4A6E 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ARKAPLAN EFEKTLERI */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 50%);
+            -webkit-animation: rotate 20s linear infinite;
+            animation: rotate 20s linear infinite;
+        }
+
+        body::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.05"><path d="M50 15 L61 39 L88 39 L67 56 L74 84 L50 69 L26 84 L33 56 L12 39 L39 39 Z" fill="white"/></svg>');
+            background-size: 50px 50px;
+            opacity: 0.1;
+        }
+
+        /* ANIMASYONLAR - Bu şekilde yazınca hata vermez */
+        <text>
+        @@-webkit-keyframes rotate {
+            from { -webkit-transform: rotate(0deg); transform: rotate(0deg); }
+            to { -webkit-transform: rotate(360deg); transform: rotate(360deg); }
+        }
+
+        @@keyframes rotate {
+            from { -webkit-transform: rotate(0deg); transform: rotate(0deg); }
+            to { -webkit-transform: rotate(360deg); transform: rotate(360deg); }
+        }
+
+        @@-webkit-keyframes slideUp {
+            from {
+                opacity: 0;
+                -webkit-transform: translateY(30px);
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                -webkit-transform: translateY(0);
+                transform: translateY(0);
+            }
+        }
+
+        @@keyframes slideUp {
+            from {
+                opacity: 0;
+                -webkit-transform: translateY(30px);
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                -webkit-transform: translateY(0);
+                transform: translateY(0);
+            }
+        }
+
+        @@-webkit-keyframes pulse {
+            0% { box-shadow: 0 20px 30px -10px rgba(11, 42, 74, 0.4); }
+            50% { box-shadow: 0 20px 40px -5px rgba(11, 42, 74, 0.6); }
+            100% { box-shadow: 0 20px 30px -10px rgba(11, 42, 74, 0.4); }
+        }
+
+        @@keyframes pulse {
+            0% { box-shadow: 0 20px 30px -10px rgba(11, 42, 74, 0.4); }
+            50% { box-shadow: 0 20px 40px -5px rgba(11, 42, 74, 0.6); }
+            100% { box-shadow: 0 20px 30px -10px rgba(11, 42, 74, 0.4); }
+        }
+
+        @@-webkit-keyframes shake {
+            0%, 100% { -webkit-transform: translateX(0); transform: translateX(0); }
+            20% { -webkit-transform: translateX(-10px); transform: translateX(-10px); }
+            40% { -webkit-transform: translateX(10px); transform: translateX(10px); }
+            60% { -webkit-transform: translateX(-5px); transform: translateX(-5px); }
+            80% { -webkit-transform: translateX(5px); transform: translateX(5px); }
+        }
+
+        @@keyframes shake {
+            0%, 100% { -webkit-transform: translateX(0); transform: translateX(0); }
+            20% { -webkit-transform: translateX(-10px); transform: translateX(-10px); }
+            40% { -webkit-transform: translateX(10px); transform: translateX(10px); }
+            60% { -webkit-transform: translateX(-5px); transform: translateX(-5px); }
+            80% { -webkit-transform: translateX(5px); transform: translateX(5px); }
+        }
+        </text>
+
+        .login-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 450px;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.98);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border-radius: 40px;
+            padding: 40px 35px;
+            box-shadow: 0 40px 70px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            -webkit-transform: translateY(0);
+            transform: translateY(0);
+            -webkit-animation: slideUp 0.6s ease-out;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        .logo-area {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #0B2A4A, #1B3B5C);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 20px 30px -10px rgba(11, 42, 74, 0.4);
+            -webkit-animation: pulse 2s infinite;
+            animation: pulse 2s infinite;
+        }
+
+        .logo-icon i {
+            font-size: 50px;
+            color: #FFD700;
+        }
+
+        .logo-area h1 {
+            color: #0B2A4A;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .logo-area p {
+            color: #6B7A8F;
+            font-size: 15px;
+            font-weight: 400;
+        }
+
+        .welcome-text {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 20px;
+            border-left: 5px solid #0B2A4A;
+        }
+
+        .welcome-text h3 {
+            color: #0B2A4A;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .welcome-text p {
+            color: #6B7A8F;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .alert-custom {
+            border-radius: 16px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: none;
+            -webkit-animation: shake 0.5s ease-in-out;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .alert-danger-custom {
+            background: linear-gradient(135deg, #fee, #ffd1d1);
+            color: #a00;
+            border-left: 5px solid #dc3545;
+        }
+
+        .alert-success-custom {
+            background: linear-gradient(135deg, #e8f5e8, #d4edda);
+            color: #155724;
+            border-left: 5px solid #28a745;
+        }
+
+        .alert-custom i {
+            font-size: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #0B2A4A;
+            margin-bottom: 8px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #0B2A4A;
+            font-size: 18px;
+            z-index: 10;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 16px 20px 16px 50px;
+            font-size: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 16px;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .form-control:focus {
+            border-color: #0B2A4A;
+            box-shadow: 0 0 0 4px rgba(11, 42, 74, 0.1);
+            outline: none;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6B7A8F;
+            cursor: pointer;
+            z-index: 10;
+            transition: color 0.3s;
+        }
+
+        .password-toggle:hover {
+            color: #0B2A4A;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #0B2A4A, #1B3B5C);
+            border: none;
+            border-radius: 16px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 15px 0 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 30px -10px rgba(11, 42, 74, 0.5);
+            background: linear-gradient(135deg, #1B3B5C, #0B2A4A);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .btn-login::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-login:active::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-login:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .test-info {
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 25px;
+            border: 1px solid #e9ecef;
+        }
+
+        .test-info h6 {
+            color: #0B2A4A;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .test-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .test-item {
+            background: white;
+            border-radius: 14px;
+            padding: 12px;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .test-item:hover {
+            border-color: #0B2A4A;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(11, 42, 74, 0.1);
+        }
+
+        .test-item-label {
+            font-size: 12px;
+            color: #6B7A8F;
+            margin-bottom: 5px;
+        }
+
+        .test-item-email {
+            font-weight: 600;
+            font-size: 13px;
+            color: #0B2A4A;
+            margin-bottom: 3px;
+        }
+
+        .test-item-password {
+            font-size: 12px;
+            color: #28a745;
+            font-family: monospace;
+        }
+
+        .feature-list {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #6B7A8F;
+            font-size: 13px;
+        }
+
+        .feature-item i {
+            color: #0B2A4A;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 30px;
+            color: rgba(255,255,255,0.5);
+            font-size: 12px;
+        }
+
+        .footer-note a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+        }
+
+        .footer-note a:hover {
+            color: white;
+        }
+    </style>
 </head>
 <body>
-    <h1>GİRİŞ SAYFASI</h1>
-    
-    @if (ViewBag.Hata != null)
-    {
-        <p style="color:red">@ViewBag.Hata</p>
-    }
-    
-    <form method="post">
-        <div>
-            <label>Email:</label>
-            <input type="email" name="email" value="burhan@beykentspor.com" />
+    <!-- AYNI HTML KISMI (DEĞİŞMEDİ) -->
+    <div class="login-container">
+        <div class="login-card">
+            <!-- Logo ve Başlık -->
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <i class="bi bi-trophy-fill"></i>
+                </div>
+                <h1>BEYKENT SPOR</h1>
+                <p>Antrenör Giriş Paneli</p>
+            </div>
+
+            <!-- Hoş Geldin Mesajı -->
+            <div class="welcome-text">
+                <h3>👋 Tekrar Hoş Geldiniz</h3>
+                <p>Panele erişmek için giriş yapın</p>
+            </div>
+
+            <!-- Hata Mesajları -->
+            @if (hataMesaji != null)
+            {
+                <div class="alert-custom alert-danger-custom">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <div>
+                        <strong>Giriş Başarısız!</strong><br />
+                        @hataMesaji
+                    </div>
+                </div>
+            }
+
+            <!-- Başarılı Mesajı -->
+            @if (basariliMesaj != null)
+            {
+                <div class="alert-custom alert-success-custom">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <div>
+                        <strong>Başarılı!</strong><br />
+                        @basariliMesaj
+                    </div>
+                </div>
+            }
+
+            <!-- Giriş Formu -->
+            <form method="post" action="@Url.Action("Giris", "Antrenor")" id="loginForm">
+                @Html.AntiForgeryToken()
+
+                <!-- Email Alanı -->
+                <div class="form-group">
+                    <label>
+                        <i class="bi bi-envelope-fill me-1"></i>
+                        E-POSTA ADRESİ
+                    </label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-envelope-fill input-icon"></i>
+                        <input type="email" 
+                               name="email" 
+                               class="form-control" 
+                               placeholder="ornek@beykentspor.com" 
+                               value="burhan@beykentspor.com" 
+                               required 
+                               autocomplete="email"
+                               id="emailInput">
+                    </div>
+                </div>
+
+                <!-- Şifre Alanı -->
+                <div class="form-group">
+                    <label>
+                        <i class="bi bi-lock-fill me-1"></i>
+                        ŞİFRE
+                    </label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-lock-fill input-icon"></i>
+                        <input type="password" 
+                               name="sifre" 
+                               id="sifreInput"
+                               class="form-control" 
+                               placeholder="••••••••" 
+                               value="123456" 
+                               required 
+                               autocomplete="current-password">
+                        <button type="button" class="password-toggle" onclick="togglePassword()">
+                            <i class="bi bi-eye" id="toggleIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Beni Hatırla -->
+                <div class="form-check mb-4">
+                    <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe" checked>
+                    <label class="form-check-label" for="rememberMe">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Beni Hatırla
+                    </label>
+                </div>
+
+                <!-- Giriş Butonu -->
+                <button type="submit" class="btn-login" id="loginButton">
+                    <span class="button-text">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>
+                        GİRİŞ YAP
+                    </span>
+                    <span class="spinner-border spinner-border-sm d-none" role="status" id="loginSpinner"></span>
+                </button>
+            </form>
+
+            <!-- Özellik Listesi -->
+            <div class="feature-list">
+                <div class="feature-item">
+                    <i class="bi bi-shield-check"></i>
+                    <span>Güvenli Giriş</span>
+                </div>
+                <div class="feature-item">
+                    <i class="bi bi-clock-history"></i>
+                    <span>7/24 Erişim</span>
+                </div>
+                <div class="feature-item">
+                    <i class="bi bi-phone"></i>
+                    <span>Mobil Uyumlu</span>
+                </div>
+            </div>
+
+            <!-- Test Bilgileri -->
+            <div class="test-info">
+                <h6>
+                    <i class="bi bi-info-circle-fill text-primary"></i>
+                    Test Giriş Bilgileri
+                </h6>
+                <div class="test-grid">
+                    <div class="test-item" onclick="fillLoginForm('burhan@beykentspor.com', '123456')">
+                        <div class="test-item-label">👑 Tam Yetkili</div>
+                        <div class="test-item-email">burhan@beykentspor.com</div>
+                        <div class="test-item-password">🔑 123456</div>
+                    </div>
+                    <div class="test-item" onclick="fillLoginForm('ertan@beykentspor.com', '123456')">
+                        <div class="test-item-label">👑 Tam Yetkili</div>
+                        <div class="test-item-email">ertan@beykentspor.com</div>
+                        <div class="test-item-password">🔑 123456</div>
+                    </div>
+                    <div class="test-item" onclick="fillLoginForm('ozgur@beykentspor.com', '123456')">
+                        <div class="test-item-label">🏋️ Yakuplu</div>
+                        <div class="test-item-email">ozgur@beykentspor.com</div>
+                        <div class="test-item-password">🔑 123456</div>
+                    </div>
+                    <div class="test-item" onclick="fillLoginForm('sezer@beykentspor.com', '123456')">
+                        <div class="test-item-label">🏢 Emlak Konut</div>
+                        <div class="test-item-email">sezer@beykentspor.com</div>
+                        <div class="test-item-password">🔑 123456</div>
+                    </div>
+                    <div class="test-item" onclick="fillLoginForm('nesrin@beykentspor.com', '123456')">
+                        <div class="test-item-label">🏠 Neşe Sever</div>
+                        <div class="test-item-email">nesrin@beykentspor.com</div>
+                        <div class="test-item-password">🔑 123456</div>
+                    </div>
+                </div>
+                <p class="text-muted small mt-3 mb-0">
+                    <i class="bi bi-lightbulb me-1"></i>
+                    Test hesaplarına tıklayarak otomatik doldurun
+                </p>
+            </div>
         </div>
-        <div>
-            <label>Şifre:</label>
-            <input type="password" name="sifre" value="123456" />
+
+        <!-- Footer -->
+        <div class="footer-note">
+            <p>© @DateTime.Now.Year Beykent Spor Kulübü - Tüm hakları saklıdır.</p>
+            <p class="mt-1">
+                <i class="bi bi-building me-1"></i>
+                Emlak Konut | Yakuplu | Neşe Sever
+            </p>
         </div>
-        <button type="submit">Giriş Yap</button>
-    </form>
+    </div>
+
+    <script>
+        // Şifre göster/gizle
+        function togglePassword() {
+            var sifre = document.getElementById('sifreInput');
+            var icon = document.getElementById('toggleIcon');
+            
+            if (sifre.type === 'password') {
+                sifre.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                sifre.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        }
+
+        // Test bilgilerini forma doldur
+        function fillLoginForm(email, password) {
+            document.querySelector('input[name="email"]').value = email;
+            document.querySelector('input[name="sifre"]').value = password;
+            
+            // Kısa bir animasyon
+            var button = document.querySelector('.btn-login');
+            button.style.transform = 'scale(0.98)';
+            setTimeout(() => {
+                button.style.transform = '';
+            }, 200);
+        }
+
+        // Loading efekti
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            var button = document.getElementById('loginButton');
+            var buttonText = button.querySelector('.button-text');
+            var spinner = document.getElementById('loginSpinner');
+            
+            button.disabled = true;
+            buttonText.classList.add('d-none');
+            spinner.classList.remove('d-none');
+        });
+
+        // Enter tuşu ile form gönderme
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('loginForm').submit();
+            }
+        });
+    </script>
 </body>
 </html>
