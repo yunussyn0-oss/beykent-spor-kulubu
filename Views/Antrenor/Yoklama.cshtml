@@ -47,6 +47,33 @@
         </div>
     </div>
 
+    <!-- Hızlı İşlem Butonları -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-success w-100" id="markAllPresent">
+                                <i class="bi bi-check-circle me-2"></i>Tümünü Katıldı Yap
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-warning w-100" id="markAllPermitted">
+                                <i class="bi bi-file-text me-2"></i>Tümünü İzinli Yap
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-danger w-100" id="markAllAbsent">
+                                <i class="bi bi-x-circle me-2"></i>Tümünü Katılmadı Yap
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Yoklama Formu -->
     <div class="row">
         <div class="col-12">
@@ -87,19 +114,42 @@
                                                 <td>@index</td>
                                                 <td class="fw-bold">@uye.AdSoyad</td>
                                                 <td>
-                                                    <select name="yoklamalar[@uye.Id].Durum" class="form-select form-select-sm">
-                                                        <option value="Katıldı" selected="@(yoklamaVar && yoklama?.Durum == "Katıldı" ? true : false)">
-                                                            ✅ Katıldı
-                                                        </option>
-                                                        <option value="Katılmadı" selected="@(yoklamaVar && yoklama?.Durum == "Katılmadı" ? true : false)">
-                                                            ❌ Katılmadı
-                                                        </option>
-                                                        <option value="İzinli" selected="@(yoklamaVar && yoklama?.Durum == "İzinli" ? true : false)">
-                                                            📝 İzinli
-                                                        </option>
-                                                        <option value="Raporlu" selected="@(yoklamaVar && yoklama?.Durum == "Raporlu" ? true : false)">
-                                                            🏥 Raporlu
-                                                        </option>
+                                                    <select name="yoklamalar[@uye.Id].Durum" class="form-select form-select-sm yoklama-durum">
+                                                        @if (yoklamaVar && yoklama?.Durum == "Katıldı")
+                                                        {
+                                                            <option value="Katıldı" selected>✅ Katıldı</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="Katıldı">✅ Katıldı</option>
+                                                        }
+                                                        
+                                                        @if (yoklamaVar && yoklama?.Durum == "Katılmadı")
+                                                        {
+                                                            <option value="Katılmadı" selected>❌ Katılmadı</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="Katılmadı">❌ Katılmadı</option>
+                                                        }
+                                                        
+                                                        @if (yoklamaVar && yoklama?.Durum == "İzinli")
+                                                        {
+                                                            <option value="İzinli" selected>📝 İzinli</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="İzinli">📝 İzinli</option>
+                                                        }
+                                                        
+                                                        @if (yoklamaVar && yoklama?.Durum == "Raporlu")
+                                                        {
+                                                            <option value="Raporlu" selected>🏥 Raporlu</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="Raporlu">🏥 Raporlu</option>
+                                                        }
                                                     </select>
                                                     <input type="hidden" name="yoklamalar[@uye.Id].UyeId" value="@uye.Id" />
                                                 </td>
@@ -145,16 +195,33 @@
     </div>
 </div>
 
-<script>
-    $(document).ready(function() {
-        // Tüm sporcuları katıldı olarak işaretle
-        $('#markAllPresent').click(function() {
-            $('select[name$=".Durum"]').val('Katıldı');
-        });
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Tümünü katıldı yap
+            $('#markAllPresent').click(function() {
+                $('.yoklama-durum').val('Katıldı');
+            });
 
-        // Tüm sporcuları izinli olarak işaretle
-        $('#markAllPermitted').click(function() {
-            $('select[name$=".Durum"]').val('İzinli');
+            // Tümünü izinli yap
+            $('#markAllPermitted').click(function() {
+                $('.yoklama-durum').val('İzinli');
+            });
+
+            // Tümünü katılmadı yap
+            $('#markAllAbsent').click(function() {
+                $('.yoklama-durum').val('Katılmadı');
+            });
+
+            // Form gönderilirken onay
+            $('form[action*="YoklamaKaydet"]').submit(function(e) {
+                var seciliSayisi = $('.yoklama-durum').length;
+                var onay = confirm(seciliSayisi + ' sporcu için yoklama kaydedilecek. Devam edilsin mi?');
+                if (!onay) {
+                    e.preventDefault();
+                }
+            });
         });
-    });
-</script>
+    </script>
+}
