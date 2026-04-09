@@ -1,5 +1,6 @@
 @{
     ViewData["Title"] = "Veli Mesaj";
+    var antrenorAdi = User.Identity?.Name ?? "Antrenör";
 }
 
 <div class="container-fluid mt-4">
@@ -88,7 +89,7 @@
 @ViewBag.TakimAdi - @ViewBag.GrupAdı grubu antrenman programı hakkında bilgilendirme yapmak isteriz.
 
 İyi günler dileriz.
-Antrenör @Context.Session.GetString("AntrenorAdi")</textarea>
+Antrenör @antrenorAdi</textarea>
                         </div>
 
                         <div class="mb-4">
@@ -142,6 +143,7 @@ Antrenör @Context.Session.GetString("AntrenorAdi")</textarea>
 </div>
 
 <!-- Telefon numarası kopyalama scripti -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
         // Tümünü seç / seçimi kaldır

@@ -5,454 +5,578 @@
     var tamYetki = ViewBag.TamYetki ?? false;
 }
 
-<div class="container-fluid mt-4">
-    <!-- Hoş Geldin Kartı -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card bg-gradient-primary text-white shadow-lg">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center">
-                            <div class="flex-shrink-0">
-                                <i class="bi bi-person-circle display-4 me-4"></i>
-                            </div>
-                            <div>
-                                <h2 class="fw-bold mb-1">Hoş Geldin, @Model.AdSoyad</h2>
-                                <p class="lead mb-0 fs-6 opacity-75">
-                                    <i class="bi bi-trophy-fill me-1"></i>
-                                    @if (tamYetki)
-                                    {
-                                        <span>Tüm Salonlar</span>
-                                    }
-                                    else
-                                    {
-                                        <span>Yetkili Salon</span>
-                                    }
-                                </p>
-                                <div class="mt-2">
-                                    <span class="badge bg-light text-dark me-2">
-                                        <i class="bi bi-people-fill me-1"></i>@ViewBag.SporcuSayisi Sporcu
-                                    </span>
-                                    @if (ViewBag.SecilenSalonAdi != null)
-                                    {
-                                        <span class="badge bg-warning text-dark">
-                                            <i class="bi bi-building me-1"></i>@ViewBag.SecilenSalonAdi
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Beykent Spor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #0B2A4A 0%, #1B3B5C 100%);
+        }
+        .hover-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            border: 1px solid #e9ecef;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .hover-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(11, 42, 74, 0.15) !important;
+            border-color: #0B2A4A;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-left: 4px solid #0B2A4A;
+        }
+        .filter-section {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 20px;
+        }
+        .table thead th {
+            background: #0B2A4A;
+            color: white;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: none;
+        }
+        .table tbody tr:hover {
+            background: #f8f9fa;
+        }
+        .badge {
+            font-weight: 500;
+            padding: 6px 12px;
+        }
+        .btn-group .btn {
+            border-radius: 8px;
+            margin: 0 2px;
+        }
+        .btn-outline-primary:hover, .btn-outline-success:hover, .btn-outline-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        .filter-badge {
+            background: #e9ecef;
+            color: #495057;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .filter-badge i {
+            color: #0B2A4A;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid mt-4">
+        <!-- Hoş Geldin Kartı -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card bg-gradient-primary text-white shadow-lg border-0">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0 me-4">
+                                    <i class="bi bi-person-circle display-1"></i>
+                                </div>
+                                <div>
+                                    <h2 class="fw-bold mb-2">Hoş Geldin, @Model.AdSoyad</h2>
+                                    <div class="d-flex gap-3">
+                                        <span class="badge bg-white text-dark py-2 px-3">
+                                            <i class="bi bi-people-fill me-2 text-primary"></i>
+                                            @ViewBag.SporcuSayisi Sporcu
                                         </span>
-                                    }
+                                        @if (tamYetki)
+                                        {
+                                            <span class="badge bg-warning text-dark py-2 px-3">
+                                                <i class="bi bi-star-fill me-2"></i>
+                                                Tam Yetkili
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-info text-white py-2 px-3">
+                                                <i class="bi bi-building me-2"></i>
+                                                @ViewBag.SecilenSalonAdi
+                                            </span>
+                                        }
+                                    </div>
                                 </div>
                             </div>
+                            <a asp-action="Cikis" class="btn btn-danger btn-lg px-5 py-3 rounded-3">
+                                <i class="bi bi-box-arrow-right me-2"></i>Çıkış
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hızlı İstatistikler -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded-3">
+                                <i class="bi bi-people-fill text-primary fs-3"></i>
+                            </div>
                         </div>
                         <div>
-                            <a asp-action="Cikis" class="btn btn-danger btn-lg px-4 py-3">
-                                <i class="bi bi-box-arrow-right me-2"></i>Çıkış Yap
-                            </a>
+                            <h6 class="text-muted mb-1">Toplam Sporcu</h6>
+                            <h3 class="fw-bold mb-0">@ViewBag.SporcuSayisi</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="bg-success bg-opacity-10 p-3 rounded-3">
+                                <i class="bi bi-building text-success fs-3"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">Salon Sayısı</h6>
+                            <h3 class="fw-bold mb-0">@(((SelectList)ViewBag.SporSalonlari)?.Count() ?? 0)</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="bg-warning bg-opacity-10 p-3 rounded-3">
+                                <i class="bi bi-grid-3x3 text-warning fs-3"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">Takım Sayısı</h6>
+                            <h3 class="fw-bold mb-0">@(((SelectList)ViewBag.Takimlar)?.Count() ?? 0)</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="bg-info bg-opacity-10 p-3 rounded-3">
+                                <i class="bi bi-diagram-3 text-info fs-3"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">Grup Sayısı</h6>
+                            <h3 class="fw-bold mb-0">@(((SelectList)ViewBag.Gruplar)?.Count() ?? 0)</h3>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Hızlı İşlem Kartları -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-3">
-            <a href="/Antrenor/Yoklama" class="text-decoration-none">
-                <div class="card shadow-sm hover-card border-0">
-                    <div class="card-body text-center p-4">
-                        <div class="bg-success bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
-                            <i class="bi bi-check2-circle text-success fs-1"></i>
+        <!-- Hızlı İşlem Kartları -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <a href="@Url.Action("Yoklama", "Antrenor")" class="text-decoration-none">
+                    <div class="card hover-card border-0 h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="bg-success bg-opacity-10 rounded-circle p-4 d-inline-block mb-3">
+                                <i class="bi bi-check2-circle text-success fs-1"></i>
+                            </div>
+                            <h5 class="fw-bold mb-2">Yoklama Al</h5>
+                            <p class="text-muted small mb-0">Antrenman yoklaması</p>
+                            <span class="badge bg-success mt-3">Bugün Al</span>
                         </div>
-                        <h5 class="fw-bold mb-2">Yoklama Al</h5>
-                        <p class="text-muted small mb-0">Antrenman yoklaması</p>
-                        <span class="badge bg-success mt-3">Bugün Al</span>
                     </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-3">
-            <a href="/Antrenor/VeliMesaj" class="text-decoration-none">
-                <div class="card shadow-sm hover-card border-0">
-                    <div class="card-body text-center p-4">
-                        <div class="bg-info bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
-                            <i class="bi bi-chat-dots text-info fs-1"></i>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="@Url.Action("VeliMesaj", "Antrenor")" class="text-decoration-none">
+                    <div class="card hover-card border-0 h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="bg-info bg-opacity-10 rounded-circle p-4 d-inline-block mb-3">
+                                <i class="bi bi-chat-dots text-info fs-1"></i>
+                            </div>
+                            <h5 class="fw-bold mb-2">Veli Mesaj</h5>
+                            <p class="text-muted small mb-0">Toplu WhatsApp/SMS</p>
+                            <span class="badge bg-info mt-3">@ViewBag.SporcuSayisi Veli</span>
                         </div>
-                        <h5 class="fw-bold mb-2">Veli Mesaj</h5>
-                        <p class="text-muted small mb-0">Toplu WhatsApp/SMS</p>
-                        <span class="badge bg-info mt-3">@ViewBag.SporcuSayisi Veli</span>
                     </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-3">
-            <a href="/Antrenor/Istatistikler" class="text-decoration-none">
-                <div class="card shadow-sm hover-card border-0">
-                    <div class="card-body text-center p-4">
-                        <div class="bg-warning bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
-                            <i class="bi bi-bar-chart-line text-warning fs-1"></i>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="@Url.Action("Istatistikler", "Antrenor")" class="text-decoration-none">
+                    <div class="card hover-card border-0 h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="bg-warning bg-opacity-10 rounded-circle p-4 d-inline-block mb-3">
+                                <i class="bi bi-bar-chart-line text-warning fs-1"></i>
+                            </div>
+                            <h5 class="fw-bold mb-2">İstatistikler</h5>
+                            <p class="text-muted small mb-0">Katılım raporları</p>
+                            <span class="badge bg-warning text-dark mt-3">Detaylar</span>
                         </div>
-                        <h5 class="fw-bold mb-2">İstatistikler</h5>
-                        <p class="text-muted small mb-0">Katılım raporları</p>
-                        <span class="badge bg-warning text-dark mt-3">Detaylar</span>
                     </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-3">
-            <a href="/Antrenor/GecmisYoklamalar" class="text-decoration-none">
-                <div class="card shadow-sm hover-card border-0">
-                    <div class="card-body text-center p-4">
-                        <div class="bg-secondary bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
-                            <i class="bi bi-clock-history text-secondary fs-1"></i>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="@Url.Action("GecmisYoklamalar", "Antrenor")" class="text-decoration-none">
+                    <div class="card hover-card border-0 h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="bg-secondary bg-opacity-10 rounded-circle p-4 d-inline-block mb-3">
+                                <i class="bi bi-clock-history text-secondary fs-1"></i>
+                            </div>
+                            <h5 class="fw-bold mb-2">Geçmiş Yoklamalar</h5>
+                            <p class="text-muted small mb-0">Önceki kayıtlar</p>
+                            <span class="badge bg-secondary mt-3">Arşiv</span>
                         </div>
-                        <h5 class="fw-bold mb-2">Geçmiş Yoklamalar</h5>
-                        <p class="text-muted small mb-0">Önceki kayıtlar</p>
-                        <span class="badge bg-secondary mt-3">Arşiv</span>
                     </div>
-                </div>
-            </a>
-        </div>
-    </div>
-
-    <!-- Filtreleme Kartı -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3">
-                    <h5 class="fw-bold mb-0">
-                        <i class="bi bi-funnel text-primary me-2"></i>
-                        Filtreleme
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <form asp-action="Panel" method="get" class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold small text-uppercase text-muted">Spor Salonu</label>
-                            <select name="salonId" class="form-select" id="salonFilter" asp-items="ViewBag.SporSalonlari">
-                                <option value="">Tüm Salonlar</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold small text-uppercase text-muted">Takım</label>
-                            <select name="takimId" class="form-select" id="takimFilter">
-                                <option value="">Tüm Takımlar</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold small text-uppercase text-muted">Grup</label>
-                            <select name="grupId" class="form-select" id="grupFilter">
-                                <option value="">Tüm Gruplar</option>
-                            </select>
-                        </div>
-
-                        <div class="col-12 text-end">
-                            <button type="submit" class="btn btn-primary px-4">
-                                <i class="bi bi-search me-1"></i>Filtrele
-                            </button>
-                            <a asp-action="Panel" class="btn btn-outline-secondary px-4">
-                                <i class="bi bi-arrow-repeat me-1"></i>Temizle
-                            </a>
-                        </div>
-                    </form>
-                </div>
+                </a>
             </div>
         </div>
-    </div>
 
-    <!-- Sporcu Listesi (WhatsApp ve SMS Butonlu) -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3">
-                    <div class="d-flex justify-content-between align-items-center">
+        <!-- Aktif Filtreler -->
+        @if (ViewBag.SecilenSalonId != null || ViewBag.SecilenTakimId != null || ViewBag.SecilenGrupId != null)
+        {
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="d-flex gap-2 align-items-center">
+                        <span class="fw-bold text-muted">Aktif Filtreler:</span>
+                        @if (ViewBag.SecilenSalonId != null)
+                        {
+                            <span class="filter-badge">
+                                <i class="bi bi-building"></i>
+                                @ViewBag.SecilenSalonAdi
+                                <a href="@Url.Action("Panel", new { takimId = ViewBag.SecilenTakimId, grupId = ViewBag.SecilenGrupId })" class="text-danger ms-2">
+                                    <i class="bi bi-x-circle-fill small"></i>
+                                </a>
+                            </span>
+                        }
+                        @if (ViewBag.SecilenTakimId != null)
+                        {
+                            <span class="filter-badge">
+                                <i class="bi bi-grid-3x3"></i>
+                                @(((SelectList)ViewBag.Takimlar)?.FirstOrDefault(x => x.Value == ViewBag.SecilenTakimId.ToString())?.Text)
+                                <a href="@Url.Action("Panel", new { salonId = ViewBag.SecilenSalonId, grupId = ViewBag.SecilenGrupId })" class="text-danger ms-2">
+                                    <i class="bi bi-x-circle-fill small"></i>
+                                </a>
+                            </span>
+                        }
+                        @if (ViewBag.SecilenGrupId != null)
+                        {
+                            <span class="filter-badge">
+                                <i class="bi bi-diagram-3"></i>
+                                @(((SelectList)ViewBag.Gruplar)?.FirstOrDefault(x => x.Value == ViewBag.SecilenGrupId.ToString())?.Text)
+                                <a href="@Url.Action("Panel", new { salonId = ViewBag.SecilenSalonId, takimId = ViewBag.SecilenTakimId })" class="text-danger ms-2">
+                                    <i class="bi bi-x-circle-fill small"></i>
+                                </a>
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Filtreleme Kartı -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white py-3">
                         <h5 class="fw-bold mb-0">
-                            <i class="bi bi-people-fill text-primary me-2"></i>
-                            Sporcu Listesi
+                            <i class="bi bi-funnel text-primary me-2"></i>
+                            Sporcu Filtreleme
                         </h5>
-                        <div>
-                            <span class="badge bg-primary me-2">@ViewBag.SporcuSayisi Sporcu</span>
-                            <a href="/Antrenor/VeliMesaj" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-envelope-paper me-1"></i>Toplu Mesaj
-                            </a>
-                        </div>
+                    </div>
+                    <div class="card-body filter-section">
+                        <form method="get" action="@Url.Action("Panel")" class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Spor Salonu</label>
+                                <select name="salonId" class="form-select form-select-lg" id="salonFilter">
+                                    <option value="">Tüm Salonlar</option>
+                                    @if (ViewBag.SporSalonlari != null)
+                                    {
+                                        foreach (var item in ViewBag.SporSalonlari)
+                                        {
+                                            if (item.Value == ViewBag.SecilenSalonId?.ToString())
+                                            {
+                                                <option value="@item.Value" selected>@item.Text</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@item.Value">@item.Text</option>
+                                            }
+                                        }
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Takım</label>
+                                <select name="takimId" class="form-select form-select-lg" id="takimFilter">
+                                    <option value="">Tüm Takımlar</option>
+                                    @if (ViewBag.Takimlar != null)
+                                    {
+                                        foreach (var item in ViewBag.Takimlar)
+                                        {
+                                            if (item.Value == ViewBag.SecilenTakimId?.ToString())
+                                            {
+                                                <option value="@item.Value" selected>@item.Text</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@item.Value">@item.Text</option>
+                                            }
+                                        }
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Grup</label>
+                                <select name="grupId" class="form-select form-select-lg" id="grupFilter">
+                                    <option value="">Tüm Gruplar</option>
+                                    @if (ViewBag.Gruplar != null)
+                                    {
+                                        foreach (var item in ViewBag.Gruplar)
+                                        {
+                                            if (item.Value == ViewBag.SecilenGrupId?.ToString())
+                                            {
+                                                <option value="@item.Value" selected>@item.Text</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@item.Value">@item.Text</option>
+                                            }
+                                        }
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="col-12 text-end mt-3">
+                                <button type="submit" class="btn btn-primary px-5 py-2">
+                                    <i class="bi bi-search me-2"></i>Filtrele
+                                </button>
+                                <a href="@Url.Action("Panel")" class="btn btn-outline-secondary px-5 py-2">
+                                    <i class="bi bi-arrow-repeat me-2"></i>Temizle
+                                </a>
+                            </div>
+                        </form>
                     </div>
                 </div>
-                <div class="card-body p-0">
-                    @if (ViewBag.Sporcular != null && ViewBag.Sporcular.Count > 0)
-                    {
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th width="50">#</th>
-                                        <th>Ad Soyad</th>
-                                        <th>Doğum Tarihi</th>
-                                        <th>Salon</th>
-                                        <th>Branş</th>
-                                        <th>Takım</th>
-                                        <th>Grup</th>
-                                        <th>Veli Adı</th>
-                                        <th>Veli Telefon</th>
-                                        <th width="200">İşlemler</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @{
-                                        int index = 0;
-                                    }
-                                    @foreach (var uye in ViewBag.Sporcular)
-                                    {
-                                        index++;
-                                        var temizTelefon = uye.VeliTelefon?.Replace(" ", "").Replace("(", "").Replace(")", "").Replace("-", "") ?? "";
-                                        
+            </div>
+        </div>
+
+        <!-- Sporcu Listesi -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="fw-bold mb-0">
+                                <i class="bi bi-people-fill text-primary me-2"></i>
+                                Sporcu Listesi
+                                <span class="badge bg-primary ms-2">@ViewBag.SporcuSayisi Kayıt</span>
+                            </h5>
+                            <div class="btn-group">
+                                <a href="@Url.Action("VeliMesaj", "Antrenor", new { takimId = ViewBag.SecilenTakimId, grupId = ViewBag.SecilenGrupId })" 
+                                   class="btn btn-outline-primary">
+                                    <i class="bi bi-envelope-paper me-2"></i>Toplu Mesaj
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        @if (ViewBag.Sporcular != null && ViewBag.Sporcular.Count > 0)
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead>
                                         <tr>
-                                            <td class="fw-bold">@index</td>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <i class="bi bi-person-circle text-primary me-2"></i>
-                                                    <span class="fw-bold">@uye.AdSoyad</span>
-                                                </div>
-                                            </td>
-                                            <td>@uye.DogumTarihi.ToShortDateString()</td>
-                                            <td>
-                                                <span class="badge bg-primary bg-opacity-10 text-primary p-2">
-                                                    @(uye.SporSalonu?.Ad ?? "-")
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-success bg-opacity-10 text-success p-2">
-                                                    @(uye.Brans?.Ad ?? "-")
-                                                </span>
-                                            </td>
-                                            <td>
-                                                @if (uye.Takim != null)
-                                                {
-                                                    <span class="badge bg-warning bg-opacity-10 text-warning p-2">
-                                                        @uye.Takim.Ad
-                                                    </span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge bg-secondary bg-opacity-10 text-secondary p-2">-</span>
-                                                }
-                                            </td>
-                                            <td>
-                                                @if (uye.Grup != null)
-                                                {
-                                                    <span class="badge bg-info bg-opacity-10 text-info p-2">
-                                                        @uye.Grup.Ad
-                                                    </span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge bg-secondary bg-opacity-10 text-secondary p-2">-</span>
-                                                }
-                                            </td>
-                                            <td>@uye.VeliAdSoyad</td>
-                                            <td>
-                                                <span class="badge bg-info">
-                                                    <i class="bi bi-telephone me-1"></i>@uye.VeliTelefon
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <div class="btn-group" role="group">
-                                                    <!-- Detaylı Veli İletişim Sayfası -->
-                                                    <a asp-action="VeliDetay" asp-route-id="@uye.Id" 
-                                                       class="btn btn-sm btn-info" 
-                                                       title="Detaylı İletişim">
-                                                        <i class="bi bi-chat-dots"></i>
-                                                    </a>
-                                                    
-                                                    <!-- Hızlı WhatsApp -->
-                                                    <a href="https://wa.me/@temizTelefon" 
-                                                       target="_blank" 
-                                                       class="btn btn-sm btn-success" 
-                                                       title="WhatsApp">
-                                                        <i class="bi bi-whatsapp"></i>
-                                                    </a>
-                                                    
-                                                    <!-- Hızlı SMS (Mesaj önceden doldurulmuş) -->
-                                                    <a href="sms:@uye.VeliTelefon?body=Sayın @uye.VeliAdSoyad, @uye.AdSoyad hakkında bilgilendirme yapmak istiyorum." 
-                                                       class="btn btn-sm btn-primary" 
-                                                       title="SMS">
-                                                        <i class="bi bi-envelope-paper"></i>
-                                                    </a>
-                                                    
-                                                    <!-- Telefon Kopyala -->
-                                                    <button class="btn btn-sm btn-outline-secondary copy-phone" 
-                                                            data-phone="@uye.VeliTelefon" 
-                                                            title="Telefon Kopyala">
-                                                        <i class="bi bi-files"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
+                                            <th>#</th>
+                                            <th>Sporcu</th>
+                                            <th>Doğum Tarihi</th>
+                                            <th>Salon</th>
+                                            <th>Branş</th>
+                                            <th>Takım</th>
+                                            <th>Grup</th>
+                                            <th>Veli</th>
+                                            <th>İletişim</th>
+                                            <th>İşlemler</th>
                                         </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="text-center py-5">
-                            <i class="bi bi-people display-1 text-muted"></i>
-                            <h4 class="mt-3 text-muted">Henüz sporcu bulunmuyor</h4>
-                            <p class="text-muted">Filtrelemeyi değiştirerek farklı sporcuları görüntüleyebilirsiniz.</p>
-                        </div>
-                    }
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                            int index = 1;
+                                        }
+                                        @foreach (var uye in ViewBag.Sporcular)
+                                        {
+                                            <tr>
+                                                <td class="fw-bold">@index</td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="bi bi-person-circle text-primary me-2 fs-5"></i>
+                                                        <div>
+                                                            <div class="fw-bold">@uye.AdSoyad</div>
+                                                            <small class="text-muted">@uye.Telefon</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>@uye.DogumTarihi.ToString("dd.MM.yyyy")</td>
+                                                <td>
+                                                    <span class="badge bg-primary bg-opacity-10 text-primary">
+                                                        @(uye.SporSalonu?.Ad ?? "-")
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-success bg-opacity-10 text-success">
+                                                        @(uye.Brans?.Ad ?? "-")
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    @if (uye.Takim != null)
+                                                    {
+                                                        <span class="badge bg-warning bg-opacity-10 text-warning">
+                                                            @uye.Takim.Ad
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-secondary">-</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (uye.Grup != null)
+                                                    {
+                                                        <span class="badge bg-info bg-opacity-10 text-info">
+                                                            @uye.Grup.Ad
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-secondary">-</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <div>
+                                                        <div class="fw-bold small">@uye.VeliAdSoyad</div>
+                                                        <small class="text-muted">@uye.VeliTelefon</small>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group">
+                                                        <a href="https://wa.me/@uye.VeliTelefon?.Replace(" ", "")" 
+                                                           target="_blank" 
+                                                           class="btn btn-sm btn-outline-success" 
+                                                           title="WhatsApp">
+                                                            <i class="bi bi-whatsapp"></i>
+                                                        </a>
+                                                        <a href="tel:@uye.VeliTelefon" 
+                                                           class="btn btn-sm btn-outline-primary" 
+                                                           title="Ara">
+                                                            <i class="bi bi-telephone"></i>
+                                                        </a>
+                                                        <button class="btn btn-sm btn-outline-secondary copy-phone" 
+                                                                data-phone="@uye.VeliTelefon" 
+                                                                title="Telefon Kopyala">
+                                                            <i class="bi bi-files"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="action-buttons">
+                                                        <a href="@Url.Action("VeliDetay", "Antrenor", new { id = uye.Id })" 
+                                                           class="btn btn-sm btn-outline-info" 
+                                                           title="Detay">
+                                                            <i class="bi bi-eye"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            index++;
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-5">
+                                <i class="bi bi-people display-1 text-muted"></i>
+                                <h4 class="mt-3 text-muted">Henüz sporcu bulunmuyor</h4>
+                                <p class="text-muted">Filtrelemeyi değiştirerek farklı sporcuları görüntüleyebilirsiniz.</p>
+                            </div>
+                        }
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<style>
-    .bg-gradient-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-    .hover-card {
-        transition: transform 0.3s, box-shadow 0.3s;
-        cursor: pointer;
-    }
-    .hover-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
-    }
-    .badge {
-        font-weight: 500;
-    }
-    .btn-group .btn {
-        border-radius: 0;
-    }
-    .btn-group .btn:first-child {
-        border-top-left-radius: 5px;
-        border-bottom-left-radius: 5px;
-    }
-    .btn-group .btn:last-child {
-        border-top-right-radius: 5px;
-        border-bottom-right-radius: 5px;
-    }
-</style>
-
-@section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         $(document).ready(function() {
-            // Sayfa yüklendiğinde seçili değerleri al
-            var seciliSalonId = '@ViewBag.SecilenSalonId';
-            var seciliTakimId = '@ViewBag.SecilenTakimId';
-            var seciliGrupId = '@ViewBag.SecilenGrupId';
+            // Telefon kopyalama
+            $('.copy-phone').click(function() {
+                var phone = $(this).data('phone');
+                navigator.clipboard.writeText(phone).then(function() {
+                    alert('Telefon numarası kopyalandı: ' + phone);
+                });
+            });
 
-            // Takımları getir (Salon seçilince)
-            function takimlariGetir(salonId, seciliTakimId) {
+            // Salon değişince takımları getir
+            $('#salonFilter').change(function() {
+                var salonId = $(this).val();
                 if (salonId) {
-                    $('#takimFilter').empty().append('<option value="">Yükleniyor...</option>');
-                    $('#grupFilter').empty().append('<option value="">Tüm Gruplar</option>');
-                    
                     $.getJSON('/Antrenor/TakimlariGetir', { salonId: salonId }, function(data) {
                         var takimSelect = $('#takimFilter');
                         takimSelect.empty().append('<option value="">Tüm Takımlar</option>');
-                        if (data && data.length > 0) {
-                            $.each(data, function(i, takim) {
-                                var option = $('<option>').text(takim.ad).val(takim.id);
-                                if (seciliTakimId && takim.id == seciliTakimId) {
-                                    option.attr('selected', 'selected');
-                                }
-                                takimSelect.append(option);
-                            });
-                            
-                            // Takım seçiliyse grupları da getir
-                            if (seciliTakimId) {
-                                gruplariGetir(seciliTakimId, seciliGrupId);
-                            }
-                        } else {
-                            takimSelect.append('<option value="">Bu salonda takım yok</option>');
-                        }
-                    }).fail(function() {
-                        $('#takimFilter').empty().append('<option value="">Hata oluştu</option>');
+                        $.each(data, function(i, takim) {
+                            takimSelect.append($('<option>').text(takim.ad).val(takim.id));
+                        });
                     });
                 } else {
                     $('#takimFilter').empty().append('<option value="">Tüm Takımlar</option>');
                     $('#grupFilter').empty().append('<option value="">Tüm Gruplar</option>');
                 }
-            }
-
-            // Grupları getir (Takım seçilince)
-            function gruplariGetir(takimId, seciliGrupId) {
-                if (takimId) {
-                    $('#grupFilter').empty().append('<option value="">Yükleniyor...</option>');
-                    
-                    $.getJSON('/Antrenor/GruplariGetir', { takimId: takimId }, function(data) {
-                        var grupSelect = $('#grupFilter');
-                        grupSelect.empty().append('<option value="">Tüm Gruplar</option>');
-                        if (data && data.length > 0) {
-                            $.each(data, function(i, grup) {
-                                var option = $('<option>').text(grup.ad).val(grup.id);
-                                if (seciliGrupId && grup.id == seciliGrupId) {
-                                    option.attr('selected', 'selected');
-                                }
-                                grupSelect.append(option);
-                            });
-                        } else {
-                            grupSelect.append('<option value="">Bu takımda grup yok</option>');
-                        }
-                    }).fail(function() {
-                        $('#grupFilter').empty().append('<option value="">Hata oluştu</option>');
-                    });
-                } else {
-                    $('#grupFilter').empty().append('<option value="">Tüm Gruplar</option>');
-                }
-            }
-
-            // Salon değişince takımları getir
-            $('#salonFilter').change(function() {
-                var salonId = $(this).val();
-                $('#takimFilter').empty().append('<option value="">Tüm Takımlar</option>');
                 $('#grupFilter').empty().append('<option value="">Tüm Gruplar</option>');
-                
-                if (salonId) {
-                    takimlariGetir(salonId, null);
-                }
             });
 
             // Takım değişince grupları getir
             $('#takimFilter').change(function() {
                 var takimId = $(this).val();
-                $('#grupFilter').empty().append('<option value="">Tüm Gruplar</option>');
-                
                 if (takimId) {
-                    gruplariGetir(takimId, null);
+                    $.getJSON('/Antrenor/GruplariGetir', { takimId: takimId }, function(data) {
+                        var grupSelect = $('#grupFilter');
+                        grupSelect.empty().append('<option value="">Tüm Gruplar</option>');
+                        $.each(data, function(i, grup) {
+                            grupSelect.append($('<option>').text(grup.ad).val(grup.id));
+                        });
+                    });
+                } else {
+                    $('#grupFilter').empty().append('<option value="">Tüm Gruplar</option>');
                 }
-            });
-
-            // Sayfa yüklendiğinde seçili salon varsa takımları getir
-            if (seciliSalonId && seciliSalonId !== '') {
-                $('#salonFilter').val(seciliSalonId);
-                takimlariGetir(seciliSalonId, seciliTakimId);
-                
-                // Seçili takım varsa onu ayarla
-                if (seciliTakimId && seciliTakimId !== '') {
-                    setTimeout(function() {
-                        $('#takimFilter').val(seciliTakimId).trigger('change');
-                    }, 300);
-                }
-            }
-
-            // Telefon kopyalama işlevi
-            $('.copy-phone').click(function() {
-                var phone = $(this).data('phone');
-                navigator.clipboard.writeText(phone).then(function() {
-                    // Toast bildirimi göster
-                    var toast = document.createElement('div');
-                    toast.className = 'position-fixed bottom-0 end-0 m-3';
-                    toast.innerHTML = '<div class="alert alert-success alert-dismissible fade show">' +
-                        '<i class="bi bi-check-circle-fill me-2"></i>Telefon numarası kopyalandı: ' + phone +
-                        '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
-                    document.body.appendChild(toast);
-                    setTimeout(() => toast.remove(), 3000);
-                });
             });
         });
     </script>
-}
+</body>
+</html>

@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SporKulubu")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b3f3f4b998599d5ef8f0fdd2eaeb552700fcdf15")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d7fce78c537aa746c6ed4de9c01d1bd0aaab4ffb")]
 [assembly: System.Reflection.AssemblyProductAttribute("SporKulubu")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SporKulubu")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
