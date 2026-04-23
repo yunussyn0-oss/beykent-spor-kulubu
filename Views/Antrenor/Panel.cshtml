@@ -1,28 +1,428 @@
 @{
     Layout = null;
+    var sporcular = ViewBag.Sporcular as List<SporKulubu.Models.Uye> ?? new List<SporKulubu.Models.Uye>();
 }
 
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
     <meta charset="utf-8" />
-    <title>Panel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel - Beykent Spor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        body { font-family: Arial; margin: 0; padding: 0; }
-        .header { background: #0B2A4A; color: white; padding: 15px; text-align: center; }
-        .container { padding: 20px; }
-        button { background: #0B2A4A; color: white; padding: 10px 20px; border: none; margin: 5px; cursor: pointer; }
+        body {
+            background: #f0f2f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar-custom {
+            background: linear-gradient(135deg, #0B2A4A 0%, #1B3B5C 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .navbar-custom .navbar-brand, .navbar-custom .nav-link {
+            color: white !important;
+        }
+        .navbar-custom .nav-link:hover {
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s;
+            border-left: 4px solid #0B2A4A;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-icon {
+            font-size: 2.5rem;
+            color: #0B2A4A;
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #0B2A4A;
+        }
+        .card-custom {
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border: none;
+        }
+        .btn-custom {
+            background: linear-gradient(135deg, #0B2A4A 0%, #1B3B5C 100%);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(11,42,74,0.3);
+            color: white;
+        }
+        .btn-outline-custom {
+            border: 2px solid #0B2A4A;
+            color: #0B2A4A;
+            border-radius: 8px;
+            padding: 8px 20px;
+            transition: all 0.3s;
+        }
+        .btn-outline-custom:hover {
+            background: #0B2A4A;
+            color: white;
+        }
+        .table-custom {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .table-custom thead {
+            background: #0B2A4A;
+            color: white;
+        }
+        .table-custom tbody tr:hover {
+            background: #f8f9fa;
+        }
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #0B2A4A;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .search-box {
+            border-radius: 25px;
+            padding: 8px 20px;
+            border: 1px solid #ddd;
+            width: 250px;
+        }
+        .badge-custom {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+        .badge-odendi {
+            background: #d4edda;
+            color: #155724;
+        }
+        .badge-borclu {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        footer {
+            background: white;
+            padding: 20px;
+            text-align: center;
+            margin-top: 30px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h2>BEYKENT SPOR - PANEL</h2>
-        <p>Hoş geldin, @ViewBag.AntrenorAdi</p>
-        <a href="/Antrenor/Cikis" style="color:white">Çıkış</a>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">
+                <i class="bi bi-trophy-fill me-2"></i>BEYKENT SPOR
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Panel", "Antrenor")">
+                            <i class="bi bi-speedometer2 me-1"></i>Panel
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("SporcuEkle", "Antrenor")">
+                            <i class="bi bi-person-plus me-1"></i>Sporcu Ekle
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Yoklama", "Antrenor")">
+                            <i class="bi bi-check2-circle me-1"></i>Yoklama
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("TopluMesaj", "Antrenor")">
+                            <i class="bi bi-chat-dots me-1"></i>Toplu Mesaj
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="@Url.Action("Cikis", "Antrenor")">
+                            <i class="bi bi-box-arrow-right me-1"></i>Çıkış
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- HOŞ GELDİN MESAJI -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card-custom card bg-white p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="fw-bold mb-1">
+                                <i class="bi bi-person-circle me-2" style="color: #0B2A4A;"></i>
+                                Hoş Geldin, @ViewBag.AntrenorAdi
+                            </h2>
+                            <p class="text-muted mb-0">Bugün @DateTime.Now.ToString("dd MMMM yyyy, dddd")</p>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-success fs-6 p-2">
+                                <i class="bi bi-people-fill me-1"></i>@sporcular.Count Sporcu
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- İSTATİSTİK KARTLARI -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-0">Toplam Sporcu</p>
+                            <h2 class="stat-number mb-0">@sporcular.Count</h2>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-0">Aylık Aidat</p>
+                            <h2 class="stat-number mb-0">₺@sporcular.Sum(s => s.AylikAidat).ToString("N0")</h2>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="bi bi-currency-dollar"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-0">Borçlu Sporcu</p>
+                            <h2 class="stat-number mb-0">@sporcular.Count(s => s.Aidatlar != null && s.Aidatlar.Any(a => !a.OdendiMi))</h2>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="bi bi-exclamation-triangle-fill" style="color: #dc3545;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-0">Kıyafet Verilen</p>
+                            <h2 class="stat-number mb-0">@sporcular.Count(s => s.KiyafetVerildiMi)</h2>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="bi bi-tshirt-fill" style="color: #28a745;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HIZLI İŞLEM KARTLARI -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <a href="@Url.Action("SporcuEkle", "Antrenor")" class="text-decoration-none">
+                    <div class="card-custom card text-center p-3">
+                        <i class="bi bi-person-plus fs-1" style="color: #0B2A4A;"></i>
+                        <h5 class="mt-2 mb-0">Yeni Sporcu</h5>
+                        <small class="text-muted">Kayıt ekle</small>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="@Url.Action("Yoklama", "Antrenor")" class="text-decoration-none">
+                    <div class="card-custom card text-center p-3">
+                        <i class="bi bi-check2-circle fs-1" style="color: #28a745;"></i>
+                        <h5 class="mt-2 mb-0">Yoklama Al</h5>
+                        <small class="text-muted">Bugünkü yoklama</small>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="@Url.Action("TopluMesaj", "Antrenor")" class="text-decoration-none">
+                    <div class="card-custom card text-center p-3">
+                        <i class="bi bi-chat-dots fs-1" style="color: #17a2b8;"></i>
+                        <h5 class="mt-2 mb-0">Toplu Mesaj</h5>
+                        <small class="text-muted">WhatsApp/SMS</small>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="#" class="text-decoration-none">
+                    <div class="card-custom card text-center p-3">
+                        <i class="bi bi-graph-up fs-1" style="color: #ffc107;"></i>
+                        <h5 class="mt-2 mb-0">Raporlar</h5>
+                        <small class="text-muted">Excel/PDF</small>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- SPORCU LİSTESİ TABLOSU -->
+        <div class="card-custom card">
+            <div class="card-header bg-white py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-people-fill me-2" style="color: #0B2A4A;"></i>
+                        Sporcu Listesi
+                    </h5>
+                    <div class="input-group w-25">
+                        <input type="text" id="searchInput" class="form-control search-box" placeholder="Sporcu ara...">
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-custom mb-0" id="sporcuTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Sporcu</th>
+                                <th>Telefon</th>
+                                <th>Salon</th>
+                                <th>Branş</th>
+                                <th>Takım/Grup</th>
+                                <th>Veli</th>
+                                <th>Aidat</th>
+                                <th>Kıyafet</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (sporcular.Any())
+                            {
+                                int sayac = 1;
+                                foreach (var uye in sporcular)
+                                {
+                                    <tr>
+                                        <td>@sayac</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar me-2">
+                                                    @uye.AdSoyad.Substring(0, 1)
+                                                </div>
+                                                <strong>@uye.AdSoyad</strong>
+                                            </div>
+                                         </td>
+                                        <td>@uye.Telefon</td>
+                                        <td>@(uye.SporSalonu?.Ad ?? "-")</td>
+                                        <td>@(uye.Brans?.Ad ?? "-")</td>
+                                        <td>
+                                            @(uye.Takim?.Ad ?? "-") / @(uye.Grup?.Ad ?? "-")
+                                        </td>
+                                        <td>
+                                            <small>@uye.VeliAdSoyad</small><br />
+                                            <small class="text-muted">@uye.VeliTelefon</small>
+                                        </td>
+                                        <td>₺@uye.AylikAidat.ToString("N0")</td>
+                                        <td>
+                                            @if (uye.KiyafetVerildiMi)
+                                            {
+                                                <span class="badge-custom badge-odendi">
+                                                    <i class="bi bi-check-circle"></i> Verildi
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge-custom badge-borclu">
+                                                    <i class="bi bi-x-circle"></i> Verilmedi
+                                                </span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="https://wa.me/@uye.VeliTelefon?.Replace(" ", "")" target="_blank" class="btn btn-sm btn-success" title="WhatsApp">
+                                                    <i class="bi bi-whatsapp"></i>
+                                                </a>
+                                                <a href="tel:@uye.VeliTelefon" class="btn btn-sm btn-primary" title="Ara">
+                                                    <i class="bi bi-telephone-fill"></i>
+                                                </a>
+                                                <button class="btn btn-sm btn-outline-secondary copy-phone" data-phone="@uye.VeliTelefon" title="Kopyala">
+                                                    <i class="bi bi-files"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    sayac++;
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="10" class="text-center py-5">
+                                        <i class="bi bi-inbox fs-1 text-muted"></i>
+                                        <p class="mt-2 text-muted">Henüz sporcu kaydı bulunmuyor.</p>
+                                        <a href="@Url.Action("SporcuEkle", "Antrenor")" class="btn btn-custom mt-2">
+                                            <i class="bi bi-person-plus me-2"></i>İlk Sporcu Ekle
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="container">
-        <h3>Giriş başarılı! ✅</h3>
-        <p>Uygulama çalışıyor. Şimdi diğer özellikleri ekleyebiliriz.</p>
-    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <p class="mb-0">© 2024 Beykent Spor Kulübü - Tüm hakları saklıdır.</p>
+        <small class="text-muted">Beylikdüzü / İstanbul</small>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Telefon kopyalama
+        document.querySelectorAll('.copy-phone').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const phone = this.dataset.phone;
+                navigator.clipboard.writeText(phone).then(() => {
+                    alert('Telefon numarası kopyalandı: ' + phone);
+                });
+            });
+        });
+
+        // Arama filtresi
+        document.getElementById('searchInput')?.addEventListener('keyup', function() {
+            const value = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#sporcuTable tbody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(value) ? '' : 'none';
+            });
+        });
+    </script>
 </body>
 </html>
