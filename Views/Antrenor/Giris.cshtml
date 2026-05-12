@@ -6,7 +6,7 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>Beykent Spor - Giriş</title>
+    <title> Beylikdüzü Beykent Spor Kulübü - Giriş</title>
     <style>
         body { font-family: Arial; background: #0B2A4A; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
         .box { background: white; padding: 40px; border-radius: 10px; width: 350px; }
@@ -18,13 +18,13 @@
 </head>
 <body>
     <div class="box">
-        <h1>BEYKENT SPOR</h1>
+        <h1> BEYLİKDÜZÜ BEYKENT SPOR KULÜBÜ </h1>
         @if (ViewBag.Hata != null)
         {
             <div class="error">@ViewBag.Hata</div>
         }
         <form method="post">
-            <input type="email" name="email" placeholder="E-posta" value="burhan@beykentspor.com" required />
+            <input type="email" name="email" placeholder="E-posta" value="burhansayan@bbsk.com" required />
             <input type="password" name="sifre" placeholder="Şifre" value="123456" required />
             <button type="submit">GİRİŞ YAP</button>
         </form>
