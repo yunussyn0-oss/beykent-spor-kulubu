@@ -86,7 +86,7 @@ public class AntrenorController : Controller
 
     // ========== SPORCU EKLE (GET) ==========
     [HttpGet]
-    public async Task<IActionResult> SporcuEkle()
+    public IActionResult SporcuEkle()
     {
         if (HttpContext.Session.GetInt32("AntrenorId") == null)
         {
@@ -238,7 +238,7 @@ public class AntrenorController : Controller
         return RedirectToAction("Giris");
     }
 
-    // ========== VERİTABANINI KUR ==========
+    // ========== VERİTABANINI KUR (YENİ GİRİŞ BİLGİLERİYLE) ==========
     [HttpGet]
     public async Task<IActionResult> VeritabaniKur()
     {
@@ -295,30 +295,52 @@ public class AntrenorController : Controller
             await _context.SaveChangesAsync();
         }
 
-        // Antrenörler
+        // Antrenörler - YENİ GİRİŞ BİLGİLERİ
         if (!_context.Antrenorler.Any())
         {
             _context.Antrenorler.AddRange(
-                new Antrenor { AdSoyad = "Burhan Şayan", Email = "burhan@beykentspor.com", Sifre = "123456", Telefon = "0532 111 2233", Uzmanlik = "Tam Yetki", KayitTarihi = DateTime.Now },
-                new Antrenor { AdSoyad = "Ertan Tuncel", Email = "ertan@beykentspor.com", Sifre = "123456", Telefon = "0532 222 3344", Uzmanlik = "Tam Yetki", KayitTarihi = DateTime.Now },
-                new Antrenor { AdSoyad = "Özgür", Email = "ozgur@beykentspor.com", Sifre = "123456", Telefon = "0532 333 4455", Uzmanlik = "Yakuplu", KayitTarihi = DateTime.Now }
+                new Antrenor { AdSoyad = "Burhan Şayan", Email = "burhansayan@bbsk.com", Sifre = "123456", Telefon = "0532 111 2233", Uzmanlik = "Baş Antrenör", KayitTarihi = DateTime.Now },
+                new Antrenor { AdSoyad = "Ertan Tuncel", Email = "ertantuncel@bbsk.com", Sifre = "123456", Telefon = "0532 222 3344", Uzmanlik = "Antrenör", KayitTarihi = DateTime.Now },
+                new Antrenor { AdSoyad = "Özgür Demir", Email = "ozgurdemir@bbsk.com", Sifre = "123456", Telefon = "0532 333 4455", Uzmanlik = "Yakuplu Sorumlusu", KayitTarihi = DateTime.Now },
+                new Antrenor { AdSoyad = "Sezer Yılmaz", Email = "sezeryilmaz@bbsk.com", Sifre = "123456", Telefon = "0532 444 5566", Uzmanlik = "Emlak Konut Sorumlusu", KayitTarihi = DateTime.Now },
+                new Antrenor { AdSoyad = "Nesrin Kaya", Email = "nesrinkaya@bbsk.com", Sifre = "123456", Telefon = "0532 555 6677", Uzmanlik = "Neşe Sever Sorumlusu", KayitTarihi = DateTime.Now }
             );
             await _context.SaveChangesAsync();
         }
 
         return Content(@"
             <html>
-            <body style='font-family:Arial;padding:20px;text-align:center'>
-                <h2 style='color:green'>✅ Veritabanı başarıyla kuruldu!</h2>
-                <h3>Beylikdüzü Beykent Spor Kulübü</h3>
-                <h4>Giriş Bilgileri:</h4>
-                <ul style='display:inline-block;text-align:left'>
-                    <li><strong>burhan@beykentspor.com</strong> / 123456 (Tam Yetki)</li>
-                    <li><strong>ertan@beykentspor.com</strong> / 123456 (Tam Yetki)</li>
-                    <li><strong>ozgur@beykentspor.com</strong> / 123456 (Yakuplu)</li>
-                </ul>
-                <br/>
-                <a href='/Antrenor/Giris' style='display:inline-block;margin-top:20px;padding:10px 20px;background:#0B2A4A;color:white;text-decoration:none;border-radius:5px'>Giriş Yap</a>
+            <head>
+                <title>Veritabanı Kuruldu - Beylikdüzü Beykent Spor</title>
+                <style>
+                    body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #0B2A4A 0%, #1B3B5C 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; margin: 0; padding: 20px; }
+                    .container { background: white; border-radius: 20px; padding: 40px; max-width: 500px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+                    h1 { color: #0B2A4A; margin-bottom: 10px; }
+                    .success { color: #28a745; font-size: 48px; margin-bottom: 20px; }
+                    .info-box { background: #f8f9fa; border-radius: 15px; padding: 20px; margin: 20px 0; text-align: left; }
+                    .info-box h3 { color: #0B2A4A; margin-bottom: 15px; }
+                    .info-box p { margin: 8px 0; }
+                    .btn { display: inline-block; background: #0B2A4A; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; margin-top: 20px; }
+                    .btn:hover { background: #1B3B5C; }
+                </style>
+            </head>
+            <body>
+                <div class='container'>
+                    <div class='success'>✅</div>
+                    <h1>BEYLİKDÜZÜ BEYKENT SPOR</h1>
+                    <p>Veritabanı başarıyla kuruldu!</p>
+                    
+                    <div class='info-box'>
+                        <h3>📋 Giriş Bilgileri</h3>
+                        <p><strong>👑 Burhan Şayan</strong><br/>burhansayan@bbsk.com / 123456</p>
+                        <p><strong>👑 Ertan Tuncel</strong><br/>ertantuncel@bbsk.com / 123456</p>
+                        <p><strong>🏋️ Özgür Demir</strong><br/>ozgurdemir@bbsk.com / 123456</p>
+                        <p><strong>🏢 Sezer Yılmaz</strong><br/>sezeryilmaz@bbsk.com / 123456</p>
+                        <p><strong>🏠 Nesrin Kaya</strong><br/>nesrinkaya@bbsk.com / 123456</p>
+                    </div>
+                    
+                    <a href='/Antrenor/Giris' class='btn'>Giriş Yap</a>
+                </div>
             </body>
             </html>
         ", "text/html");
