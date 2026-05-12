@@ -7,17 +7,23 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Session services
+// Session services - Kalıcı oturum için
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.IdleTimeout = TimeSpan.FromDays(30);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
+    options.Cookie.MaxAge = TimeSpan.FromDays(30);
+    options.Cookie.SameSite = SameSiteMode.Lax;
 });
 
-// Database configuration
+// Database configuration - SQLite (Render'da kalıcı disk için)
+var dbPath = Environment.GetEnvironmentVariable("RENDER_DISK_PATH") != null 
+    ? Path.Combine(Environment.GetEnvironmentVariable("RENDER_DISK_PATH"), "sporkulubu.db")
+    : "sporkulubu.db";
+
 builder.Services.AddDbContext<UygulamaDbContext>(options =>
-    options.UseSqlite("Data Source=sporkulubu.db"));
+    options.UseSqlite($"Data Source={dbPath}"));
 
 var app = builder.Build();
 
@@ -54,6 +60,7 @@ using (var scope = app.Services.CreateScope())
             {
                 context.Branslar.Add(new Brans { Ad = "Voleybol", TakimVarMi = true, GrupVarMi = true, SporSalonuId = salon.Id });
                 context.Branslar.Add(new Brans { Ad = "Basketbol", TakimVarMi = true, GrupVarMi = true, SporSalonuId = salon.Id });
+                context.Branslar.Add(new Brans { Ad = "Atletik Performans", TakimVarMi = false, GrupVarMi = false, SporSalonuId = salon.Id });
             }
             context.SaveChanges();
             Console.WriteLine("Branşlar eklendi.");
@@ -63,14 +70,15 @@ using (var scope = app.Services.CreateScope())
         if (!context.Takimlar.Any())
         {
             Console.WriteLine("Takımlar ekleniyor...");
-            var branslar = context.Branslar.ToList();
+            var branslar = context.Branslar.Where(b => b.TakimVarMi == true).ToList();
             foreach (var brans in branslar)
             {
                 context.Takimlar.AddRange(
-                    new Takim { Ad = "Mini Takım", SporSalonuId = brans.SporSalonuId, BransId = brans.Id },
-                    new Takim { Ad = "Midi Takım", SporSalonuId = brans.SporSalonuId, BransId = brans.Id },
-                    new Takim { Ad = "Küçük Takım", SporSalonuId = brans.SporSalonuId, BransId = brans.Id },
-                    new Takim { Ad = "Yıldız Takım", SporSalonuId = brans.SporSalonuId, BransId = brans.Id }
+                    new Takim { Ad = "U8 Takım", SporSalonuId = brans.SporSalonuId, BransId = brans.Id },
+                    new Takim { Ad = "U10 Takım", SporSalonuId = brans.SporSalonuId, BransId = brans.Id },
+                    new Takim { Ad = "U12 Takım", SporSalonuId = brans.SporSalonuId, BransId = brans.Id },
+                    new Takim { Ad = "U14 Takım", SporSalonuId = brans.SporSalonuId, BransId = brans.Id },
+                    new Takim { Ad = "U16 Takım", SporSalonuId = brans.SporSalonuId, BransId = brans.Id }
                 );
             }
             context.SaveChanges();
@@ -94,7 +102,7 @@ using (var scope = app.Services.CreateScope())
             Console.WriteLine("Gruplar eklendi.");
         }
         
-        // ========== ANTRENÖRLER (YENİ MAİLLERLE) ==========
+        // ========== ANTRENÖRLER ==========
         if (!context.Antrenorler.Any())
         {
             Console.WriteLine("Antrenörler ekleniyor...");
@@ -122,15 +130,21 @@ using (var scope = app.Services.CreateScope())
             var nesrin = context.Antrenorler.FirstOrDefault(a => a.Email == "nesrinkaya@bbsk.com");
             
             if (ozgur != null && yakuplu != null)
+            {
                 context.AntrenorTakimlar.Add(new AntrenorTakim { AntrenorId = ozgur.Id, SporSalonuId = yakuplu.Id, AtanmaTarihi = DateTime.Now });
+            }
             
             if (sezer != null && emlak != null)
+            {
                 context.AntrenorTakimlar.Add(new AntrenorTakim { AntrenorId = sezer.Id, SporSalonuId = emlak.Id, AtanmaTarihi = DateTime.Now });
+            }
             
             if (nesrin != null && nese != null)
+            {
                 context.AntrenorTakimlar.Add(new AntrenorTakim { AntrenorId = nesrin.Id, SporSalonuId = nese.Id, AtanmaTarihi = DateTime.Now });
+            }
             
-            await context.SaveChangesAsync();
+            context.SaveChanges();
             Console.WriteLine("Antrenör-takım atamaları eklendi.");
         }
         
@@ -140,10 +154,10 @@ using (var scope = app.Services.CreateScope())
             Console.WriteLine("Örnek sporcular ekleniyor...");
             var yakuplu = context.SporSalonlari.FirstOrDefault(s => s.Ad.Contains("Yakuplu"));
             var voleybol = context.Branslar.FirstOrDefault(b => b.Ad == "Voleybol" && b.SporSalonuId == yakuplu.Id);
-            var miniTakim = context.Takimlar.FirstOrDefault(t => t.Ad == "Mini Takım" && t.SporSalonuId == yakuplu.Id);
-            var aGrubu = context.Gruplar.FirstOrDefault(g => g.Ad == "A Grubu" && g.TakimId == miniTakim.Id);
+            var u8Takim = context.Takimlar.FirstOrDefault(t => t.Ad == "U8 Takım" && t.SporSalonuId == yakuplu.Id);
+            var aGrubu = context.Gruplar.FirstOrDefault(g => g.Ad == "A Grubu" && g.TakimId == u8Takim.Id);
             
-            if (yakuplu != null && voleybol != null && miniTakim != null && aGrubu != null)
+            if (yakuplu != null && voleybol != null && u8Takim != null && aGrubu != null)
             {
                 context.Uyeler.Add(new Uye
                 {
@@ -156,7 +170,7 @@ using (var scope = app.Services.CreateScope())
                     VeliTelefon = "0532 111 2233",
                     SporSalonuId = yakuplu.Id,
                     BransId = voleybol.Id,
-                    TakimId = miniTakim.Id,
+                    TakimId = u8Takim.Id,
                     GrupId = aGrubu.Id,
                     KiyafetVerildiMi = true,
                     KayitTarihi = DateTime.Now
@@ -179,6 +193,12 @@ using (var scope = app.Services.CreateScope())
 app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
+
+// Ana sayfayı direkt login'e yönlendir
+app.MapGet("/", async context =>
+{
+    context.Response.Redirect("/Antrenor/Giris");
+});
 
 app.MapControllerRoute(
     name: "default",
