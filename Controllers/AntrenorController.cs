@@ -87,7 +87,6 @@ public class AntrenorController : Controller
             var takimlar = await _context.Takimlar
                 .Where(t => t.SporSalonuId == salonId.Value)
                 .OrderBy(t => t.Ad)
-                .AsNoTracking()
                 .ToListAsync();
             ViewBag.Takimlar = new SelectList(takimlar, "Id", "Ad", takimId);
         }
@@ -101,7 +100,6 @@ public class AntrenorController : Controller
             var gruplar = await _context.Gruplar
                 .Where(g => g.TakimId == takimId.Value)
                 .OrderBy(g => g.Ad)
-                .AsNoTracking()
                 .ToListAsync();
             ViewBag.Gruplar = new SelectList(gruplar, "Id", "Ad", grupId);
         }
@@ -179,23 +177,6 @@ public class AntrenorController : Controller
         return View(uye);
     }
 
-    // ========== SPORCU SİL ==========
-    [HttpGet]
-    public async Task<IActionResult> SporcuSil(int id)
-    {
-        if (HttpContext.Session.GetInt32("AntrenorId") == null)
-            return RedirectToAction("Giris");
-
-        var uye = await _context.Uyeler.FindAsync(id);
-        if (uye == null)
-            return NotFound();
-
-        _context.Uyeler.Remove(uye);
-        await _context.SaveChangesAsync();
-        TempData["Basarili"] = "Sporcu başarıyla silindi!";
-        return RedirectToAction("Panel");
-    }
-
     // ========== SPORCU DÜZENLE (GET) ==========
     [HttpGet]
     public async Task<IActionResult> SporcuDuzenle(int id)
@@ -204,10 +185,22 @@ public class AntrenorController : Controller
             return RedirectToAction("Giris");
 
         var uye = await _context.Uyeler.FindAsync(id);
-        if (uye == null)
-            return NotFound();
+        if (uye == null) return NotFound();
 
         ViewBag.SporSalonlari = new SelectList(_context.SporSalonlari.ToList(), "Id", "Ad", uye.SporSalonuId);
+        
+        if (uye.SporSalonuId.HasValue)
+        {
+            var takimlar = await _context.Takimlar.Where(t => t.SporSalonuId == uye.SporSalonuId.Value).ToListAsync();
+            ViewBag.Takimlar = new SelectList(takimlar, "Id", "Ad", uye.TakimId);
+        }
+        
+        if (uye.TakimId.HasValue)
+        {
+            var gruplar = await _context.Gruplar.Where(g => g.TakimId == uye.TakimId.Value).ToListAsync();
+            ViewBag.Gruplar = new SelectList(gruplar, "Id", "Ad", uye.GrupId);
+        }
+
         return View(uye);
     }
 
@@ -227,6 +220,22 @@ public class AntrenorController : Controller
 
         ViewBag.SporSalonlari = new SelectList(_context.SporSalonlari.ToList(), "Id", "Ad", uye.SporSalonuId);
         return View(uye);
+    }
+
+    // ========== SPORCU SİL ==========
+    [HttpGet]
+    public async Task<IActionResult> SporcuSil(int id)
+    {
+        if (HttpContext.Session.GetInt32("AntrenorId") == null)
+            return RedirectToAction("Giris");
+
+        var uye = await _context.Uyeler.FindAsync(id);
+        if (uye == null) return NotFound();
+
+        _context.Uyeler.Remove(uye);
+        await _context.SaveChangesAsync();
+        TempData["Basarili"] = "Sporcu başarıyla silindi!";
+        return RedirectToAction("Panel");
     }
 
     // ========== AJAX: TAKIMLARI GETİR ==========
