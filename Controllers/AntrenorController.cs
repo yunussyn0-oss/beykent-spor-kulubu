@@ -52,7 +52,7 @@ public class AntrenorController : Controller
         return RedirectToAction("Panel");
     }
 
-    // ========== ANA PANEL (Yetkilendirme ile) ==========
+    // ========== ANA PANEL ==========
     public async Task<IActionResult> Panel(int? salonId, int? takimId, int? grupId)
     {
         var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
@@ -61,10 +61,8 @@ public class AntrenorController : Controller
         var antrenor = await _context.Antrenorler.FindAsync(antrenorId);
         if (antrenor == null) return RedirectToAction("Giris");
 
-        // YETKİ KONTROLÜ - Tam Yetki (Burhan ve Ertan)
         bool tamYetki = antrenor.AdSoyad.Contains("Burhan") || antrenor.AdSoyad.Contains("Ertan");
 
-        // Yetkili olduğu salonları bul
         var yetkiliSalonIds = new List<int>();
         if (!tamYetki)
         {
@@ -75,7 +73,6 @@ public class AntrenorController : Controller
                 .ToListAsync();
         }
 
-        // ===== SALON LİSTESİ (Yetkiye göre) =====
         IQueryable<SporSalonu> salonQuery = _context.SporSalonlari.AsNoTracking();
         
         if (!tamYetki && yetkiliSalonIds.Any())
@@ -86,7 +83,6 @@ public class AntrenorController : Controller
         var salonlar = await salonQuery.OrderBy(s => s.Ad).ToListAsync();
         ViewBag.SporSalonlari = new SelectList(salonlar, "Id", "Ad", salonId);
 
-        // ===== TAKIM LİSTESİ (Seçili salona göre) =====
         if (salonId.HasValue && salonId.Value > 0)
         {
             var takimlar = await _context.Takimlar
@@ -100,7 +96,6 @@ public class AntrenorController : Controller
             ViewBag.Takimlar = new SelectList(Enumerable.Empty<SelectListItem>());
         }
 
-        // ===== GRUP LİSTESİ (Seçili takıma göre) =====
         if (takimId.HasValue && takimId.Value > 0)
         {
             var gruplar = await _context.Gruplar
@@ -114,7 +109,6 @@ public class AntrenorController : Controller
             ViewBag.Gruplar = new SelectList(Enumerable.Empty<SelectListItem>());
         }
 
-        // ===== SPORCU LİSTESİ (Filtrelerle) =====
         var query = _context.Uyeler
             .Include(u => u.SporSalonu)
             .Include(u => u.Brans)
@@ -122,13 +116,11 @@ public class AntrenorController : Controller
             .Include(u => u.Grup)
             .AsQueryable();
 
-        // Yetki filtresi
         if (!tamYetki && yetkiliSalonIds.Any())
         {
             query = query.Where(u => u.SporSalonuId.HasValue && yetkiliSalonIds.Contains(u.SporSalonuId.Value));
         }
 
-        // Kullanıcı filtreleri
         if (salonId.HasValue && salonId.Value > 0)
             query = query.Where(u => u.SporSalonuId == salonId.Value);
         
@@ -373,10 +365,12 @@ public class AntrenorController : Controller
 
         await _context.SaveChangesAsync();
         TempData["Basarili"] = "Yoklama başarıyla kaydedildi!";
-        return RedirectToAction("Yoklama", new { tarih, takimId, grupId });
+        
+        // Aynı sayfaya yönlendir (Panel'e değil, yoklama sayfasına)
+        return RedirectToAction("Yoklama", new { tarih = tarih, takimId = takimId, grupId = grupId });
     }
 
-    // ========== TOPLU MESAJ (GET) ==========
+    // ========== TOPLU MESAJ ==========
     [HttpGet]
     public async Task<IActionResult> TopluMesaj(int? takimId, int? grupId)
     {
@@ -438,47 +432,6 @@ public class AntrenorController : Controller
         return View(uye);
     }
 
-    // ========== İSTATİSTİKLER ==========
-    [HttpGet]
-    public async Task<IActionResult> Istatistikler(int? takimId, int? grupId)
-    {
-        var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
-        if (antrenorId == null) return RedirectToAction("Giris");
-
-        ViewBag.TumTakimlar = new SelectList(
-            await _context.Takimlar.OrderBy(t => t.Ad).ToListAsync(), 
-            "Id", "Ad", takimId);
-        
-        if (takimId.HasValue && takimId.Value > 0)
-        {
-            ViewBag.TumGruplar = new SelectList(
-                await _context.Gruplar
-                    .Where(g => g.TakimId == takimId.Value)
-                    .OrderBy(g => g.Ad)
-                    .ToListAsync(),
-                "Id", "Ad", grupId);
-        }
-
-        var query = _context.Uyeler
-            .Include(u => u.Aidatlar)
-            .AsQueryable();
-
-        if (takimId.HasValue && takimId.Value > 0)
-            query = query.Where(u => u.TakimId == takimId.Value);
-        
-        if (grupId.HasValue && grupId.Value > 0)
-            query = query.Where(u => u.GrupId == grupId.Value);
-
-        var uyeler = await query.ToListAsync();
-
-        ViewBag.ToplamSporcu = uyeler.Count;
-        ViewBag.ToplamAidat = uyeler.Sum(u => u.AylikAidat);
-        ViewBag.BorcluSporcu = uyeler.Count(u => u.Aidatlar != null && u.Aidatlar.Any(a => !a.OdendiMi));
-        ViewBag.KiyafetVerilen = uyeler.Count(u => u.KiyafetVerildiMi);
-
-        return View();
-    }
-
     // ========== GEÇMİŞ YOKLAMALAR ==========
     [HttpGet]
     public async Task<IActionResult> GecmisYoklamalar(DateTime? baslangic, DateTime? bitis)
@@ -508,14 +461,13 @@ public class AntrenorController : Controller
         return View(yoklamalar);
     }
 
-    // ========== ŞİFREMİ UNUTTUM (GET) ==========
+    // ========== ŞİFREMİ UNUTTUM ==========
     [HttpGet]
     public IActionResult SifremiUnuttum()
     {
         return View();
     }
 
-    // ========== ŞİFREMİ UNUTTUM (POST) ==========
     [HttpPost]
     public async Task<IActionResult> SifremiUnuttum(string email)
     {
@@ -534,7 +486,6 @@ public class AntrenorController : Controller
             return View();
         }
 
-        // Şifreyi sıfırla
         antrenor.Sifre = "123456";
         await _context.SaveChangesAsync();
 
@@ -542,7 +493,7 @@ public class AntrenorController : Controller
         return RedirectToAction("Giris");
     }
 
-    // ========== ŞİFRE DEĞİŞTİR (GET) ==========
+    // ========== ŞİFRE DEĞİŞTİR ==========
     [HttpGet]
     public IActionResult SifreDegistir()
     {
@@ -552,7 +503,6 @@ public class AntrenorController : Controller
         return View();
     }
 
-    // ========== ŞİFRE DEĞİŞTİR (POST) ==========
     [HttpPost]
     public async Task<IActionResult> SifreDegistir(string eskiSifre, string yeniSifre, string yeniSifreTekrar)
     {

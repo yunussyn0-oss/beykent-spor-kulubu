@@ -1,7 +1,6 @@
 @{
     Layout = null;
     var sporcular = ViewBag.Sporcular as List<SporKulubu.Models.Uye> ?? new List<SporKulubu.Models.Uye>();
-    var salonlar = ViewBag.SporSalonlari as IEnumerable<SelectListItem> ?? new List<SelectListItem>();
 }
 
 <!DOCTYPE html>
@@ -25,86 +24,28 @@
         .btn-custom:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(11,42,74,0.3); color: white; }
         .table-custom { background: white; border-radius: 15px; overflow: hidden; }
         .table-custom thead { background: #0B2A4A; color: white; }
-        .table-custom thead th { padding: 12px; font-weight: 600; }
         .table-custom tbody tr:hover { background: #f8f9fa; }
-        .table-custom tbody td { padding: 10px; vertical-align: middle; }
         .avatar { width: 40px; height: 40px; border-radius: 50%; background: #0B2A4A; color: white; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; }
         .badge-custom { padding: 6px 12px; border-radius: 20px; font-size: 12px; }
         .badge-verildi { background: #d4edda; color: #155724; }
         .badge-verilmedi { background: #f8d7da; color: #721c24; }
         footer { background: white; padding: 20px; text-align: center; margin-top: 30px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
-        .action-buttons .btn { margin: 0 2px; border-radius: 6px; }
-        
-        /* SPOR SALONU KARTLARI */
-        .salon-card {
-            background: white;
-            border-radius: 20px;
-            padding: 25px;
-            text-align: center;
-            transition: all 0.3s;
-            cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            border: 2px solid transparent;
-        }
-        .salon-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 30px rgba(11,42,74,0.15);
-        }
-        .salon-card.active {
-            border-color: #0B2A4A;
-            background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
-        }
-        .salon-icon {
-            width: 70px;
-            height: 70px;
-            background: linear-gradient(135deg, #0B2A4A 0%, #1B3B5C 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px;
-        }
-        .salon-icon i {
-            font-size: 30px;
-            color: #FFD700;
-        }
-        .salon-card h4 {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 5px;
-            color: #0B2A4A;
-        }
-        .salon-card p {
-            font-size: 13px;
-            color: #6B7A8F;
-            margin-bottom: 0;
-        }
-        .salon-card .sporcu-sayisi {
-            font-size: 24px;
-            font-weight: bold;
-            color: #0B2A4A;
-            margin-top: 10px;
-        }
-        
-        .filter-section {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
+        .salon-card { background: white; border-radius: 20px; padding: 25px; text-align: center; transition: all 0.3s; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.08); border: 2px solid transparent; }
+        .salon-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(11,42,74,0.15); }
+        .salon-card.active { border-color: #0B2A4A; background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%); }
+        .salon-icon { width: 70px; height: 70px; background: linear-gradient(135deg, #0B2A4A 0%, #1B3B5C 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; }
+        .salon-icon i { font-size: 30px; color: #FFD700; }
+        .filter-section { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .bg-gradient-primary { background: linear-gradient(135deg, #0B2A4A 0%, #1B3B5C 100%); }
     </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-custom">
         <div class="container">
             <a class="navbar-brand fw-bold" href="#">
-                <i class="bi bi-trophy-fill me-2"></i>BEYLİKDÜZÜ BEYKENT SPOR KULÜBÜ
+                <i class="bi bi-trophy-fill me-2"></i>BEYLİKDÜZÜ BEYKENT SPOR
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="collapse navbar-collapse">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="@Url.Action("Panel", "Antrenor")"><i class="bi bi-speedometer2 me-1"></i>Panel</a></li>
                     <li class="nav-item"><a class="nav-link" href="@Url.Action("SporcuEkle", "Antrenor")"><i class="bi bi-person-plus me-1"></i>Sporcu Ekle</a></li>
@@ -134,6 +75,14 @@
             </div>
         </div>
 
+        <!-- İSTATİSTİK KARTLARI -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3"><div class="stat-card"><div class="d-flex justify-content-between align-items-center"><div><p class="text-muted mb-0">Toplam Sporcu</p><h2 class="stat-number mb-0">@sporcular.Count</h2></div><div class="stat-icon"><i class="bi bi-people-fill"></i></div></div></div></div>
+            <div class="col-md-3"><div class="stat-card"><div class="d-flex justify-content-between align-items-center"><div><p class="text-muted mb-0">Aylık Aidat</p><h2 class="stat-number mb-0">₺@sporcular.Sum(s => s.AylikAidat).ToString("N0")</h2></div><div class="stat-icon"><i class="bi bi-currency-dollar"></i></div></div></div></div>
+            <div class="col-md-3"><div class="stat-card"><div class="d-flex justify-content-between align-items-center"><div><p class="text-muted mb-0">Borçlu Sporcu</p><h2 class="stat-number mb-0">0</h2></div><div class="stat-icon"><i class="bi bi-exclamation-triangle-fill" style="color: #dc3545;"></i></div></div></div></div>
+            <div class="col-md-3"><div class="stat-card"><div class="d-flex justify-content-between align-items-center"><div><p class="text-muted mb-0">Kıyafet Verilen</p><h2 class="stat-number mb-0">@sporcular.Count(s => s.KiyafetVerildiMi)</h2></div><div class="stat-icon"><i class="bi bi-tshirt-fill" style="color: #28a745;"></i></div></div></div></div>
+        </div>
+
         <!-- SPOR SALONU KARTLARI -->
         <div class="row g-4 mb-4">
             @if (ViewBag.SporSalonlari != null)
@@ -148,17 +97,11 @@
                     else if (salon.Text.Contains("Neşe")) iconClass = "bi-emoji-smile";
                     
                     <div class="col-md-4">
-                        <div class="salon-card" data-salon-id="@salonId">
-                            <div class="salon-icon">
-                                <i class="bi @iconClass"></i>
-                            </div>
+                        <div class="salon-card @(ViewBag.SecilenSalonId == salonId ? "active" : "")" data-salon-id="@salonId">
+                            <div class="salon-icon"><i class="bi @iconClass"></i></div>
                             <h4>@salon.Text</h4>
                             <p>Spor Salonu</p>
                             <div class="sporcu-sayisi">@sporcuSayisi Sporcu</div>
-                            @if (ViewBag.SecilenSalonId == salonId)
-                            {
-                                <span class="badge bg-primary mt-2">Seçili</span>
-                            }
                         </div>
                     </div>
                 }
@@ -169,8 +112,8 @@
         <div class="filter-section">
             <div class="row align-items-center">
                 <div class="col-md-8">
-                    <form method="get" action="@Url.Action("Panel", "Antrenor")" id="filterForm" class="row g-3">
-                        <div class="col-md-4">
+                    <form method="get" action="@Url.Action("Panel", "Antrenor")" class="row g-3">
+                        <div class="col-md-5">
                             <label class="form-label fw-bold">Takım</label>
                             <select name="takimId" class="form-select" id="takimFilter">
                                 <option value="">Tüm Takımlar</option>
@@ -190,7 +133,7 @@
                                 }
                             </select>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-5">
                             <label class="form-label fw-bold">Grup</label>
                             <select name="grupId" class="form-select" id="grupFilter">
                                 <option value="">Tüm Gruplar</option>
@@ -210,13 +153,9 @@
                                 }
                             </select>
                         </div>
-                        <div class="col-md-4 d-flex align-items-end">
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="bi bi-search me-1"></i>Filtrele
-                            </button>
-                            <a href="@Url.Action("Panel", "Antrenor")" class="btn btn-secondary w-100 ms-2">
-                                <i class="bi bi-arrow-repeat me-1"></i>Temizle
-                            </a>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">Filtrele</button>
+                            <a href="@Url.Action("Panel", "Antrenor")" class="btn btn-secondary w-100 ms-2">Temizle</a>
                         </div>
                     </form>
                 </div>
@@ -230,28 +169,15 @@
         <div class="card-custom card">
             <div class="card-header bg-white py-3">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 fw-bold">
-                        <i class="bi bi-people-fill me-2" style="color: #0B2A4A;"></i>
-                        Sporcu Listesi
-                        @if (ViewBag.SecilenSalonAdi != null && ViewBag.SecilenSalonAdi != "Tüm Salonlar")
-                        {
-                            <span class="badge bg-primary ms-2">@ViewBag.SecilenSalonAdi</span>
-                        }
-                    </h5>
-                    <div>
-                        <button id="btnRapor" class="btn btn-success btn-sm">
-                            <i class="bi bi-file-earmark-excel me-1"></i>Excel
-                        </button>
-                    </div>
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-people-fill me-2" style="color: #0B2A4A;"></i>Sporcu Listesi</h5>
+                    <button id="btnRapor" class="btn btn-success btn-sm"><i class="bi bi-file-earmark-excel me-1"></i>Excel</button>
                 </div>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-custom mb-0" id="sporcuTable">
                         <thead>
-                            <tr>
-                                <th>#</th><th>Sporcu</th><th>Telefon</th><th>Salon</th><th>Branş</th><th>Takım/Grup</th><th>Veli</th><th>Aidat</th><th>Kıyafet</th><th>İşlemler</th>
-                            </tr>
+                            <tr><th>#</th><th>Sporcu</th><th>Telefon</th><th>Salon</th><th>Branş</th><th>Takım/Grup</th><th>Veli</th><th>Aidat</th><th>Kıyafet</th><th>İşlemler</th></tr>
                         </thead>
                         <tbody>
                             @if (sporcular.Any())
@@ -268,16 +194,7 @@
                                         <td>@(uye.Takim?.Ad ?? "-") / @(uye.Grup?.Ad ?? "-")</td>
                                         <td><small>@uye.VeliAdSoyad</small><br /><small class="text-muted">@uye.VeliTelefon</small></td>
                                         <td>₺@uye.AylikAidat.ToString("N0")</td>
-                                        <td>
-                                            @if (uye.KiyafetVerildiMi)
-                                            {
-                                                <span class="badge-custom badge-verildi"><i class="bi bi-check-circle"></i> Verildi</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge-custom badge-verilmedi"><i class="bi bi-x-circle"></i> Verilmedi</span>
-                                            }
-                                         </td>
+                                        <td>@if (uye.KiyafetVerildiMi){<span class="badge-custom badge-verildi"><i class="bi bi-check-circle"></i> Verildi</span>}else{<span class="badge-custom badge-verilmedi"><i class="bi bi-x-circle"></i> Verilmedi</span>}</td>
                                         <td class="action-buttons">
                                             <a href="@Url.Action("VeliDetay", "Antrenor", new { id = uye.Id })" class="btn btn-sm btn-info" title="Detay"><i class="bi bi-eye"></i></a>
                                             <a href="@Url.Action("SporcuDuzenle", "Antrenor", new { id = uye.Id })" class="btn btn-sm btn-warning" title="Düzenle"><i class="bi bi-pencil"></i></a>
@@ -328,22 +245,17 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         $(document).ready(function() {
-            // SPOR SALONU KARTLARINA TIKLAMA
             $('.salon-card').click(function() {
                 var salonId = $(this).data('salon-id');
                 window.location.href = '/Antrenor/Panel?salonId=' + salonId;
             });
             
-            // Silme modal
             $('.delete-sporcu').click(function() {
-                var id = $(this).data('id');
-                var name = $(this).data('name');
-                $('#deleteSporcuAdi').text(name);
-                $('#confirmDelete').attr('href', '/Antrenor/SporcuSil/' + id);
+                $('#deleteSporcuAdi').text($(this).data('name'));
+                $('#confirmDelete').attr('href', '/Antrenor/SporcuSil/' + $(this).data('id'));
                 $('#deleteModal').modal('show');
             });
             
-            // Arama filtresi
             $('#searchInput').on('keyup', function() {
                 var value = $(this).val().toLowerCase();
                 $('#sporcuTable tbody tr').filter(function() {
@@ -351,7 +263,6 @@
                 });
             });
             
-            // Excel Rapor
             $('#btnRapor').click(function() {
                 var rows = [];
                 $('#sporcuTable tbody tr').each(function() {
@@ -365,21 +276,11 @@
                             row.push(text);
                         }
                     });
-                    if (row.length > 0 && row[0] !== 'Henüz sporcu kaydı bulunmuyor') {
-                        rows.push(row);
-                    }
+                    if (row.length > 0 && row[0] !== 'Henüz sporcu kaydı bulunmuyor') rows.push(row);
                 });
-                
-                if (rows.length === 0) {
-                    alert('Listelenecek sporcu yok!');
-                    return;
-                }
-                
+                if (rows.length === 0) { alert('Listelenecek sporcu yok!'); return; }
                 var csv = "Sıra,Ad Soyad,Telefon,Salon,Branş,Takım/Grup,Veli,Aidat,Kıyafet\n";
-                rows.forEach(function(row, index) {
-                    csv += (index + 1) + "," + row.map(cell => '"' + cell + '"').join(",") + "\n";
-                });
-                
+                rows.forEach(function(row, index) { csv += (index + 1) + "," + row.map(cell => '"' + cell + '"').join(",") + "\n"; });
                 var blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
                 var link = document.createElement("a");
                 var url = URL.createObjectURL(blob);
@@ -391,22 +292,15 @@
                 URL.revokeObjectURL(url);
             });
             
-            // Takım değişince grupları getir
             $('#takimFilter').change(function() {
                 var takimId = $(this).val();
-                var salonId = new URLSearchParams(window.location.search).get('salonId');
-                
                 if (takimId) {
                     $.getJSON('/Antrenor/GruplariGetir', { takimId: takimId }, function(data) {
                         var grupSelect = $('#grupFilter');
                         grupSelect.empty().append('<option value="">Tüm Gruplar</option>');
-                        $.each(data, function(i, grup) {
-                            grupSelect.append($('<option>').text(grup.ad).val(grup.id));
-                        });
+                        $.each(data, function(i, grup) { grupSelect.append($('<option>').text(grup.ad).val(grup.id)); });
                     });
-                } else {
-                    $('#grupFilter').empty().append('<option value="">Tüm Gruplar</option>');
-                }
+                } else { $('#grupFilter').empty().append('<option value="">Tüm Gruplar</option>'); }
             });
         });
     </script>
