@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Session services - Kalıcı oturum için
+// Session services
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromDays(30);
@@ -17,7 +17,7 @@ builder.Services.AddSession(options =>
     options.Cookie.SameSite = SameSiteMode.Lax;
 });
 
-// ========== KALICI VERİTABANI (Render Disk veya Lokal) ==========
+// ========== VERİTABANI (Render Disk veya Lokal) ==========
 string dbPath;
 if (Directory.Exists("/data"))
 {
@@ -35,85 +35,122 @@ builder.Services.AddDbContext<UygulamaDbContext>(options =>
 
 var app = builder.Build();
 
-// ========== VERİTABANINI OTOMATİK OLUŞTUR VE ÖRNEK VERİLERİ EKLE ==========
+// ========== VERİTABANINI OTOMATİK OLUŞTUR ==========
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<UygulamaDbContext>();
     
     try
     {
-        // Veritabanını oluştur
         context.Database.EnsureCreated();
-        Console.WriteLine("✅ Veritabanı oluşturuldu veya zaten mevcut.");
+        Console.WriteLine("Veritabanı hazır.");
         
-        // ========== SPOR SALONLARI ==========
+        // ========== 1. SPOR SALONLARI ==========
         if (!context.SporSalonlari.Any())
         {
-            Console.WriteLine("📌 Spor salonları ekleniyor...");
+            Console.WriteLine("Spor salonları ekleniyor...");
             context.SporSalonlari.AddRange(
                 new SporSalonu { Ad = "Emlak Konut Spor Salonu" },
                 new SporSalonu { Ad = "Yakuplu For Life Spor Salonu" },
                 new SporSalonu { Ad = "Neşe Sever Spor Salonu" }
             );
             context.SaveChanges();
-            Console.WriteLine("✅ 3 spor salonu eklendi.");
+            Console.WriteLine("3 spor salonu eklendi.");
         }
         
-        // ========== BRANŞLAR ==========
+        // ========== 2. BRANŞLAR ==========
         if (!context.Branslar.Any())
         {
-            Console.WriteLine("📌 Branşlar ekleniyor...");
+            Console.WriteLine("Branşlar ekleniyor...");
             var salonlar = context.SporSalonlari.ToList();
+            
             foreach (var salon in salonlar)
             {
+                // VOLEYBOL - Tüm salonlarda
                 context.Branslar.Add(new Brans { Ad = "Voleybol", TakimVarMi = true, GrupVarMi = true, SporSalonuId = salon.Id });
-                context.Branslar.Add(new Brans { Ad = "Basketbol", TakimVarMi = true, GrupVarMi = true, SporSalonuId = salon.Id });
+                
+                // ATLETİK PERFORMANS - Tüm salonlarda
                 context.Branslar.Add(new Brans { Ad = "Atletik Performans", TakimVarMi = false, GrupVarMi = false, SporSalonuId = salon.Id });
-            }
-            context.SaveChanges();
-            Console.WriteLine("✅ Branşlar eklendi.");
-        }
-        
-        // ========== TAKIMLAR ==========
-        if (!context.Takimlar.Any())
-        {
-            Console.WriteLine("📌 Takımlar ekleniyor...");
-            var branslar = context.Branslar.Where(b => b.TakimVarMi == true).ToList();
-            foreach (var brans in branslar)
-            {
-                context.Takimlar.AddRange(
-                    new Takim { Ad = "U8 Takım", SporSalonuId = brans.SporSalonuId, BransId = brans.Id },
-                    new Takim { Ad = "U10 Takım", SporSalonuId = brans.SporSalonuId, BransId = brans.Id },
-                    new Takim { Ad = "U12 Takım", SporSalonuId = brans.SporSalonuId, BransId = brans.Id },
-                    new Takim { Ad = "U14 Takım", SporSalonuId = brans.SporSalonuId, BransId = brans.Id },
-                    new Takim { Ad = "U16 Takım", SporSalonuId = brans.SporSalonuId, BransId = brans.Id }
-                );
-            }
-            context.SaveChanges();
-            Console.WriteLine("✅ Takımlar eklendi.");
-        }
-        
-        // ========== GRUPLAR ==========
-        if (!context.Gruplar.Any())
-        {
-            Console.WriteLine("📌 Gruplar ekleniyor...");
-            string[] grupHarfleri = { "A", "B", "C", "D", "E" };
-            var takimlar = context.Takimlar.ToList();
-            foreach (var takim in takimlar)
-            {
-                foreach (var harf in grupHarfleri)
+                
+                // BASKETBOL - SADECE Yakuplu salonunda
+                if (salon.Ad.Contains("Yakuplu"))
                 {
-                    context.Gruplar.Add(new Grup { Ad = harf + " Grubu", TakimId = takim.Id });
+                    context.Branslar.Add(new Brans { Ad = "Basketbol", TakimVarMi = true, GrupVarMi = true, SporSalonuId = salon.Id });
                 }
             }
             context.SaveChanges();
-            Console.WriteLine("✅ Gruplar eklendi.");
+            Console.WriteLine("Branşlar eklendi. (Basketbol sadece Yakuplu'da)");
         }
         
-        // ========== ANTRENÖRLER (YENİ MAİLLERLE) ==========
+        // ========== 3. TAKIMLAR ==========
+        // Önce tüm Voleybol branşlarını bul
+        var voleybolBranslari = context.Branslar.Where(b => b.Ad == "Voleybol").ToList();
+        var basketbolBranslari = context.Branslar.Where(b => b.Ad == "Basketbol").ToList();
+        
+        // Voleybol takımları (Mini, Midi, Küçük, Yıldız)
+        string[] voleybolTakimlari = { "Mini Takım", "Midi Takım", "Küçük Takım", "Yıldız Takım" };
+        
+        // Basketbol takımları (U8, U10, U12, U14)
+        string[] basketbolTakimlari = { "U8 Takım", "U10 Takım", "U12 Takım", "U14 Takım" };
+        
+        if (!context.Takimlar.Any())
+        {
+            Console.WriteLine("Takımlar ekleniyor...");
+            
+            // Voleybol takımları - HER SALON İÇİN
+            foreach (var brans in voleybolBranslari)
+            {
+                foreach (var takimAd in voleybolTakimlari)
+                {
+                    context.Takimlar.Add(new Takim
+                    {
+                        Ad = takimAd,
+                        SporSalonuId = brans.SporSalonuId,
+                        BransId = brans.Id
+                    });
+                }
+            }
+            
+            // Basketbol takımları - SADECE YAKUPLU İÇİN
+            foreach (var brans in basketbolBranslari)
+            {
+                foreach (var takimAd in basketbolTakimlari)
+                {
+                    context.Takimlar.Add(new Takim
+                    {
+                        Ad = takimAd,
+                        SporSalonuId = brans.SporSalonuId,
+                        BransId = brans.Id
+                    });
+                }
+            }
+            
+            context.SaveChanges();
+            Console.WriteLine("Takımlar eklendi.");
+        }
+        
+        // ========== 4. GRUPLAR (A, B, C, D, E) ==========
+        if (!context.Gruplar.Any())
+        {
+            Console.WriteLine("Gruplar ekleniyor...");
+            string[] grupHarfleri = { "A Grubu", "B Grubu", "C Grubu", "D Grubu", "E Grubu" };
+            var takimlar = context.Takimlar.ToList();
+            
+            foreach (var takim in takimlar)
+            {
+                foreach (var grupAd in grupHarfleri)
+                {
+                    context.Gruplar.Add(new Grup { Ad = grupAd, TakimId = takim.Id });
+                }
+            }
+            context.SaveChanges();
+            Console.WriteLine("Gruplar eklendi.");
+        }
+        
+        // ========== 5. ANTRENÖRLER ==========
         if (!context.Antrenorler.Any())
         {
-            Console.WriteLine("📌 Antrenörler ekleniyor...");
+            Console.WriteLine("Antrenörler ekleniyor...");
             context.Antrenorler.AddRange(
                 new Antrenor { AdSoyad = "Burhan Şayan", Email = "burhansayan@bbsk.com", Sifre = "123456", Telefon = "0532 111 2233", Uzmanlik = "Baş Antrenör", KayitTarihi = DateTime.Now },
                 new Antrenor { AdSoyad = "Ertan Tuncel", Email = "ertantuncel@bbsk.com", Sifre = "123456", Telefon = "0532 222 3344", Uzmanlik = "Antrenör", KayitTarihi = DateTime.Now },
@@ -122,13 +159,13 @@ using (var scope = app.Services.CreateScope())
                 new Antrenor { AdSoyad = "Nesrin Kaya", Email = "nesrinkaya@bbsk.com", Sifre = "123456", Telefon = "0532 555 6677", Uzmanlik = "Neşe Sever Sorumlusu", KayitTarihi = DateTime.Now }
             );
             context.SaveChanges();
-            Console.WriteLine("✅ Antrenörler eklendi.");
+            Console.WriteLine("Antrenörler eklendi.");
         }
         
-        // ========== ANTRENÖR-TAKIM ATAMALARI ==========
+        // ========== 6. ANTRENÖR-TAKIM ATAMALARI ==========
         if (!context.AntrenorTakimlar.Any())
         {
-            Console.WriteLine("📌 Antrenör-takım atamaları ekleniyor...");
+            Console.WriteLine("Antrenör-takım atamaları ekleniyor...");
             var yakuplu = context.SporSalonlari.FirstOrDefault(s => s.Ad.Contains("Yakuplu"));
             var emlak = context.SporSalonlari.FirstOrDefault(s => s.Ad.Contains("Emlak"));
             var nese = context.SporSalonlari.FirstOrDefault(s => s.Ad.Contains("Neşe"));
@@ -141,31 +178,28 @@ using (var scope = app.Services.CreateScope())
             {
                 context.AntrenorTakimlar.Add(new AntrenorTakim { AntrenorId = ozgur.Id, SporSalonuId = yakuplu.Id, AtanmaTarihi = DateTime.Now });
             }
-            
             if (sezer != null && emlak != null)
             {
                 context.AntrenorTakimlar.Add(new AntrenorTakim { AntrenorId = sezer.Id, SporSalonuId = emlak.Id, AtanmaTarihi = DateTime.Now });
             }
-            
             if (nesrin != null && nese != null)
             {
                 context.AntrenorTakimlar.Add(new AntrenorTakim { AntrenorId = nesrin.Id, SporSalonuId = nese.Id, AtanmaTarihi = DateTime.Now });
             }
-            
             context.SaveChanges();
-            Console.WriteLine("✅ Antrenör-takım atamaları eklendi.");
+            Console.WriteLine("Antrenör-takım atamaları eklendi.");
         }
         
-        // ========== ÖRNEK SPORCULAR ==========
+        // ========== 7. ÖRNEK SPORCU ==========
         if (!context.Uyeler.Any())
         {
-            Console.WriteLine("📌 Örnek sporcular ekleniyor...");
+            Console.WriteLine("Örnek sporcu ekleniyor...");
             var yakuplu = context.SporSalonlari.FirstOrDefault(s => s.Ad.Contains("Yakuplu"));
             var voleybol = context.Branslar.FirstOrDefault(b => b.Ad == "Voleybol" && b.SporSalonuId == yakuplu.Id);
-            var u8Takim = context.Takimlar.FirstOrDefault(t => t.Ad == "U8 Takım" && t.SporSalonuId == yakuplu.Id);
-            var aGrubu = context.Gruplar.FirstOrDefault(g => g.Ad == "A Grubu" && g.TakimId == u8Takim.Id);
+            var miniTakim = context.Takimlar.FirstOrDefault(t => t.Ad == "Mini Takım" && t.SporSalonuId == yakuplu.Id);
+            var aGrubu = context.Gruplar.FirstOrDefault(g => g.Ad == "A Grubu" && g.TakimId == miniTakim.Id);
             
-            if (yakuplu != null && voleybol != null && u8Takim != null && aGrubu != null)
+            if (yakuplu != null && voleybol != null && miniTakim != null && aGrubu != null)
             {
                 context.Uyeler.Add(new Uye
                 {
@@ -178,32 +212,29 @@ using (var scope = app.Services.CreateScope())
                     VeliTelefon = "0532 111 2233",
                     SporSalonuId = yakuplu.Id,
                     BransId = voleybol.Id,
-                    TakimId = u8Takim.Id,
+                    TakimId = miniTakim.Id,
                     GrupId = aGrubu.Id,
                     KiyafetVerildiMi = true,
                     KayitTarihi = DateTime.Now
                 });
                 context.SaveChanges();
-                Console.WriteLine("✅ Örnek sporcu eklendi.");
+                Console.WriteLine("Örnek sporcu eklendi.");
             }
         }
         
-        Console.WriteLine("🎉 Tüm örnek veriler başarıyla eklendi!");
+        Console.WriteLine("Veritabanı kurulumu tamamlandı!");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"❌ Veritabanı hatası: {ex.Message}");
-        Console.WriteLine($"Detay: {ex.InnerException?.Message}");
+        Console.WriteLine("Veritabanı hatasi: " + ex.Message);
     }
 }
-// ========== VERİTABANI KURULUMU SONU ==========
 
-// Configure the HTTP request pipeline.
+// ========== MIDDLEWARE ==========
 app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
 
-// Ana sayfayı direkt login'e yönlendir
 app.MapGet("/", async context =>
 {
     context.Response.Redirect("/Antrenor/Giris");
@@ -213,11 +244,8 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Antrenor}/{action=Giris}/{id?}");
 
-// PORT ayarı - Render için
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 app.Urls.Add($"http://0.0.0.0:{port}");
 
-Console.WriteLine($"✅ Uygulama başlatıldı! Port: {port}");
-Console.WriteLine($"✅ Veritabanı yolu: {dbPath}");
-
+Console.WriteLine($"Uygulama başlatildi! Port: {port}");
 app.Run();
