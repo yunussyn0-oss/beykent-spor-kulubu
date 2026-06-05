@@ -61,23 +61,26 @@ public class AntrenorController : Controller
         var antrenor = await _context.Antrenorler.FindAsync(antrenorId);
         if (antrenor == null) return RedirectToAction("Giris");
 
+        // YETKİ KONTROLÜ - Tam Yetki (Burhan ve Ertan)
         bool tamYetki = antrenor.AdSoyad.Contains("Burhan") || antrenor.AdSoyad.Contains("Ertan");
 
-        // ===== SALON LİSTESİ (Yetkiye göre) =====
-        IQueryable<SporSalonu> salonQuery = _context.SporSalonlari.AsNoTracking();
-        
+        // Yetkili olduğu salonları bul
+        var yetkiliSalonIds = new List<int>();
         if (!tamYetki)
         {
-            var yetkiliSalonIds = await _context.AntrenorTakimlar
+            yetkiliSalonIds = await _context.AntrenorTakimlar
                 .Where(at => at.AntrenorId == antrenorId && at.SporSalonuId.HasValue)
                 .Select(at => at.SporSalonuId.Value)
                 .Distinct()
                 .ToListAsync();
-            
-            if (yetkiliSalonIds.Any())
-            {
-                salonQuery = salonQuery.Where(s => yetkiliSalonIds.Contains(s.Id));
-            }
+        }
+
+        // ===== SALON LİSTESİ (Yetkiye göre) =====
+        IQueryable<SporSalonu> salonQuery = _context.SporSalonlari.AsNoTracking();
+        
+        if (!tamYetki && yetkiliSalonIds.Any())
+        {
+            salonQuery = salonQuery.Where(s => yetkiliSalonIds.Contains(s.Id));
         }
 
         var salonlar = await salonQuery.OrderBy(s => s.Ad).ToListAsync();
@@ -120,10 +123,9 @@ public class AntrenorController : Controller
             .AsQueryable();
 
         // Yetki filtresi
-        if (!tamYetki && salonlar.Any())
+        if (!tamYetki && yetkiliSalonIds.Any())
         {
-            var yetkiliIds = salonlar.Select(s => s.Id).ToList();
-            query = query.Where(u => u.SporSalonuId.HasValue && yetkiliIds.Contains(u.SporSalonuId.Value));
+            query = query.Where(u => u.SporSalonuId.HasValue && yetkiliSalonIds.Contains(u.SporSalonuId.Value));
         }
 
         // Kullanıcı filtreleri
@@ -159,10 +161,6 @@ public class AntrenorController : Controller
             return RedirectToAction("Giris");
 
         ViewBag.SporSalonlari = new SelectList(_context.SporSalonlari.ToList(), "Id", "Ad");
-        ViewBag.Branslar = new SelectList(Enumerable.Empty<SelectListItem>());
-        ViewBag.Takimlar = new SelectList(Enumerable.Empty<SelectListItem>());
-        ViewBag.Gruplar = new SelectList(Enumerable.Empty<SelectListItem>());
-        
         return View();
     }
 
