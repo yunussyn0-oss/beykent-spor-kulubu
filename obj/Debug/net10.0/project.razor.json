@@ -17581,6 +17581,11 @@
   "RootNamespace": "SporKulubu",
   "Documents": [
     {
+      "FilePath": "c:\\Users\\ASUS\\OneDrive\\Masaüstü\\SporKulubu\\SporKulubu\\Views\\Antrenor\\SifreDegistir.cshtml",
+      "TargetPath": "Views\\Antrenor\\SifreDegistir.cshtml",
+      "FileKind": "mvc"
+    },
+    {
       "FilePath": "c:\\Users\\ASUS\\OneDrive\\Masaüstü\\SporKulubu\\SporKulubu\\Views\\_ViewStart.cshtml",
       "TargetPath": "Views\\_ViewStart.cshtml",
       "FileKind": "mvc"
@@ -17598,6 +17603,11 @@
     {
       "FilePath": "c:\\Users\\ASUS\\OneDrive\\Masaüstü\\SporKulubu\\SporKulubu\\Views\\Shared\\_ValidationScriptsPartial.cshtml",
       "TargetPath": "Views\\Shared\\_ValidationScriptsPartial.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "c:\\Users\\ASUS\\OneDrive\\Masaüstü\\SporKulubu\\SporKulubu\\Views\\Antrenor\\SifremiUnuttum.cshtml",
+      "TargetPath": "Views\\Antrenor\\SifremiUnuttum.cshtml",
       "FileKind": "mvc"
     },
     {
@@ -17651,6 +17661,11 @@
       "FileKind": "mvc"
     },
     {
+      "FilePath": "c:\\Users\\ASUS\\OneDrive\\Masaüstü\\SporKulubu\\SporKulubu\\Views\\Antrenor\\TopluMesaj.cshtml",
+      "TargetPath": "Views\\Antrenor\\TopluMesaj.cshtml",
+      "FileKind": "mvc"
+    },
+    {
       "FilePath": "c:\\Users\\ASUS\\OneDrive\\Masaüstü\\SporKulubu\\SporKulubu\\Views\\Antrenor\\Istatistikler.cshtml",
       "TargetPath": "Views\\Antrenor\\Istatistikler.cshtml",
       "FileKind": "mvc"
@@ -17688,6 +17703,11 @@
     {
       "FilePath": "c:\\Users\\ASUS\\OneDrive\\Masaüstü\\SporKulubu\\SporKulubu\\Views\\Antrenor\\GecmisYoklamalar.cshtml",
       "TargetPath": "Views\\Antrenor\\GecmisYoklamalar.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "c:\\Users\\ASUS\\OneDrive\\Masaüstü\\SporKulubu\\SporKulubu\\Views\\Antrenor\\SporcuEkle.cshtml",
+      "TargetPath": "Views\\Antrenor\\SporcuEkle.cshtml",
       "FileKind": "mvc"
     },
     {

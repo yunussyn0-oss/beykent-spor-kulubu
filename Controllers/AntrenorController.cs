@@ -52,7 +52,7 @@ public class AntrenorController : Controller
         return RedirectToAction("Panel");
     }
 
-    // ========== ANA PANEL ==========
+    // ========== ANA PANEL (Yetkilendirme ile) ==========
     public async Task<IActionResult> Panel(int? salonId, int? takimId, int? grupId)
     {
         var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
@@ -140,7 +140,6 @@ public class AntrenorController : Controller
 
         var sporcular = await query.OrderBy(u => u.AdSoyad).ToListAsync();
 
-        // ViewBag değerleri
         ViewBag.Sporcular = sporcular;
         ViewBag.SporcuSayisi = sporcular.Count;
         ViewBag.TamYetki = tamYetki;
@@ -305,7 +304,6 @@ public class AntrenorController : Controller
 
         var seciliTarih = tarih ?? DateTime.Now.Date;
 
-        // Tüm takımlar
         ViewBag.TumTakimlar = new SelectList(
             await _context.Takimlar.OrderBy(t => t.Ad).ToListAsync(), 
             "Id", "Ad", takimId);
@@ -320,7 +318,6 @@ public class AntrenorController : Controller
                 "Id", "Ad", grupId);
         }
 
-        // Sporcuları getir
         var query = _context.Uyeler
             .Include(u => u.Takim)
             .Include(u => u.Grup)
@@ -334,7 +331,6 @@ public class AntrenorController : Controller
 
         var sporcular = await query.OrderBy(u => u.AdSoyad).ToListAsync();
 
-        // Bugünün yoklamaları
         var yoklamalar = await _context.Yoklamalar
             .Where(y => y.AntrenorId == antrenorId && y.Tarih.Date == seciliTarih.Date)
             .ToDictionaryAsync(y => y.UyeId);
@@ -356,7 +352,6 @@ public class AntrenorController : Controller
         var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
         if (antrenorId == null) return RedirectToAction("Giris");
 
-        // Önce o günün eski yoklamalarını sil
         var eskiYoklamalar = await _context.Yoklamalar
             .Where(y => y.AntrenorId == antrenorId && y.Tarih.Date == tarih.Date)
             .ToListAsync();
@@ -366,7 +361,6 @@ public class AntrenorController : Controller
             _context.Yoklamalar.RemoveRange(eskiYoklamalar);
         }
 
-        // Yeni yoklamaları ekle
         if (yoklamalar != null && yoklamalar.Any())
         {
             foreach (var y in yoklamalar.Where(y => !string.IsNullOrEmpty(y.Durum)))
@@ -389,7 +383,6 @@ public class AntrenorController : Controller
         var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
         if (antrenorId == null) return RedirectToAction("Giris");
 
-        // Tüm takımlar
         ViewBag.TumTakimlar = new SelectList(
             await _context.Takimlar.OrderBy(t => t.Ad).ToListAsync(), 
             "Id", "Ad", takimId);
@@ -404,7 +397,6 @@ public class AntrenorController : Controller
                 "Id", "Ad", grupId);
         }
 
-        // Sporcuları getir
         var query = _context.Uyeler
             .Include(u => u.SporSalonu)
             .Include(u => u.Brans)
@@ -514,6 +506,91 @@ public class AntrenorController : Controller
         ViewBag.Bitis = bitis;
 
         return View(yoklamalar);
+    }
+
+    // ========== ŞİFREMİ UNUTTUM (GET) ==========
+    [HttpGet]
+    public IActionResult SifremiUnuttum()
+    {
+        return View();
+    }
+
+    // ========== ŞİFREMİ UNUTTUM (POST) ==========
+    [HttpPost]
+    public async Task<IActionResult> SifremiUnuttum(string email)
+    {
+        if (string.IsNullOrEmpty(email))
+        {
+            ViewBag.Hata = "E-posta adresi giriniz!";
+            return View();
+        }
+
+        var antrenor = await _context.Antrenorler
+            .FirstOrDefaultAsync(a => a.Email == email);
+
+        if (antrenor == null)
+        {
+            ViewBag.Hata = "Bu e-posta adresine kayıtlı antrenör bulunamadı!";
+            return View();
+        }
+
+        // Şifreyi sıfırla
+        antrenor.Sifre = "123456";
+        await _context.SaveChangesAsync();
+
+        TempData["Basarili"] = "Şifreniz sıfırlandı! Yeni şifreniz: 123456";
+        return RedirectToAction("Giris");
+    }
+
+    // ========== ŞİFRE DEĞİŞTİR (GET) ==========
+    [HttpGet]
+    public IActionResult SifreDegistir()
+    {
+        if (HttpContext.Session.GetInt32("AntrenorId") == null)
+            return RedirectToAction("Giris");
+        
+        return View();
+    }
+
+    // ========== ŞİFRE DEĞİŞTİR (POST) ==========
+    [HttpPost]
+    public async Task<IActionResult> SifreDegistir(string eskiSifre, string yeniSifre, string yeniSifreTekrar)
+    {
+        var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
+        if (antrenorId == null)
+            return RedirectToAction("Giris");
+
+        if (string.IsNullOrEmpty(eskiSifre) || string.IsNullOrEmpty(yeniSifre))
+        {
+            ViewBag.Hata = "Tüm alanları doldurunuz!";
+            return View();
+        }
+
+        if (yeniSifre != yeniSifreTekrar)
+        {
+            ViewBag.Hata = "Yeni şifreler uyuşmuyor!";
+            return View();
+        }
+
+        if (yeniSifre.Length < 6)
+        {
+            ViewBag.Hata = "Yeni şifre en az 6 karakter olmalıdır!";
+            return View();
+        }
+
+        var antrenor = await _context.Antrenorler.FindAsync(antrenorId);
+        
+        if (antrenor.Sifre != eskiSifre)
+        {
+            ViewBag.Hata = "Mevcut şifre yanlış!";
+            return View();
+        }
+
+        antrenor.Sifre = yeniSifre;
+        await _context.SaveChangesAsync();
+
+        TempData["Basarili"] = "Şifreniz başarıyla değiştirildi!";
+        return RedirectToAction("Panel");
     }
 
     // ========== ÇIKIŞ ==========

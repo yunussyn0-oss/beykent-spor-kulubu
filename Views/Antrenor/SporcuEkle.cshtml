@@ -1,6 +1,7 @@
 @{
     Layout = null;
     var sporSalonlari = ViewBag.SporSalonlari as IEnumerable<SelectListItem> ?? new List<SelectListItem>();
+    var branslar = ViewBag.Branslar as IEnumerable<SelectListItem> ?? new List<SelectListItem>();
     var takimlar = ViewBag.Takimlar as IEnumerable<SelectListItem> ?? new List<SelectListItem>();
     var gruplar = ViewBag.Gruplar as IEnumerable<SelectListItem> ?? new List<SelectListItem>();
 }
@@ -38,16 +39,8 @@
             </a>
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("Panel", "Antrenor")">
-                            <i class="bi bi-speedometer2 me-1"></i>Panele Dön
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("Cikis", "Antrenor")">
-                            <i class="bi bi-box-arrow-right me-1"></i>Çıkış
-                        </a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="@Url.Action("Panel", "Antrenor")"><i class="bi bi-speedometer2 me-1"></i>Panele Dön</a></li>
+                    <li class="nav-item"><a class="nav-link" href="@Url.Action("Cikis", "Antrenor")"><i class="bi bi-box-arrow-right me-1"></i>Çıkış</a></li>
                 </ul>
             </div>
         </div>
@@ -113,26 +106,18 @@
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Takım</label>
-                                <select name="TakimId" class="form-select" id="TakimId">
+                                <label class="form-label required">Takım</label>
+                                <select name="TakimId" class="form-select" id="TakimId" required>
                                     <option value="">-- Önce Salon Seçin --</option>
-                                    @foreach (var takim in takimlar)
-                                    {
-                                        <option value="@takim.Value">@takim.Text</option>
-                                    }
                                 </select>
-                                <small class="text-muted">Önce salon seçin, takımlar listelenecektir.</small>
+                                <small class="text-muted">Mini, Midi, Küçük, Yıldız takımları</small>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Grup</label>
-                                <select name="GrupId" class="form-select" id="GrupId">
+                                <label class="form-label required">Grup</label>
+                                <select name="GrupId" class="form-select" id="GrupId" required>
                                     <option value="">-- Önce Takım Seçin --</option>
-                                    @foreach (var grup in gruplar)
-                                    {
-                                        <option value="@grup.Value">@grup.Text</option>
-                                    }
                                 </select>
-                                <small class="text-muted">Önce takım seçin, gruplar listelenecektir.</small>
+                                <small class="text-muted">A, B, C, D, E grupları</small>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label required">Aylık Aidat (₺)</label>

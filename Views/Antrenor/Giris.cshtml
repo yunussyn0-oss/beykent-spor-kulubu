@@ -6,170 +6,562 @@
 <html lang="tr">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
     <title>Giriş - Beylikdüzü Beykent Spor Kulübü</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             background: linear-gradient(135deg, #0B2A4A 0%, #1B3B5C 50%, #2C4A6E 100%);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
-        .login-card {
-            background: white;
-            border-radius: 24px;
-            padding: 40px;
+
+        /* Ana Container */
+        .login-wrapper {
             width: 100%;
-            max-width: 450px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            max-width: 480px;
+            margin: 0 auto;
         }
-        .logo {
+
+        /* Kart Tasarımı */
+        .login-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border-radius: 32px;
+            padding: 40px 35px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        /* Logo Alanı */
+        .logo-area {
             text-align: center;
             margin-bottom: 30px;
         }
-        .logo img {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 50%;
-            margin-bottom: 15px;
-            border: 3px solid #FFD700;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+
+        .logo-icon {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, #0B2A4A, #1B3B5C);
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 25px rgba(11, 42, 74, 0.3);
         }
-        .logo h1 {
+
+        .logo-icon i {
+            font-size: 45px;
+            color: #FFD700;
+        }
+
+        .logo-area h1 {
             color: #0B2A4A;
-            font-size: 24px;
-            margin-top: 10px;
+            font-size: 26px;
             font-weight: 700;
+            margin-bottom: 5px;
+            letter-spacing: -0.5px;
         }
-        .logo p {
+
+        .logo-area p {
             color: #6B7A8F;
             font-size: 14px;
+            font-weight: 400;
         }
+
+        /* Hoş Geldin Mesajı */
+        .welcome-box {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 20px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 25px;
+            border-left: 4px solid #0B2A4A;
+        }
+
+        .welcome-box h3 {
+            color: #0B2A4A;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .welcome-box p {
+            color: #6B7A8F;
+            font-size: 13px;
+            margin: 0;
+        }
+
+        /* Form Elemanları */
         .form-group {
             margin-bottom: 20px;
         }
+
         .form-group label {
+            display: block;
             font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             color: #0B2A4A;
             margin-bottom: 8px;
-            display: block;
         }
-        .input-group {
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #0B2A4A;
+            font-size: 18px;
+            z-index: 10;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px 20px 15px 50px;
+            font-size: 15px;
             border: 2px solid #e1e5e9;
-            border-radius: 12px;
+            border-radius: 16px;
             transition: all 0.3s;
-        }
-        .input-group:focus-within {
-            border-color: #0B2A4A;
-        }
-        .input-group-text {
             background: white;
+        }
+
+        .form-control:focus {
+            border-color: #0B2A4A;
+            box-shadow: 0 0 0 4px rgba(11, 42, 74, 0.1);
+            outline: none;
+        }
+
+        /* Şifre Gösterme Butonu */
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
             border: none;
+            color: #6B7A8F;
+            cursor: pointer;
+            z-index: 10;
+            transition: color 0.3s;
+        }
+
+        .password-toggle:hover {
             color: #0B2A4A;
         }
-        .form-control {
-            border: none;
-            padding: 12px 0;
+
+        /* Checkbox */
+        .form-check {
+            margin-bottom: 20px;
         }
-        .form-control:focus {
-            outline: none;
-            box-shadow: none;
+
+        .form-check-input {
+            cursor: pointer;
         }
+
+        .form-check-label {
+            color: #6B7A8F;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* Giriş Butonu */
         .btn-login {
-            background: linear-gradient(135deg, #0B2A4A, #1B3B5C);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 14px;
-            font-weight: 600;
             width: 100%;
-            margin-top: 10px;
+            padding: 16px;
+            background: linear-gradient(135deg, #0B2A4A, #1B3B5C);
+            border: none;
+            border-radius: 16px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
             transition: all 0.3s;
+            margin: 10px 0 15px;
         }
+
         .btn-login:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(11,42,74,0.3);
+            box-shadow: 0 10px 25px rgba(11, 42, 74, 0.4);
+            background: linear-gradient(135deg, #1B3B5C, #0B2A4A);
         }
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            text-align: center;
+
+        .btn-login:active {
+            transform: translateY(0);
         }
-        .test-info {
-            background: #f0f4f8;
+
+        .btn-login:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* Hata Mesajı */
+        .alert-custom {
             border-radius: 16px;
-            padding: 15px;
-            margin-top: 25px;
+            padding: 12px 18px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: none;
         }
+
+        .alert-danger-custom {
+            background: linear-gradient(135deg, #fee, #ffd1d1);
+            color: #a00;
+            border-left: 4px solid #dc3545;
+        }
+
+        .alert-success-custom {
+            background: linear-gradient(135deg, #e8f5e8, #d4edda);
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        /* Test Bilgileri */
+        .test-info {
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 18px;
+            margin-top: 25px;
+            border: 1px solid #e9ecef;
+        }
+
         .test-info h6 {
             color: #0B2A4A;
             font-weight: 700;
-            margin-bottom: 10px;
+            font-size: 13px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
+
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+        }
+
         .test-item {
-            font-size: 12px;
-            padding: 5px 0;
-            border-bottom: 1px solid #ddd;
+            background: white;
+            border-radius: 12px;
+            padding: 8px 10px;
+            border: 1px solid #e9ecef;
+            transition: all 0.2s;
+            cursor: pointer;
+            font-size: 11px;
         }
-        .test-item:last-child {
-            border-bottom: none;
+
+        .test-item:hover {
+            border-color: #0B2A4A;
+            transform: translateY(-2px);
+            background: #f0f4f8;
+        }
+
+        .test-item-email {
+            font-weight: 600;
+            color: #0B2A4A;
+            word-break: break-all;
+        }
+
+        .test-item-password {
+            color: #28a745;
+            font-family: monospace;
+            font-size: 10px;
+        }
+
+        /* Alt Linkler */
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            font-size: 13px;
+        }
+
+        .footer-links a {
+            color: #6B7A8F;
+            text-decoration: none;
+            transition: color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .footer-links a:hover {
+            color: #0B2A4A;
+        }
+
+        /* Responsive Ayarlar */
+        @@media (max-width: 576px) {
+            .login-card {
+                padding: 30px 25px;
+            }
+            
+            .logo-icon {
+                width: 70px;
+                height: 70px;
+            }
+            
+            .logo-icon i {
+                font-size: 35px;
+            }
+            
+            .logo-area h1 {
+                font-size: 22px;
+            }
+            
+            .btn-login {
+                padding: 14px;
+                font-size: 14px;
+            }
+            
+            .test-item {
+                padding: 6px 8px;
+            }
+            
+            .test-item-email {
+                font-size: 10px;
+            }
+        }
+
+        @@media (min-width: 768px) {
+            .test-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @@media (min-width: 1024px) and (max-width: 1366px) {
+            .login-wrapper {
+                max-width: 420px;
+            }
+            
+            .login-card {
+                padding: 35px 30px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="login-card">
-        <div class="logo">
-            <img src="/images/logo.jpeg" alt="Beylikdüzü Beykent Spor Kulübü">
-            <h1>BEYLİKDÜZÜ BEYKENT SPOR</h1>
-            <p>Antrenör Giriş Paneli</p>
+    <div class="login-wrapper">
+        <div class="login-card">
+            <!-- Logo ve Başlık -->
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <i class="bi bi-trophy-fill"></i>
+                </div>
+                <h1>BEYLİKDÜZÜ BEYKENT SPOR</h1>
+                <p>Antrenör Giriş Paneli</p>
+            </div>
+
+            <!-- Hoş Geldin Mesajı -->
+            <div class="welcome-box">
+                <h3>👋 Hoş Geldiniz</h3>
+                <p>Panele erişmek için giriş yapın</p>
+            </div>
+
+            <!-- Hata Mesajları -->
+            @if (ViewBag.Hata != null)
+            {
+                <div class="alert-custom alert-danger-custom">
+                    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                    <div>@ViewBag.Hata</div>
+                </div>
+            }
+
+            @if (TempData["Basarili"] != null)
+            {
+                <div class="alert-custom alert-success-custom">
+                    <i class="bi bi-check-circle-fill fs-5"></i>
+                    <div>@TempData["Basarili"]</div>
+                </div>
+            }
+
+            <!-- Giriş Formu -->
+            <form method="post" action="@Url.Action("Giris", "Antrenor")" id="loginForm">
+                @Html.AntiForgeryToken()
+
+                <!-- Email Alanı -->
+                <div class="form-group">
+                    <label><i class="bi bi-envelope-fill me-1"></i> E-POSTA ADRESİ</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-envelope-fill input-icon"></i>
+                        <input type="email" 
+                               name="email" 
+                               id="emailInput"
+                               class="form-control" 
+                               placeholder="ornek@bbsk.com" 
+                               required 
+                               autocomplete="email">
+                    </div>
+                </div>
+
+                <!-- Şifre Alanı -->
+                <div class="form-group">
+                    <label><i class="bi bi-lock-fill me-1"></i> ŞİFRE</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-lock-fill input-icon"></i>
+                        <input type="password" 
+                               name="sifre" 
+                               id="passwordInput"
+                               class="form-control" 
+                               placeholder="••••••••" 
+                               required 
+                               autocomplete="current-password">
+                        <button type="button" class="password-toggle" onclick="togglePassword()">
+                            <i class="bi bi-eye" id="toggleIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Beni Hatırla -->
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe" checked>
+                    <label class="form-check-label" for="rememberMe">
+                        <i class="bi bi-check-circle me-1"></i> Beni Hatırla
+                    </label>
+                </div>
+
+                <!-- Giriş Butonu -->
+                <button type="submit" class="btn-login" id="loginButton">
+                    <span class="button-text">
+                        <i class="bi bi-box-arrow-in-right me-2"></i> GİRİŞ YAP
+                    </span>
+                    <span class="spinner-border spinner-border-sm d-none" role="status" id="loginSpinner"></span>
+                </button>
+            </form>
+
+            <!-- Alt Linkler -->
+            <div class="footer-links">
+                <a href="@Url.Action("SifremiUnuttum", "Antrenor")">
+                    <i class="bi bi-question-circle"></i> Şifremi Unuttum
+                </a>
+                <a href="@Url.Action("SifreDegistir", "Antrenor")">
+                    <i class="bi bi-key"></i> Şifre Değiştir
+                </a>
+            </div>
+
+            <!-- Test Giriş Bilgileri -->
+            <div class="test-info">
+                <h6>
+                    <i class="bi bi-info-circle-fill text-primary"></i>
+                    TEST GİRİŞ BİLGİLERİ
+                </h6>
+                <div class="test-grid">
+                    <div class="test-item" onclick="fillForm('burhansayan@bbsk.com', '123456')">
+                        <div class="test-item-email">👑 burhansayan@bbsk.com</div>
+                        <div class="test-item-password">🔑 123456</div>
+                        <small>Tüm Salonlar</small>
+                    </div>
+                    <div class="test-item" onclick="fillForm('ertantuncel@bbsk.com', '123456')">
+                        <div class="test-item-email">👑 ertantuncel@bbsk.com</div>
+                        <div class="test-item-password">🔑 123456</div>
+                        <small>Tüm Salonlar</small>
+                    </div>
+                    <div class="test-item" onclick="fillForm('ozgurdemir@bbsk.com', '123456')">
+                        <div class="test-item-email">🏋️ ozgurdemir@bbsk.com</div>
+                        <div class="test-item-password">🔑 123456</div>
+                        <small>Sadece Yakuplu</small>
+                    </div>
+                    <div class="test-item" onclick="fillForm('eftelyakose@bbsk.com', '123456')">
+                        <div class="test-item-email">🏋️ eftelyakose@bbsk.com</div>
+                        <div class="test-item-password">🔑 123456</div>
+                        <small>Sadece Yakuplu</small>
+                    </div>
+                    <div class="test-item" onclick="fillForm('sezerkaya@bbsk.com', '123456')">
+                        <div class="test-item-email">🏢 sezerkaya@bbsk.com</div>
+                        <div class="test-item-password">🔑 123456</div>
+                        <small>Sadece Emlak Konut</small>
+                    </div>
+                </div>
+                <p class="text-muted small mt-3 mb-0 text-center">
+                    <i class="bi bi-lightbulb me-1"></i>
+                    Test hesaplarına tıklayarak otomatik doldurun
+                </p>
+            </div>
         </div>
 
-        @if (ViewBag.Hata != null)
-        {
-            <div class="error">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>@ViewBag.Hata
-            </div>
-        }
-
-        <form method="post" action="@Url.Action("Giris", "Antrenor")">
-            <div class="form-group">
-                <label><i class="bi bi-envelope-fill me-2"></i>E-posta Adresi</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-envelope-fill"></i></span>
-                    <input type="email" name="email" class="form-control" placeholder="ornek@bbsk.com" required />
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label><i class="bi bi-lock-fill me-2"></i>Şifre</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
-                    <input type="password" name="sifre" class="form-control" placeholder="••••••••" required />
-                </div>
-            </div>
-
-            <button type="submit" class="btn-login">
-                <i class="bi bi-box-arrow-in-right me-2"></i>GİRİŞ YAP
-            </button>
-        </form>
-
-        <div class="test-info">
-            <h6><i class="bi bi-info-circle-fill me-2"></i>Test Giriş Bilgileri</h6>
-            <div class="test-item">👑 burhansayan@bbsk.com / 123456</div>
-            <div class="test-item">👑 ertantuncel@bbsk.com / 123456</div>
-            <div class="test-item">🏋️ ozgurdemir@bbsk.com / 123456</div>
-            <div class="test-item">🏢 sezeryilmaz@bbsk.com / 123456</div>
-            <div class="test-item">🏠 nesrinkaya@bbsk.com / 123456</div>
+        <!-- Footer -->
+        <div class="text-center mt-4">
+            <p class="text-white-50 small mb-0">
+                © @DateTime.Now.Year Beylikdüzü Beykent Spor Kulübü<br>
+                <i class="bi bi-building me-1"></i> Emlak Konut | Yakuplu | Neşe Sever
+            </p>
         </div>
     </div>
+
+    <script>
+        // Şifre göster/gizle
+        function togglePassword() {
+            var passwordInput = document.getElementById('passwordInput');
+            var icon = document.getElementById('toggleIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        }
+
+        // Test bilgilerini forma doldur
+        function fillForm(email, password) {
+            document.getElementById('emailInput').value = email;
+            document.getElementById('passwordInput').value = password;
+            
+            var button = document.querySelector('.btn-login');
+            button.style.transform = 'scale(0.98)';
+            setTimeout(() => {
+                button.style.transform = '';
+            }, 200);
+        }
+
+        // Loading efekti
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            var button = document.getElementById('loginButton');
+            var buttonText = button.querySelector('.button-text');
+            var spinner = document.getElementById('loginSpinner');
+            
+            button.disabled = true;
+            buttonText.classList.add('d-none');
+            spinner.classList.remove('d-none');
+        });
+
+        // Enter tuşu ile form gönderme
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                var form = document.getElementById('loginForm');
+                if (form) {
+                    e.preventDefault();
+                    form.submit();
+                }
+            }
+        });
+    </script>
 </body>
 </html>
