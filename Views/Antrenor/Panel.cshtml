@@ -37,6 +37,9 @@
         .salon-icon i { font-size: 30px; color: #FFD700; }
         .filter-section { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .bg-gradient-primary { background: linear-gradient(135deg, #0B2A4A 0%, #1B3B5C 100%); }
+        .search-box { border-radius: 25px; padding: 10px 20px; border: 1px solid #ddd; width: 100%; }
+        .action-buttons .btn { margin: 2px; border-radius: 6px; }
+        .sporcu-sayisi { font-size: 18px; font-weight: bold; color: #0B2A4A; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -108,10 +111,10 @@
             }
         </div>
 
-        <!-- FİLTRE BÖLÜMÜ -->
+        <!-- FİLTRE BÖLÜMÜ - DÜZENLENDİ -->
         <div class="filter-section">
-            <div class="row align-items-center">
-                <div class="col-md-8">
+            <div class="row">
+                <div class="col-md-12">
                     <form method="get" action="@Url.Action("Panel", "Antrenor")" class="row g-3">
                         <div class="col-md-5">
                             <label class="form-label fw-bold">Takım</label>
@@ -153,14 +156,19 @@
                                 }
                             </select>
                         </div>
-                        <div class="col-md-2 d-flex align-items-end">
-                            <button type="submit" class="btn btn-primary w-100">Filtrele</button>
-                            <a href="@Url.Action("Panel", "Antrenor")" class="btn btn-secondary w-100 ms-2">Temizle</a>
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold">&nbsp;</label>
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary w-100">Filtrele</button>
+                                <a href="@Url.Action("Panel", "Antrenor")" class="btn btn-secondary w-100">Temizle</a>
+                            </div>
                         </div>
                     </form>
                 </div>
-                <div class="col-md-4 text-end">
-                    <input type="text" id="searchInput" class="form-control" placeholder="Sporcu ara...">
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <input type="text" id="searchInput" class="search-box" placeholder="🔍 Sporcu adı, telefon veya veli adı ile ara...">
                 </div>
             </div>
         </div>
@@ -170,14 +178,25 @@
             <div class="card-header bg-white py-3">
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="mb-0 fw-bold"><i class="bi bi-people-fill me-2" style="color: #0B2A4A;"></i>Sporcu Listesi</h5>
-                    <button id="btnRapor" class="btn btn-success btn-sm"><i class="bi bi-file-earmark-excel me-1"></i>Excel</button>
+                    <button id="btnRapor" class="btn btn-success btn-sm"><i class="bi bi-file-earmark-excel me-1"></i>Excel Rapor</button>
                 </div>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-custom mb-0" id="sporcuTable">
                         <thead>
-                            <tr><th>#</th><th>Sporcu</th><th>Telefon</th><th>Salon</th><th>Branş</th><th>Takım/Grup</th><th>Veli</th><th>Aidat</th><th>Kıyafet</th><th>İşlemler</th></tr>
+                            <tr>
+                                <th>#</th>
+                                <th>Sporcu</th>
+                                <th>Telefon</th>
+                                <th>Salon</th>
+                                <th>Branş</th>
+                                <th>Takım/Grup</th>
+                                <th>Veli</th>
+                                <th>Aidat</th>
+                                <th>Kıyafet</th>
+                                <th>İşlemler</th>
+                            </tr>
                         </thead>
                         <tbody>
                             @if (sporcular.Any())
@@ -187,14 +206,31 @@
                                 {
                                     <tr>
                                         <td class="fw-bold">@sayac</td>
-                                        <td><div class="d-flex align-items-center"><div class="avatar me-2">@uye.AdSoyad.Substring(0, 1)</div><strong>@uye.AdSoyad</strong></div></td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar me-2">@uye.AdSoyad.Substring(0, 1)</div>
+                                                <strong>@uye.AdSoyad</strong>
+                                            </div>
+                                         </td>
                                         <td>@uye.Telefon</td>
                                         <td>@(uye.SporSalonu?.Ad ?? "-")</td>
                                         <td>@(uye.Brans?.Ad ?? "-")</td>
                                         <td>@(uye.Takim?.Ad ?? "-") / @(uye.Grup?.Ad ?? "-")</td>
-                                        <td><small>@uye.VeliAdSoyad</small><br /><small class="text-muted">@uye.VeliTelefon</small></td>
+                                        <td>
+                                            <small>@uye.VeliAdSoyad</small><br />
+                                            <small class="text-muted">@uye.VeliTelefon</small>
+                                         </td>
                                         <td>₺@uye.AylikAidat.ToString("N0")</td>
-                                        <td>@if (uye.KiyafetVerildiMi){<span class="badge-custom badge-verildi"><i class="bi bi-check-circle"></i> Verildi</span>}else{<span class="badge-custom badge-verilmedi"><i class="bi bi-x-circle"></i> Verilmedi</span>}</td>
+                                        <td>
+                                            @if (uye.KiyafetVerildiMi)
+                                            {
+                                                <span class="badge-custom badge-verildi"><i class="bi bi-check-circle"></i> Verildi</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge-custom badge-verilmedi"><i class="bi bi-x-circle"></i> Verilmedi</span>
+                                            }
+                                         </td>
                                         <td class="action-buttons">
                                             <a href="@Url.Action("VeliDetay", "Antrenor", new { id = uye.Id })" class="btn btn-sm btn-info" title="Detay"><i class="bi bi-eye"></i></a>
                                             <a href="@Url.Action("SporcuDuzenle", "Antrenor", new { id = uye.Id })" class="btn btn-sm btn-warning" title="Düzenle"><i class="bi bi-pencil"></i></a>
@@ -245,17 +281,20 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         $(document).ready(function() {
+            // Salon kartlarına tıklama
             $('.salon-card').click(function() {
                 var salonId = $(this).data('salon-id');
                 window.location.href = '/Antrenor/Panel?salonId=' + salonId;
             });
             
+            // Silme modal
             $('.delete-sporcu').click(function() {
                 $('#deleteSporcuAdi').text($(this).data('name'));
                 $('#confirmDelete').attr('href', '/Antrenor/SporcuSil/' + $(this).data('id'));
                 $('#deleteModal').modal('show');
             });
             
+            // Arama filtresi
             $('#searchInput').on('keyup', function() {
                 var value = $(this).val().toLowerCase();
                 $('#sporcuTable tbody tr').filter(function() {
@@ -263,6 +302,7 @@
                 });
             });
             
+            // Excel rapor
             $('#btnRapor').click(function() {
                 var rows = [];
                 $('#sporcuTable tbody tr').each(function() {
@@ -292,6 +332,7 @@
                 URL.revokeObjectURL(url);
             });
             
+            // Takım değişince grupları getir
             $('#takimFilter').change(function() {
                 var takimId = $(this).val();
                 if (takimId) {
