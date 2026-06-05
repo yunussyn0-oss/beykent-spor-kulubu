@@ -63,6 +63,7 @@ public class AntrenorController : Controller
 
         bool tamYetki = antrenor.AdSoyad.Contains("Burhan") || antrenor.AdSoyad.Contains("Ertan");
 
+        // ===== SALON LİSTESİ (Yetkiye göre) =====
         IQueryable<SporSalonu> salonQuery = _context.SporSalonlari.AsNoTracking();
         
         if (!tamYetki)
@@ -82,6 +83,7 @@ public class AntrenorController : Controller
         var salonlar = await salonQuery.OrderBy(s => s.Ad).ToListAsync();
         ViewBag.SporSalonlari = new SelectList(salonlar, "Id", "Ad", salonId);
 
+        // ===== TAKIM LİSTESİ (Seçili salona göre) =====
         if (salonId.HasValue && salonId.Value > 0)
         {
             var takimlar = await _context.Takimlar
@@ -95,6 +97,7 @@ public class AntrenorController : Controller
             ViewBag.Takimlar = new SelectList(Enumerable.Empty<SelectListItem>());
         }
 
+        // ===== GRUP LİSTESİ (Seçili takıma göre) =====
         if (takimId.HasValue && takimId.Value > 0)
         {
             var gruplar = await _context.Gruplar
@@ -108,6 +111,7 @@ public class AntrenorController : Controller
             ViewBag.Gruplar = new SelectList(Enumerable.Empty<SelectListItem>());
         }
 
+        // ===== SPORCU LİSTESİ (Filtrelerle) =====
         var query = _context.Uyeler
             .Include(u => u.SporSalonu)
             .Include(u => u.Brans)
@@ -115,12 +119,14 @@ public class AntrenorController : Controller
             .Include(u => u.Grup)
             .AsQueryable();
 
+        // Yetki filtresi
         if (!tamYetki && salonlar.Any())
         {
             var yetkiliIds = salonlar.Select(s => s.Id).ToList();
             query = query.Where(u => u.SporSalonuId.HasValue && yetkiliIds.Contains(u.SporSalonuId.Value));
         }
 
+        // Kullanıcı filtreleri
         if (salonId.HasValue && salonId.Value > 0)
             query = query.Where(u => u.SporSalonuId == salonId.Value);
         
@@ -132,6 +138,7 @@ public class AntrenorController : Controller
 
         var sporcular = await query.OrderBy(u => u.AdSoyad).ToListAsync();
 
+        // ViewBag değerleri
         ViewBag.Sporcular = sporcular;
         ViewBag.SporcuSayisi = sporcular.Count;
         ViewBag.TamYetki = tamYetki;
@@ -152,8 +159,10 @@ public class AntrenorController : Controller
             return RedirectToAction("Giris");
 
         ViewBag.SporSalonlari = new SelectList(_context.SporSalonlari.ToList(), "Id", "Ad");
+        ViewBag.Branslar = new SelectList(Enumerable.Empty<SelectListItem>());
         ViewBag.Takimlar = new SelectList(Enumerable.Empty<SelectListItem>());
         ViewBag.Gruplar = new SelectList(Enumerable.Empty<SelectListItem>());
+        
         return View();
     }
 
@@ -191,13 +200,17 @@ public class AntrenorController : Controller
         
         if (uye.SporSalonuId.HasValue)
         {
-            var takimlar = await _context.Takimlar.Where(t => t.SporSalonuId == uye.SporSalonuId.Value).ToListAsync();
+            var takimlar = await _context.Takimlar
+                .Where(t => t.SporSalonuId == uye.SporSalonuId.Value)
+                .ToListAsync();
             ViewBag.Takimlar = new SelectList(takimlar, "Id", "Ad", uye.TakimId);
         }
         
         if (uye.TakimId.HasValue)
         {
-            var gruplar = await _context.Gruplar.Where(g => g.TakimId == uye.TakimId.Value).ToListAsync();
+            var gruplar = await _context.Gruplar
+                .Where(g => g.TakimId == uye.TakimId.Value)
+                .ToListAsync();
             ViewBag.Gruplar = new SelectList(gruplar, "Id", "Ad", uye.GrupId);
         }
 
@@ -212,10 +225,19 @@ public class AntrenorController : Controller
 
         if (ModelState.IsValid)
         {
-            _context.Update(uye);
-            await _context.SaveChangesAsync();
-            TempData["Basarili"] = "Sporcu başarıyla güncellendi!";
-            return RedirectToAction("Panel");
+            try
+            {
+                _context.Update(uye);
+                await _context.SaveChangesAsync();
+                TempData["Basarili"] = "Sporcu başarıyla güncellendi!";
+                return RedirectToAction("Panel");
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.Uyeler.Any(e => e.Id == id))
+                    return NotFound();
+                throw;
+            }
         }
 
         ViewBag.SporSalonlari = new SelectList(_context.SporSalonlari.ToList(), "Id", "Ad", uye.SporSalonuId);
@@ -242,24 +264,38 @@ public class AntrenorController : Controller
     [HttpGet]
     public async Task<IActionResult> TakimlariGetir(int salonId)
     {
-        var takimlar = await _context.Takimlar
-            .Where(t => t.SporSalonuId == salonId)
-            .OrderBy(t => t.Ad)
-            .Select(t => new { t.Id, t.Ad })
-            .ToListAsync();
-        return Json(takimlar);
+        try
+        {
+            var takimlar = await _context.Takimlar
+                .Where(t => t.SporSalonuId == salonId)
+                .OrderBy(t => t.Ad)
+                .Select(t => new { t.Id, t.Ad })
+                .ToListAsync();
+            return Json(takimlar);
+        }
+        catch
+        {
+            return Json(new List<object>());
+        }
     }
 
     // ========== AJAX: GRUPLARI GETİR ==========
     [HttpGet]
     public async Task<IActionResult> GruplariGetir(int takimId)
     {
-        var gruplar = await _context.Gruplar
-            .Where(g => g.TakimId == takimId)
-            .OrderBy(g => g.Ad)
-            .Select(g => new { g.Id, g.Ad })
-            .ToListAsync();
-        return Json(gruplar);
+        try
+        {
+            var gruplar = await _context.Gruplar
+                .Where(g => g.TakimId == takimId)
+                .OrderBy(g => g.Ad)
+                .Select(g => new { g.Id, g.Ad })
+                .ToListAsync();
+            return Json(gruplar);
+        }
+        catch
+        {
+            return Json(new List<object>());
+        }
     }
 
     // ========== YOKLAMA (GET) ==========
@@ -271,15 +307,22 @@ public class AntrenorController : Controller
 
         var seciliTarih = tarih ?? DateTime.Now.Date;
 
-        ViewBag.TumTakimlar = new SelectList(await _context.Takimlar.OrderBy(t => t.Ad).ToListAsync(), "Id", "Ad", takimId);
+        // Tüm takımlar
+        ViewBag.TumTakimlar = new SelectList(
+            await _context.Takimlar.OrderBy(t => t.Ad).ToListAsync(), 
+            "Id", "Ad", takimId);
         
         if (takimId.HasValue && takimId.Value > 0)
         {
             ViewBag.TumGruplar = new SelectList(
-                await _context.Gruplar.Where(g => g.TakimId == takimId.Value).OrderBy(g => g.Ad).ToListAsync(),
+                await _context.Gruplar
+                    .Where(g => g.TakimId == takimId.Value)
+                    .OrderBy(g => g.Ad)
+                    .ToListAsync(),
                 "Id", "Ad", grupId);
         }
 
+        // Sporcuları getir
         var query = _context.Uyeler
             .Include(u => u.Takim)
             .Include(u => u.Grup)
@@ -293,6 +336,7 @@ public class AntrenorController : Controller
 
         var sporcular = await query.OrderBy(u => u.AdSoyad).ToListAsync();
 
+        // Bugünün yoklamaları
         var yoklamalar = await _context.Yoklamalar
             .Where(y => y.AntrenorId == antrenorId && y.Tarih.Date == seciliTarih.Date)
             .ToDictionaryAsync(y => y.UyeId);
@@ -314,6 +358,7 @@ public class AntrenorController : Controller
         var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
         if (antrenorId == null) return RedirectToAction("Giris");
 
+        // Önce o günün eski yoklamalarını sil
         var eskiYoklamalar = await _context.Yoklamalar
             .Where(y => y.AntrenorId == antrenorId && y.Tarih.Date == tarih.Date)
             .ToListAsync();
@@ -323,6 +368,7 @@ public class AntrenorController : Controller
             _context.Yoklamalar.RemoveRange(eskiYoklamalar);
         }
 
+        // Yeni yoklamaları ekle
         if (yoklamalar != null && yoklamalar.Any())
         {
             foreach (var y in yoklamalar.Where(y => !string.IsNullOrEmpty(y.Durum)))
@@ -345,15 +391,22 @@ public class AntrenorController : Controller
         var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
         if (antrenorId == null) return RedirectToAction("Giris");
 
-        ViewBag.TumTakimlar = new SelectList(await _context.Takimlar.OrderBy(t => t.Ad).ToListAsync(), "Id", "Ad", takimId);
+        // Tüm takımlar
+        ViewBag.TumTakimlar = new SelectList(
+            await _context.Takimlar.OrderBy(t => t.Ad).ToListAsync(), 
+            "Id", "Ad", takimId);
         
         if (takimId.HasValue && takimId.Value > 0)
         {
             ViewBag.TumGruplar = new SelectList(
-                await _context.Gruplar.Where(g => g.TakimId == takimId.Value).OrderBy(g => g.Ad).ToListAsync(),
+                await _context.Gruplar
+                    .Where(g => g.TakimId == takimId.Value)
+                    .OrderBy(g => g.Ad)
+                    .ToListAsync(),
                 "Id", "Ad", grupId);
         }
 
+        // Sporcuları getir
         var query = _context.Uyeler
             .Include(u => u.SporSalonu)
             .Include(u => u.Brans)
@@ -393,6 +446,76 @@ public class AntrenorController : Controller
         if (uye == null) return NotFound();
 
         return View(uye);
+    }
+
+    // ========== İSTATİSTİKLER ==========
+    [HttpGet]
+    public async Task<IActionResult> Istatistikler(int? takimId, int? grupId)
+    {
+        var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
+        if (antrenorId == null) return RedirectToAction("Giris");
+
+        ViewBag.TumTakimlar = new SelectList(
+            await _context.Takimlar.OrderBy(t => t.Ad).ToListAsync(), 
+            "Id", "Ad", takimId);
+        
+        if (takimId.HasValue && takimId.Value > 0)
+        {
+            ViewBag.TumGruplar = new SelectList(
+                await _context.Gruplar
+                    .Where(g => g.TakimId == takimId.Value)
+                    .OrderBy(g => g.Ad)
+                    .ToListAsync(),
+                "Id", "Ad", grupId);
+        }
+
+        var query = _context.Uyeler
+            .Include(u => u.Aidatlar)
+            .AsQueryable();
+
+        if (takimId.HasValue && takimId.Value > 0)
+            query = query.Where(u => u.TakimId == takimId.Value);
+        
+        if (grupId.HasValue && grupId.Value > 0)
+            query = query.Where(u => u.GrupId == grupId.Value);
+
+        var uyeler = await query.ToListAsync();
+
+        ViewBag.ToplamSporcu = uyeler.Count;
+        ViewBag.ToplamAidat = uyeler.Sum(u => u.AylikAidat);
+        ViewBag.BorcluSporcu = uyeler.Count(u => u.Aidatlar != null && u.Aidatlar.Any(a => !a.OdendiMi));
+        ViewBag.KiyafetVerilen = uyeler.Count(u => u.KiyafetVerildiMi);
+
+        return View();
+    }
+
+    // ========== GEÇMİŞ YOKLAMALAR ==========
+    [HttpGet]
+    public async Task<IActionResult> GecmisYoklamalar(DateTime? baslangic, DateTime? bitis)
+    {
+        var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
+        if (antrenorId == null) return RedirectToAction("Giris");
+
+        var query = _context.Yoklamalar
+            .Where(y => y.AntrenorId == antrenorId)
+            .Include(y => y.Uye)
+            .AsQueryable();
+
+        if (baslangic.HasValue)
+            query = query.Where(y => y.Tarih.Date >= baslangic.Value.Date);
+        
+        if (bitis.HasValue)
+            query = query.Where(y => y.Tarih.Date <= bitis.Value.Date);
+
+        var yoklamalar = await query
+            .OrderByDescending(y => y.Tarih)
+            .Take(100)
+            .ToListAsync();
+
+        ViewBag.Baslangic = baslangic;
+        ViewBag.Bitis = bitis;
+
+        return View(yoklamalar);
     }
 
     // ========== ÇIKIŞ ==========
