@@ -64,7 +64,7 @@
                 <div class="profile-card">
                     <div class="text-center mb-4">
                         <div class="profile-avatar">
-                            @if (!string.IsNullOrEmpty(uye?.SporcuResmi))
+                            @if (uye != null && !string.IsNullOrEmpty(uye.SporcuResmi))
                             {
                                 <img src="@uye.SporcuResmi" alt="Sporcu Fotoğrafı">
                             }
@@ -73,19 +73,19 @@
                                 <i class="bi bi-person-circle"></i>
                             }
                         </div>
-                        <h3 class="fw-bold">@uye?.AdSoyad</h3>
-                        <p class="text-muted">@uye?.Branş</p>
+                        <h3 class="fw-bold">@(uye?.AdSoyad ?? "Bilinmiyor")</h3>
+                        <p class="text-muted">@(uye?.Branş ?? "-")</p>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6">
                             <div class="info-row">
                                 <span class="info-label"><i class="bi bi-telephone me-2"></i>Telefon:</span>
-                                <span class="info-value">@uye?.Telefon</span>
+                                <span class="info-value">@(uye?.Telefon ?? "-")</span>
                             </div>
                             <div class="info-row">
                                 <span class="info-label"><i class="bi bi-calendar me-2"></i>Doğum Tarihi:</span>
-                                <span class="info-value">@uye?.DogumTarihi.ToString("dd.MM.yyyy")</span>
+                                <span class="info-value">@(uye?.DogumTarihi.ToString("dd.MM.yyyy") ?? "-")</span>
                             </div>
                             <div class="info-row">
                                 <span class="info-label"><i class="bi bi-building me-2"></i>Salon:</span>
@@ -95,15 +95,15 @@
                         <div class="col-md-6">
                             <div class="info-row">
                                 <span class="info-label"><i class="bi bi-person me-2"></i>Veli:</span>
-                                <span class="info-value">@uye?.VeliAdSoyad</span>
+                                <span class="info-value">@(uye?.VeliAdSoyad ?? "-")</span>
                             </div>
                             <div class="info-row">
                                 <span class="info-label"><i class="bi bi-telephone me-2"></i>Veli Tel:</span>
-                                <span class="info-value">@uye?.VeliTelefon</span>
+                                <span class="info-value">@(uye?.VeliTelefon ?? "-")</span>
                             </div>
                             <div class="info-row">
                                 <span class="info-label"><i class="bi bi-currency-dollar me-2"></i>Aidat:</span>
-                                <span class="info-value">₺@uye?.AylikAidat.ToString("N0")</span>
+                                <span class="info-value">₺@(uye?.AylikAidat.ToString("N0") ?? "0")</span>
                             </div>
                         </div>
                     </div>
@@ -111,12 +111,15 @@
                     <hr />
 
                     <div class="text-center">
-                        <a href="https://wa.me/@uye?.VeliTelefon?.Replace(" ", "")" target="_blank" class="btn btn-success me-2">
-                            <i class="bi bi-whatsapp me-2"></i>WhatsApp
-                        </a>
-                        <a href="tel:@uye?.VeliTelefon" class="btn btn-primary me-2">
-                            <i class="bi bi-telephone me-2"></i>Ara
-                        </a>
+                        @if (!string.IsNullOrEmpty(uye?.VeliTelefon))
+                        {
+                            <a href="https://wa.me/@uye.VeliTelefon.Replace(" ", "")" target="_blank" class="btn btn-success me-2">
+                                <i class="bi bi-whatsapp me-2"></i>WhatsApp
+                            </a>
+                            <a href="tel:@uye.VeliTelefon" class="btn btn-primary me-2">
+                                <i class="bi bi-telephone me-2"></i>Ara
+                            </a>
+                        }
                         <a href="@Url.Action("Panel", "Antrenor")" class="btn btn-secondary">
                             <i class="bi bi-arrow-left me-2"></i>Geri Dön
                         </a>

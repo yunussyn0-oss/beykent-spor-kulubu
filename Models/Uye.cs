@@ -43,10 +43,6 @@ public class Uye
     [Display(Name = "Veli Telefon")]
     public string VeliTelefon { get; set; } = string.Empty;
     
-    // Sporcu Fotoğrafı
-    [Display(Name = "Sporcu Fotoğrafı")]
-    public string? SporcuFoto { get; set; }
-    
     // Spor Salonu
     public int? SporSalonuId { get; set; }
     public SporSalonu? SporSalonu { get; set; }
@@ -73,6 +69,10 @@ public class Uye
     
     [Display(Name = "Kıyafet Notları")]
     public string? KiyafetNotlari { get; set; }
+    
+    // Sporcu Resmi (YENİ EKLENDİ - BUILD HATASI İÇİN ÇOK ÖNEMLİ)
+    [Display(Name = "Sporcu Resmi")]
+    public string? SporcuResmi { get; set; }
     
     // Aidatlar
     public ICollection<Aidat>? Aidatlar { get; set; }
