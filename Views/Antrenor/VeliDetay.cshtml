@@ -1,27 +1,46 @@
-@model SporKulubu.Models.Uye
 @{
     Layout = null;
+    var uye = Model as SporKulubu.Models.Uye;
 }
 
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Veli İletişim - @Model.AdSoyad</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <title>Veli Detay - Beylikdüzü Beykent Spor Kulübü</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         body { background: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
-        .navbar-custom { background: linear-gradient(135deg, #0B2A4A 0%, #1B3B5C 100%); padding: 12px 0; }
+        .navbar-custom { background: linear-gradient(135deg, #0B2A4A 0%, #1B3B5C 100%); box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .navbar-custom .navbar-brand, .navbar-custom .nav-link { color: white !important; }
-        .card-custom { background: white; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); border: none; }
-        .btn-wa { background: #25D366; color: white; border: none; }
-        .btn-wa:hover { background: #128C7E; color: white; }
-        .profile-img { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid #0B2A4A; }
-        @@media (max-width: 768px) {
-            .profile-img { width: 100px; height: 100px; }
+        .profile-card { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+        .profile-avatar { 
+            width: 120px; 
+            height: 120px; 
+            background: linear-gradient(135deg, #0B2A4A, #1B3B5C); 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            margin: 0 auto 20px;
+            overflow: hidden;
         }
+        .profile-avatar img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+        }
+        .profile-avatar i { 
+            font-size: 50px; 
+            color: #FFD700; 
+        }
+        .btn-custom { background: linear-gradient(135deg, #0B2A4A 0%, #1B3B5C 100%); color: white; border: none; padding: 10px 25px; border-radius: 8px; transition: all 0.3s; }
+        .btn-custom:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(11,42,74,0.3); color: white; }
+        .info-row { padding: 10px 0; border-bottom: 1px solid #eee; }
+        .info-label { font-weight: 600; color: #0B2A4A; width: 130px; display: inline-block; }
+        .info-value { color: #333; }
     </style>
 </head>
 <body>
@@ -30,96 +49,81 @@
             <a class="navbar-brand fw-bold" href="@Url.Action("Panel", "Antrenor")">
                 <i class="bi bi-trophy-fill me-2"></i>BEYLİKDÜZÜ BEYKENT SPOR
             </a>
-            <a class="nav-link" href="@Url.Action("Panel", "Antrenor")"><i class="bi bi-arrow-left me-1"></i>Panele Dön</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="@Url.Action("Panel", "Antrenor")"><i class="bi bi-speedometer2 me-1"></i>Panel</a></li>
+                    <li class="nav-item"><a class="nav-link" href="@Url.Action("Cikis", "Antrenor")"><i class="bi bi-box-arrow-right me-1"></i>Çıkış</a></li>
+                </ul>
+            </div>
         </div>
     </nav>
 
     <div class="container mt-4">
-        <div class="row">
-            <div class="col-md-4">
-                <div class="card-custom p-4 text-center">
-                    <div class="mb-3">
-                        @if (!string.IsNullOrEmpty(Model.SporcuFoto))
-                        {
-                            <img src="@Model.SporcuFoto" class="profile-img" id="sporcuResim">
-                        }
-                        else
-                        {
-                            <img src="https://placehold.co/150x150/0B2A4A/white?text=@Model.AdSoyad.Substring(0,1)" class="profile-img" id="sporcuResim">
-                        }
-                        
-                        <form method="post" action="@Url.Action("SporcuFotoYukle", "Antrenor")" enctype="multipart/form-data" class="mt-2" id="fotoForm">
-                            <input type="hidden" name="id" value="@Model.Id" />
-                            <label class="btn btn-sm btn-outline-primary mt-2">
-                                <i class="bi bi-camera me-1"></i>Fotoğraf Yükle
-                                <input type="file" name="file" accept="image/*" style="display:none" onchange="this.form.submit()" />
-                            </label>
-                        </form>
-                    </div>
-                    
-                    <h4 class="fw-bold">@Model.AdSoyad</h4>
-                    <p class="text-muted">@(Model.Brans?.Ad ?? "-") / @(Model.Takim?.Ad ?? "-")</p>
-                    <hr />
-                    <div class="text-start">
-                        <p><i class="bi bi-calendar me-2"></i> Doğum: @Model.DogumTarihi.ToShortDateString()</p>
-                        <p><i class="bi bi-building me-2"></i> Salon: @(Model.SporSalonu?.Ad ?? "-")</p>
-                        <p><i class="bi bi-diagram-3 me-2"></i> Grup: @(Model.Grup?.Ad ?? "-")</p>
-                        <p><i class="bi bi-currency-dollar me-2"></i> Aidat: ₺@Model.AylikAidat.ToString("N0")</p>
-                    </div>
-                </div>
-            </div>
-
+        <div class="row justify-content-center">
             <div class="col-md-8">
-                <div class="card-custom p-4 mb-4">
-                    <h5><i class="bi bi-people me-2"></i>Veli Bilgileri</h5>
-                    <hr />
+                <div class="profile-card">
+                    <div class="text-center mb-4">
+                        <div class="profile-avatar">
+                            @if (!string.IsNullOrEmpty(uye?.SporcuResmi))
+                            {
+                                <img src="@uye.SporcuResmi" alt="Sporcu Fotoğrafı">
+                            }
+                            else
+                            {
+                                <i class="bi bi-person-circle"></i>
+                            }
+                        </div>
+                        <h3 class="fw-bold">@uye?.AdSoyad</h3>
+                        <p class="text-muted">@uye?.Branş</p>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6">
-                            <p><i class="bi bi-person me-2"></i> <strong>Veli Adı:</strong> @Model.VeliAdSoyad</p>
+                            <div class="info-row">
+                                <span class="info-label"><i class="bi bi-telephone me-2"></i>Telefon:</span>
+                                <span class="info-value">@uye?.Telefon</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label"><i class="bi bi-calendar me-2"></i>Doğum Tarihi:</span>
+                                <span class="info-value">@uye?.DogumTarihi.ToString("dd.MM.yyyy")</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label"><i class="bi bi-building me-2"></i>Salon:</span>
+                                <span class="info-value">@(uye?.SporSalonu?.Ad ?? "-")</span>
+                            </div>
                         </div>
                         <div class="col-md-6">
-                            <p><i class="bi bi-telephone me-2"></i> <strong>Telefon:</strong> @Model.VeliTelefon</p>
+                            <div class="info-row">
+                                <span class="info-label"><i class="bi bi-person me-2"></i>Veli:</span>
+                                <span class="info-value">@uye?.VeliAdSoyad</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label"><i class="bi bi-telephone me-2"></i>Veli Tel:</span>
+                                <span class="info-value">@uye?.VeliTelefon</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label"><i class="bi bi-currency-dollar me-2"></i>Aidat:</span>
+                                <span class="info-value">₺@uye?.AylikAidat.ToString("N0")</span>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="card-custom p-4">
-                    <h5><i class="bi bi-chat-dots me-2"></i>Hızlı İletişim</h5>
                     <hr />
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <a href="https://wa.me/@Model.VeliTelefon?.Replace(" ", "")" target="_blank" class="btn btn-wa w-100 py-3">
-                                <i class="bi bi-whatsapp me-2 fs-5"></i> WhatsApp'tan Mesaj Gönder
-                            </a>
-                        </div>
-                        <div class="col-md-6">
-                            <a href="tel:@Model.VeliTelefon" class="btn btn-primary w-100 py-3">
-                                <i class="bi bi-telephone-fill me-2 fs-5"></i> Telefonla Ara
-                            </a>
-                        </div>
-                        <div class="col-12">
-                            <button class="btn btn-outline-secondary w-100 py-3" id="copyPhone">
-                                <i class="bi bi-files me-2 fs-5"></i> Telefonu Kopyala
-                            </button>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="mt-4">
-                    <a href="@Url.Action("Panel", "Antrenor")" class="btn btn-outline-secondary w-100">
-                        <i class="bi bi-arrow-left me-2"></i>Panele Dön
-                    </a>
+                    <div class="text-center">
+                        <a href="https://wa.me/@uye?.VeliTelefon?.Replace(" ", "")" target="_blank" class="btn btn-success me-2">
+                            <i class="bi bi-whatsapp me-2"></i>WhatsApp
+                        </a>
+                        <a href="tel:@uye?.VeliTelefon" class="btn btn-primary me-2">
+                            <i class="bi bi-telephone me-2"></i>Ara
+                        </a>
+                        <a href="@Url.Action("Panel", "Antrenor")" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Geri Dön
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <script>
-        document.getElementById('copyPhone')?.addEventListener('click', function() {
-            navigator.clipboard.writeText('@Model.VeliTelefon').then(() => {
-                alert('Telefon numarası kopyalandı: @Model.VeliTelefon');
-            });
-        });
-    </script>
 </body>
 </html>
