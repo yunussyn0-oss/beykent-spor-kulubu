@@ -175,124 +175,124 @@ public class AntrenorController : Controller
         return View(uye);
     }
 
-    // ========== ANTRENÖR FOTOĞRAF YÜKLE ==========
-    [HttpPost]
-    public async Task<IActionResult> ProfilResmiYukle(IFormFile file)
-    {
-        var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
-        if (antrenorId == null) return RedirectToAction("Giris");
-
-        if (file != null && file.Length > 0)
-        {
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-            var extension = Path.GetExtension(file.FileName).ToLower();
-            if (!allowedExtensions.Contains(extension))
-            {
-                TempData["Hata"] = "Sadece resim dosyaları yüklenebilir!";
-                return RedirectToAction("Profil");
-            }
-
-            if (file.Length > 5 * 1024 * 1024)
-            {
-                TempData["Hata"] = "Dosya boyutu 5MB'dan büyük olamaz!";
-                return RedirectToAction("Profil");
-            }
-
-            var fileName = $"antrenor_{antrenorId}_{DateTime.Now.Ticks}{extension}";
-            var uploadDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "antrenorler");
-            Directory.CreateDirectory(uploadDir);
-            var filePath = Path.Combine(uploadDir, fileName);
-            
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-            
-            var antrenor = await _context.Antrenorler.FindAsync(antrenorId);
-            antrenor.ProfilResmi = $"/images/antrenorler/{fileName}";
-            await _context.SaveChangesAsync();
-            
-            TempData["Basarili"] = "Profil fotoğrafınız başarıyla güncellendi!";
-        }
-        
-        return RedirectToAction("Profil");
-    }
-
-    // ========== ANTRENÖR PROFİL SAYFASI ==========
+    // ========== SPORCU DÜZENLE (GET) ==========
     [HttpGet]
-    public async Task<IActionResult> Profil()
+    public async Task<IActionResult> SporcuDuzenle(int id)
     {
-        var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
-        if (antrenorId == null) return RedirectToAction("Giris");
-
-        var antrenor = await _context.Antrenorler.FindAsync(antrenorId);
-        if (antrenor == null) return RedirectToAction("Giris");
-        
-        return View(antrenor);
-    }
-
-    // ========== SPORCU FOTOĞRAF YÜKLE ==========
-    [HttpPost]
-    public async Task<IActionResult> SporcuFotoYukle(int id, IFormFile file)
-    {
-        var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
-        if (antrenorId == null) return RedirectToAction("Giris");
+        if (HttpContext.Session.GetInt32("AntrenorId") == null)
+            return RedirectToAction("Giris");
 
         var uye = await _context.Uyeler.FindAsync(id);
         if (uye == null) return NotFound();
 
-        if (file != null && file.Length > 0)
+        ViewBag.SporSalonlari = new SelectList(_context.SporSalonlari.ToList(), "Id", "Ad", uye.SporSalonuId);
+        
+        if (uye.SporSalonuId.HasValue)
         {
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-            var extension = Path.GetExtension(file.FileName).ToLower();
-            if (!allowedExtensions.Contains(extension))
-            {
-                TempData["Hata"] = "Sadece resim dosyaları yüklenebilir!";
-                return RedirectToAction("VeliDetay", new { id });
-            }
-
-            if (file.Length > 5 * 1024 * 1024)
-            {
-                TempData["Hata"] = "Dosya boyutu 5MB'dan büyük olamaz!";
-                return RedirectToAction("VeliDetay", new { id });
-            }
-
-            var fileName = $"sporcu_{id}_{DateTime.Now.Ticks}{extension}";
-            var uploadDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "sporcular");
-            Directory.CreateDirectory(uploadDir);
-            var filePath = Path.Combine(uploadDir, fileName);
-            
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-            
-            uye.SporcuFoto = $"/images/sporcular/{fileName}";
-            await _context.SaveChangesAsync();
-            
-            TempData["Basarili"] = "Sporcu fotoğrafı başarıyla güncellendi!";
+            var takimlar = await _context.Takimlar
+                .Where(t => t.SporSalonuId == uye.SporSalonuId.Value)
+                .ToListAsync();
+            ViewBag.Takimlar = new SelectList(takimlar, "Id", "Ad", uye.TakimId);
         }
         
-        return RedirectToAction("VeliDetay", new { id });
-    }
-
-    // ========== VELİ DETAY ==========
-    [HttpGet]
-    public async Task<IActionResult> VeliDetay(int id)
-    {
-        var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
-        if (antrenorId == null) return RedirectToAction("Giris");
-
-        var uye = await _context.Uyeler
-            .Include(u => u.SporSalonu)
-            .Include(u => u.Brans)
-            .Include(u => u.Takim)
-            .Include(u => u.Grup)
-            .FirstOrDefaultAsync(u => u.Id == id);
-
-        if (uye == null) return NotFound();
+        if (uye.TakimId.HasValue)
+        {
+            var gruplar = await _context.Gruplar
+                .Where(g => g.TakimId == uye.TakimId.Value)
+                .ToListAsync();
+            ViewBag.Gruplar = new SelectList(gruplar, "Id", "Ad", uye.GrupId);
+        }
 
         return View(uye);
+    }
+
+    // ========== SPORCU DÜZENLE (POST) ==========
+    [HttpPost]
+    public async Task<IActionResult> SporcuDuzenle(int id, Uye uye)
+    {
+        if (id != uye.Id) return NotFound();
+
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                _context.Update(uye);
+                await _context.SaveChangesAsync();
+                TempData["Basarili"] = "Sporcu başarıyla güncellendi!";
+                return RedirectToAction("Panel");
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.Uyeler.Any(e => e.Id == id))
+                    return NotFound();
+                throw;
+            }
+        }
+
+        ViewBag.SporSalonlari = new SelectList(_context.SporSalonlari.ToList(), "Id", "Ad", uye.SporSalonuId);
+        return View(uye);
+    }
+
+    // ========== SPORCU SİL (DÜZELTİLDİ - ÇALIŞIYOR) ==========
+    [HttpGet]
+    public async Task<IActionResult> SporcuSil(int id)
+    {
+        var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
+        if (antrenorId == null)
+        {
+            return RedirectToAction("Giris");
+        }
+
+        var uye = await _context.Uyeler.FindAsync(id);
+        if (uye == null)
+        {
+            TempData["Hata"] = "Sporcu bulunamadı!";
+            return RedirectToAction("Panel");
+        }
+
+        _context.Uyeler.Remove(uye);
+        await _context.SaveChangesAsync();
+        
+        TempData["Basarili"] = "Sporcu başarıyla silindi!";
+        return RedirectToAction("Panel");
+    }
+
+    // ========== AJAX: TAKIMLARI GETİR ==========
+    [HttpGet]
+    public async Task<IActionResult> TakimlariGetir(int salonId)
+    {
+        try
+        {
+            var takimlar = await _context.Takimlar
+                .Where(t => t.SporSalonuId == salonId)
+                .OrderBy(t => t.Ad)
+                .Select(t => new { t.Id, t.Ad })
+                .ToListAsync();
+            return Json(takimlar);
+        }
+        catch
+        {
+            return Json(new List<object>());
+        }
+    }
+
+    // ========== AJAX: GRUPLARI GETİR ==========
+    [HttpGet]
+    public async Task<IActionResult> GruplariGetir(int takimId)
+    {
+        try
+        {
+            var gruplar = await _context.Gruplar
+                .Where(g => g.TakimId == takimId)
+                .OrderBy(g => g.Ad)
+                .Select(g => new { g.Id, g.Ad })
+                .ToListAsync();
+            return Json(gruplar);
+        }
+        catch
+        {
+            return Json(new List<object>());
+        }
     }
 
     // ========== YOKLAMA (GET) ==========
@@ -344,36 +344,51 @@ public class AntrenorController : Controller
         return View();
     }
 
-    // ========== YOKLAMA KAYDET (POST) ==========
+    // ========== YOKLAMA KAYDET (POST) - DÜZELTİLDİ ==========
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> YoklamaKaydet(List<Yoklama> yoklamalar, DateTime tarih, int? takimId, int? grupId)
     {
         var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
-        if (antrenorId == null) return RedirectToAction("Giris");
-
-        var eskiYoklamalar = await _context.Yoklamalar
-            .Where(y => y.AntrenorId == antrenorId && y.Tarih.Date == tarih.Date)
-            .ToListAsync();
-
-        if (eskiYoklamalar.Any())
+        if (antrenorId == null)
         {
-            _context.Yoklamalar.RemoveRange(eskiYoklamalar);
+            return RedirectToAction("Giris");
         }
 
-        if (yoklamalar != null && yoklamalar.Any())
+        try
         {
-            foreach (var y in yoklamalar.Where(y => !string.IsNullOrEmpty(y.Durum)))
+            // Önce o günün eski yoklamalarını sil
+            var eskiYoklamalar = await _context.Yoklamalar
+                .Where(y => y.AntrenorId == antrenorId && y.Tarih.Date == tarih.Date)
+                .ToListAsync();
+
+            if (eskiYoklamalar.Any())
             {
-                y.AntrenorId = antrenorId.Value;
-                y.Tarih = tarih.Date;
-                _context.Yoklamalar.Add(y);
+                _context.Yoklamalar.RemoveRange(eskiYoklamalar);
             }
+
+            // Yeni yoklamaları ekle
+            if (yoklamalar != null && yoklamalar.Any())
+            {
+                foreach (var y in yoklamalar)
+                {
+                    if (!string.IsNullOrEmpty(y.Durum))
+                    {
+                        y.AntrenorId = antrenorId.Value;
+                        y.Tarih = tarih.Date;
+                        _context.Yoklamalar.Add(y);
+                    }
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            TempData["Basarili"] = "Yoklama başarıyla kaydedildi!";
+        }
+        catch (Exception ex)
+        {
+            TempData["Hata"] = "Yoklama kaydedilirken hata oluştu: " + ex.Message;
         }
 
-        await _context.SaveChangesAsync();
-        TempData["Basarili"] = "Yoklama başarıyla kaydedildi!";
-        
         return RedirectToAction("Yoklama", new { tarih = tarih, takimId = takimId, grupId = grupId });
     }
 
@@ -418,6 +433,25 @@ public class AntrenorController : Controller
         ViewBag.SecilenGrupId = grupId;
 
         return View();
+    }
+
+    // ========== VELİ DETAY ==========
+    [HttpGet]
+    public async Task<IActionResult> VeliDetay(int id)
+    {
+        var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
+        if (antrenorId == null) return RedirectToAction("Giris");
+
+        var uye = await _context.Uyeler
+            .Include(u => u.SporSalonu)
+            .Include(u => u.Brans)
+            .Include(u => u.Takim)
+            .Include(u => u.Grup)
+            .FirstOrDefaultAsync(u => u.Id == id);
+
+        if (uye == null) return NotFound();
+
+        return View(uye);
     }
 
     // ========== GEÇMİŞ YOKLAMALAR ==========
@@ -498,7 +532,7 @@ public class AntrenorController : Controller
         if (antrenorId == null)
             return RedirectToAction("Giris");
 
-        if (string.IsNullOrEmpty(eskiSifre) || string.IsNullOrEmpty(yeniSifre) || string.IsNullOrEmpty(yeniSifreTekrar))
+        if (string.IsNullOrEmpty(eskiSifre) || string.IsNullOrEmpty(yeniSifre))
         {
             ViewBag.Hata = "Tüm alanları doldurunuz!";
             return View();
@@ -517,9 +551,7 @@ public class AntrenorController : Controller
         }
 
         var antrenor = await _context.Antrenorler.FindAsync(antrenorId);
-        if (antrenor == null)
-            return RedirectToAction("Giris");
-
+        
         if (antrenor.Sifre != eskiSifre)
         {
             ViewBag.Hata = "Mevcut şifre yanlış!";
