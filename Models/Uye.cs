@@ -43,6 +43,10 @@ public class Uye
     [Display(Name = "Veli Telefon")]
     public string VeliTelefon { get; set; } = string.Empty;
     
+    // Sporcu Fotoğrafı
+    [Display(Name = "Sporcu Fotoğrafı")]
+    public string? SporcuFoto { get; set; }
+    
     // Spor Salonu
     public int? SporSalonuId { get; set; }
     public SporSalonu? SporSalonu { get; set; }

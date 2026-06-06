@@ -17706,6 +17706,11 @@
       "FileKind": "mvc"
     },
     {
+      "FilePath": "c:\\Users\\ASUS\\OneDrive\\Masaüstü\\SporKulubu\\SporKulubu\\Views\\Antrenor\\Profil.cshtml",
+      "TargetPath": "Views\\Antrenor\\Profil.cshtml",
+      "FileKind": "mvc"
+    },
+    {
       "FilePath": "c:\\Users\\ASUS\\OneDrive\\Masaüstü\\SporKulubu\\SporKulubu\\Views\\Antrenor\\SporcuEkle.cshtml",
       "TargetPath": "Views\\Antrenor\\SporcuEkle.cshtml",
       "FileKind": "mvc"
