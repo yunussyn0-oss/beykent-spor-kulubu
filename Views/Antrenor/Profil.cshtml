@@ -1,35 +1,27 @@
-@model SporKulubu.Models.Antrenor
 @{
     Layout = null;
+    var antrenor = Model as SporKulubu.Models.Antrenor;
 }
 
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Profilim - Beylikdüzü Beykent Spor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <title>Profil - Beylikdüzü Beykent Spor Kulübü</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         body { background: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
-        .navbar-custom { background: linear-gradient(135deg, #0B2A4A 0%, #1B3B5C 100%); padding: 12px 0; }
+        .navbar-custom { background: linear-gradient(135deg, #0B2A4A 0%, #1B3B5C 100%); box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .navbar-custom .navbar-brand, .navbar-custom .nav-link { color: white !important; }
-        .profile-card { background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        .profile-header { background: linear-gradient(135deg, #0B2A4A 0%, #1B3B5C 100%); height: 120px; }
-        .profile-avatar { margin-top: -60px; text-align: center; }
-        .profile-avatar img { width: 120px; height: 120px; border-radius: 50%; border: 4px solid white; object-fit: cover; background: white; }
-        .avatar-upload { position: relative; margin-top: 10px; }
-        .avatar-upload .btn-upload { background: #0B2A4A; color: white; border-radius: 50%; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid white; }
-        .file-input { display: none; }
-        .btn-custom { background: linear-gradient(135deg, #0B2A4A, #1B3B5C); color: white; border: none; padding: 10px 25px; border-radius: 10px; transition: all 0.3s; }
-        .btn-custom:hover { transform: translateY(-2px); color: white; }
-        .alert-custom { border-radius: 12px; padding: 12px 18px; margin-bottom: 20px; }
-        .alert-success-custom { background: #d4edda; color: #155724; border-left: 4px solid #28a745; }
-        .alert-danger-custom { background: #f8d7da; color: #721c24; border-left: 4px solid #dc3545; }
-        @@media (max-width: 768px) {
-            .profile-card { margin: 0 10px; }
-        }
+        .profile-card { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+        .profile-avatar { width: 100px; height: 100px; background: linear-gradient(135deg, #0B2A4A, #1B3B5C); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+        .profile-avatar i { font-size: 50px; color: #FFD700; }
+        .btn-custom { background: linear-gradient(135deg, #0B2A4A 0%, #1B3B5C 100%); color: white; border: none; padding: 10px 25px; border-radius: 8px; transition: all 0.3s; }
+        .btn-custom:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(11,42,74,0.3); color: white; }
+        .form-control { border-radius: 10px; padding: 10px 15px; }
+        .form-label { font-weight: 600; color: #0B2A4A; }
     </style>
 </head>
 <body>
@@ -38,13 +30,18 @@
             <a class="navbar-brand fw-bold" href="@Url.Action("Panel", "Antrenor")">
                 <i class="bi bi-trophy-fill me-2"></i>BEYLİKDÜZÜ BEYKENT SPOR
             </a>
-            <div class="ms-auto">
-                <a class="nav-link d-inline-block" href="@Url.Action("Panel", "Antrenor")">
-                    <i class="bi bi-arrow-left me-1"></i>Panele Dön
-                </a>
-                <a class="nav-link d-inline-block ms-3" href="@Url.Action("Cikis", "Antrenor")">
-                    <i class="bi bi-box-arrow-right me-1"></i>Çıkış
-                </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="@Url.Action("Panel", "Antrenor")"><i class="bi bi-speedometer2 me-1"></i>Panel</a></li>
+                    <li class="nav-item"><a class="nav-link" href="@Url.Action("SporcuEkle", "Antrenor")"><i class="bi bi-person-plus me-1"></i>Sporcu Ekle</a></li>
+                    <li class="nav-item"><a class="nav-link" href="@Url.Action("Yoklama", "Antrenor")"><i class="bi bi-check2-circle me-1"></i>Yoklama</a></li>
+                    <li class="nav-item"><a class="nav-link" href="@Url.Action("TopluMesaj", "Antrenor")"><i class="bi bi-chat-dots me-1"></i>Toplu Mesaj</a></li>
+                    <li class="nav-item"><a class="nav-link" href="@Url.Action("Profil", "Antrenor")"><i class="bi bi-person-circle me-1"></i>Profilim</a></li>
+                    <li class="nav-item"><a class="nav-link" href="@Url.Action("Cikis", "Antrenor")"><i class="bi bi-box-arrow-right me-1"></i>Çıkış</a></li>
+                </ul>
             </div>
         </div>
     </nav>
@@ -53,66 +50,61 @@
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="profile-card">
-                    <div class="profile-header"></div>
-                    
-                    <div class="text-center profile-avatar">
-                        @if (!string.IsNullOrEmpty(Model.ProfilResmi))
-                        {
-                            <img src="@Model.ProfilResmi" alt="Profil Resmi" id="profilResim">
-                        }
-                        else
-                        {
-                            <img src="https://placehold.co/120x120/0B2A4A/white?text=@Model.AdSoyad.Substring(0,1)" alt="Profil Resmi" id="profilResim">
-                        }
-                        <div class="avatar-upload">
-                            <form method="post" action="@Url.Action("ProfilResmiYukle", "Antrenor")" enctype="multipart/form-data" id="fotoForm">
-                                <label class="btn-upload" id="uploadLabel">
-                                    <i class="bi bi-camera-fill"></i>
-                                </label>
-                                <input type="file" name="file" id="fileInput" class="file-input" accept="image/*" />
-                            </form>
-                            <p class="text-muted small mt-2">Fotoğraf değiştirmek için kameraya tıklayın</p>
+                    <div class="text-center mb-4">
+                        <div class="profile-avatar">
+                            <i class="bi bi-person-circle"></i>
                         </div>
+                        <h3 class="fw-bold">@antrenor?.AdSoyad</h3>
+                        <p class="text-muted">@antrenor?.Uzmanlik</p>
+                        <span class="badge bg-primary">@antrenor?.Email</span>
                     </div>
-                    
-                    <div class="card-body p-4 text-center">
-                        @if (TempData["Basarili"] != null)
-                        {
-                            <div class="alert-custom alert-success-custom mb-3">@TempData["Basarili"]</div>
-                        }
-                        @if (TempData["Hata"] != null)
-                        {
-                            <div class="alert-custom alert-danger-custom mb-3">@TempData["Hata"]</div>
-                        }
-                        
-                        <h3 class="fw-bold">@Model.AdSoyad</h3>
-                        <p class="text-muted"><i class="bi bi-envelope me-1"></i> @Model.Email</p>
-                        <p class="text-muted"><i class="bi bi-telephone me-1"></i> @Model.Telefon</p>
-                        <p class="text-muted"><i class="bi bi-star me-1"></i> @Model.Uzmanlik</p>
-                        <hr />
-                        <div class="d-flex justify-content-center gap-3 flex-wrap">
-                            <a href="@Url.Action("SifreDegistir", "Antrenor")" class="btn btn-outline-primary">
-                                <i class="bi bi-key me-1"></i>Şifre Değiştir
-                            </a>
-                            <a href="@Url.Action("Panel", "Antrenor")" class="btn-custom">
-                                <i class="bi bi-speedometer2 me-1"></i>Panele Git
+
+                    @if (TempData["Basarili"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle-fill me-2"></i>@TempData["Basarili"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form method="post" action="@Url.Action("ProfilGuncelle", "Antrenor")">
+                        <div class="mb-3">
+                            <label class="form-label">Ad Soyad</label>
+                            <input type="text" name="AdSoyad" class="form-control" value="@antrenor?.AdSoyad" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">E-posta</label>
+                            <input type="email" class="form-control" value="@antrenor?.Email" disabled readonly />
+                            <small class="text-muted">E-posta değiştirilemez</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Telefon</label>
+                            <input type="tel" name="Telefon" class="form-control" value="@antrenor?.Telefon" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Uzmanlık / Görev</label>
+                            <input type="text" name="Uzmanlik" class="form-control" value="@antrenor?.Uzmanlik" required />
+                        </div>
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn-custom w-100">
+                                <i class="bi bi-save me-2"></i>Bilgileri Güncelle
+                            </button>
+                            <a href="@Url.Action("Panel", "Antrenor")" class="btn btn-outline-secondary w-100">
+                                <i class="bi bi-arrow-left me-2"></i>Geri Dön
                             </a>
                         </div>
+                    </form>
+
+                    <hr class="my-4" />
+                    
+                    <div class="text-center">
+                        <a href="@Url.Action("SifreDegistir", "Antrenor")" class="btn btn-outline-primary">
+                            <i class="bi bi-key me-2"></i>Şifre Değiştir
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <script>
-        document.getElementById('uploadLabel').addEventListener('click', function() {
-            document.getElementById('fileInput').click();
-        });
-        document.getElementById('fileInput').addEventListener('change', function() {
-            if (this.files && this.files[0]) {
-                document.getElementById('fotoForm').submit();
-            }
-        });
-    </script>
 </body>
 </html>

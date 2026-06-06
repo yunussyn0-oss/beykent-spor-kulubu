@@ -233,7 +233,7 @@ public class AntrenorController : Controller
         return View(uye);
     }
 
-    // ========== SPORCU SİL (DÜZELTİLDİ - ÇALIŞIYOR) ==========
+    // ========== SPORCU SİL ==========
     [HttpGet]
     public async Task<IActionResult> SporcuSil(int id)
     {
@@ -255,6 +255,55 @@ public class AntrenorController : Controller
         
         TempData["Basarili"] = "Sporcu başarıyla silindi!";
         return RedirectToAction("Panel");
+    }
+
+    // ========== PROFİL SAYFASI ==========
+    [HttpGet]
+    public async Task<IActionResult> Profil()
+    {
+        var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
+        if (antrenorId == null)
+        {
+            return RedirectToAction("Giris");
+        }
+
+        var antrenor = await _context.Antrenorler
+            .FirstOrDefaultAsync(a => a.Id == antrenorId);
+
+        if (antrenor == null)
+        {
+            return RedirectToAction("Giris");
+        }
+
+        return View(antrenor);
+    }
+
+    // ========== PROFİL GÜNCELLE (POST) ==========
+    [HttpPost]
+    public async Task<IActionResult> ProfilGuncelle(Antrenor model)
+    {
+        var antrenorId = HttpContext.Session.GetInt32("AntrenorId");
+        if (antrenorId == null)
+        {
+            return RedirectToAction("Giris");
+        }
+
+        var antrenor = await _context.Antrenorler.FindAsync(antrenorId);
+        if (antrenor == null)
+        {
+            return RedirectToAction("Giris");
+        }
+
+        antrenor.AdSoyad = model.AdSoyad;
+        antrenor.Telefon = model.Telefon;
+        antrenor.Uzmanlik = model.Uzmanlik;
+
+        await _context.SaveChangesAsync();
+        
+        HttpContext.Session.SetString("AntrenorAdi", antrenor.AdSoyad);
+        
+        TempData["Basarili"] = "Profil bilgileriniz güncellendi!";
+        return RedirectToAction("Profil");
     }
 
     // ========== AJAX: TAKIMLARI GETİR ==========
@@ -344,7 +393,7 @@ public class AntrenorController : Controller
         return View();
     }
 
-    // ========== YOKLAMA KAYDET (POST) - DÜZELTİLDİ ==========
+    // ========== YOKLAMA KAYDET (POST) ==========
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> YoklamaKaydet(List<Yoklama> yoklamalar, DateTime tarih, int? takimId, int? grupId)
@@ -357,7 +406,6 @@ public class AntrenorController : Controller
 
         try
         {
-            // Önce o günün eski yoklamalarını sil
             var eskiYoklamalar = await _context.Yoklamalar
                 .Where(y => y.AntrenorId == antrenorId && y.Tarih.Date == tarih.Date)
                 .ToListAsync();
@@ -367,7 +415,6 @@ public class AntrenorController : Controller
                 _context.Yoklamalar.RemoveRange(eskiYoklamalar);
             }
 
-            // Yeni yoklamaları ekle
             if (yoklamalar != null && yoklamalar.Any())
             {
                 foreach (var y in yoklamalar)
@@ -562,7 +609,7 @@ public class AntrenorController : Controller
         await _context.SaveChangesAsync();
 
         TempData["Basarili"] = "Şifreniz başarıyla değiştirildi!";
-        return RedirectToAction("Panel");
+        return RedirectToAction("Profil");
     }
 
     // ========== ÇIKIŞ ==========
