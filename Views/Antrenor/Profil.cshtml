@@ -30,15 +30,8 @@
             cursor: pointer;
             border: 3px solid #FFD700;
         }
-        .profile-avatar img { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-        }
-        .profile-avatar i { 
-            font-size: 55px; 
-            color: #FFD700; 
-        }
+        .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-avatar i { font-size: 55px; color: #FFD700; }
         .avatar-overlay {
             position: absolute;
             bottom: 0;
@@ -52,9 +45,7 @@
             opacity: 0;
             transition: opacity 0.3s;
         }
-        .profile-avatar:hover .avatar-overlay {
-            opacity: 1;
-        }
+        .profile-avatar:hover .avatar-overlay { opacity: 1; }
         .btn-custom { background: linear-gradient(135deg, #0B2A4A 0%, #1B3B5C 100%); color: white; border: none; padding: 10px 25px; border-radius: 8px; transition: all 0.3s; }
         .btn-custom:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(11,42,74,0.3); color: white; }
         .form-control { border-radius: 10px; padding: 10px 15px; }
@@ -87,7 +78,6 @@
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="profile-card">
-                    <!-- Profil Fotoğrafı -->
                     <div class="text-center mb-4">
                         <div class="profile-avatar" onclick="document.getElementById('fotoInput').click()">
                             @if (!string.IsNullOrEmpty(antrenor?.ProfilResmi))
@@ -107,8 +97,7 @@
                         <span class="badge bg-primary">@antrenor?.Email</span>
                     </div>
 
-                    <!-- Fotoğraf Yükleme Formu (Gizli) -->
-                    <form method="post" action="@Url.Action("ProfilFotoYukle", "Antrenor")" enctype="multipart/form-data" id="fotoForm">
+                    <form method="post" asp-action="ProfilFotoYukle" asp-controller="Antrenor" enctype="multipart/form-data" id="fotoForm">
                         <input type="file" name="foto" id="fotoInput" accept="image/jpeg,image/png,image/jpg,image/gif" style="display:none" onchange="this.form.submit()" />
                     </form>
 
@@ -128,8 +117,7 @@
                         </div>
                     }
 
-                    <!-- Bilgi Güncelleme Formu -->
-                    <form method="post" action="@Url.Action("ProfilGuncelle", "Antrenor")">
+                    <form method="post" asp-action="ProfilGuncelle" asp-controller="Antrenor">
                         <div class="mb-3">
                             <label class="form-label">Ad Soyad</label>
                             <input type="text" name="AdSoyad" class="form-control" value="@antrenor?.AdSoyad" required />
@@ -148,21 +136,14 @@
                             <input type="text" name="Uzmanlik" class="form-control" value="@antrenor?.Uzmanlik" required />
                         </div>
                         <div class="d-flex gap-2 mt-4">
-                            <button type="submit" class="btn-custom w-100">
-                                <i class="bi bi-save me-2"></i>Bilgileri Güncelle
-                            </button>
-                            <a href="@Url.Action("Panel", "Antrenor")" class="btn btn-outline-secondary w-100">
-                                <i class="bi bi-arrow-left me-2"></i>Geri Dön
-                            </a>
+                            <button type="submit" class="btn-custom w-100">Bilgileri Güncelle</button>
+                            <a href="@Url.Action("Panel", "Antrenor")" class="btn btn-outline-secondary w-100">Geri Dön</a>
                         </div>
                     </form>
 
                     <hr class="my-4" />
-                    
                     <div class="text-center">
-                        <a href="@Url.Action("SifreDegistir", "Antrenor")" class="btn btn-outline-primary">
-                            <i class="bi bi-key me-2"></i>Şifre Değiştir
-                        </a>
+                        <a href="@Url.Action("SifreDegistir", "Antrenor")" class="btn btn-outline-primary">Şifre Değiştir</a>
                     </div>
                 </div>
             </div>
