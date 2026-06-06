@@ -147,11 +147,11 @@ using (var scope = app.Services.CreateScope())
         {
             Console.WriteLine("Antrenörler ekleniyor...");
             context.Antrenorler.AddRange(
-                new Antrenor { AdSoyad = "Burhan Şayan", Email = "burhansayan@bbsk.com", Sifre = "Pasör7", Telefon = "0532 111 2233", Uzmanlik = "Tam Yetki", KayitTarihi = DateTime.Now },
-                new Antrenor { AdSoyad = "Ertan Tuncel", Email = "ertantuncel@bbsk.com", Sifre = "Ertan347837", Telefon = "0532 222 3344", Uzmanlik = "Tam Yetki", KayitTarihi = DateTime.Now },
-                new Antrenor { AdSoyad = "Özgür Doğan", Email = "ozgurdogan@bbsk.com", Sifre = "Özgür3434", Telefon = "0532 333 4455", Uzmanlik = "Yakuplu Sorumlusu", KayitTarihi = DateTime.Now },
-                new Antrenor { AdSoyad = "Eftelya Köse", Email = "eftelyakose@bbsk.com", Sifre = "Eftelya3467", Telefon = "0532 444 5566", Uzmanlik = "Yakuplu Sorumlusu", KayitTarihi = DateTime.Now },
-                new Antrenor { AdSoyad = "Sezer Kaya", Email = "sezerkaya@bbsk.com", Sifre = "sezer029", Telefon = "0532 555 6677", Uzmanlik = "Emlak Konut Sorumlusu", KayitTarihi = DateTime.Now }
+                new Antrenor { AdSoyad = "Burhan Şayan", Email = "burhansayan@bbsk.com", Sifre = "Pasör7", Telefon = "0505 896 8407", Uzmanlik = "Tam Yetki", KayitTarihi = DateTime.Now },
+                new Antrenor { AdSoyad = "Ertan Tunçel", Email = "ertantunçel@bbsk.com", Sifre = "Ertan347837.", Telefon = "0531 703 92 43", Uzmanlik = "Tam Yetki", KayitTarihi = DateTime.Now },
+                new Antrenor { AdSoyad = "Özgür Doğan", Email = "özgurdogan@bbsk.com", Sifre = "Özgür3434.", Telefon = "0532 333 4455", Uzmanlik = "Yakuplu Sorumlusu", KayitTarihi = DateTime.Now },
+                new Antrenor { AdSoyad = "Eftelya Köse", Email = "eftelyakose@bbsk.com", Sifre = "Eftelya3467.", Telefon = "0532 444 5566", Uzmanlik = "Yakuplu Sorumlusu", KayitTarihi = DateTime.Now },
+                new Antrenor { AdSoyad = "Sezer Kaya", Email = "sezerkaya@bbsk.com", Sifre = "Sezer3443.", Telefon = "0532 555 6677", Uzmanlik = "Emlak Konut Sorumlusu", KayitTarihi = DateTime.Now }
             );
             context.SaveChanges();
             Console.WriteLine("Antrenörler eklendi. (Şifreler güncellendi)");
