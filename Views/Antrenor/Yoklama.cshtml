@@ -9,271 +9,329 @@
 <html lang="tr">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
     <title>Yoklama Alma - Beylikdüzü Beykent Spor</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { background: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
-        .navbar-custom { background: linear-gradient(135deg, #0B2A4A 0%, #1B3B5C 100%); box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .navbar-custom .navbar-brand, .navbar-custom .nav-link { color: white !important; }
-        .table-custom { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f0f2f5; font-family: 'Poppins', sans-serif; }
+        
+        /* Navbar */
+        .navbar-custom { background: linear-gradient(135deg, #0B2A4A 0%, #1B3B5C 100%); box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 12px 0; }
+        .navbar-custom .navbar-brand, .navbar-custom .nav-link { color: white !important; font-weight: 500; }
+        .navbar-brand { font-size: 1.2rem; font-weight: 700; }
+        
+        /* Kartlar */
+        .card-custom { background: white; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); border: none; overflow: hidden; }
+        .card-header-custom { background: white; border-bottom: 2px solid #0B2A4A; padding: 15px 20px; }
+        
+        /* Tablo */
+        .table-custom { margin-bottom: 0; }
         .table-custom thead { background: #0B2A4A; color: white; }
-        .table-custom thead th { padding: 12px; font-weight: 600; }
+        .table-custom thead th { padding: 15px 12px; font-weight: 600; font-size: 14px; text-align: center; }
+        .table-custom tbody td { padding: 12px; vertical-align: middle; text-align: center; }
         .table-custom tbody tr:hover { background: #f8f9fa; }
-        .table-custom tbody td { padding: 10px; vertical-align: middle; }
-        .bg-gradient-primary { background: linear-gradient(135deg, #0B2A4A 0%, #1B3B5C 100%); }
+        
+        /* Badge */
+        .badge-custom { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+        .badge-takim { background: #e3f2fd; color: #0B2A4A; }
+        .badge-grup { background: #e8f5e9; color: #2e7d32; }
+        
+        /* Form Elemanları */
+        .form-select-sm { min-width: 130px; border-radius: 10px; border: 1px solid #ddd; padding: 8px 12px; font-size: 13px; }
+        .form-control-sm { border-radius: 10px; border: 1px solid #ddd; padding: 8px 12px; font-size: 13px; }
+        .form-select-sm:focus, .form-control-sm:focus { border-color: #0B2A4A; box-shadow: 0 0 0 3px rgba(11,42,74,0.1); outline: none; }
+        
+        /* Butonlar */
+        .btn-custom { background: linear-gradient(135deg, #0B2A4A, #1B3B5C); color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 600; transition: all 0.3s; }
+        .btn-custom:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(11,42,74,0.3); color: white; }
+        .btn-outline-custom { border: 2px solid #0B2A4A; color: #0B2A4A; background: white; padding: 8px 20px; border-radius: 10px; font-weight: 500; transition: all 0.3s; }
+        .btn-outline-custom:hover { background: #0B2A4A; color: white; }
+        
+        /* Filtre Bölümü */
+        .filter-section { background: white; border-radius: 20px; padding: 20px; margin-bottom: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        
+        /* Hızlı İşlem Butonları */
+        .quick-actions { display: flex; gap: 10px; flex-wrap: wrap; margin: 20px 0; }
+        .quick-btn { flex: 1; padding: 10px; border-radius: 10px; font-weight: 600; transition: all 0.3s; cursor: pointer; text-align: center; }
+        .quick-btn-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .quick-btn-success:hover { background: #28a745; color: white; }
+        .quick-btn-warning { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .quick-btn-warning:hover { background: #ffc107; color: white; }
+        .quick-btn-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .quick-btn-danger:hover { background: #dc3545; color: white; }
+        
+        /* Footer */
+        footer { background: white; padding: 15px; text-align: center; margin-top: 30px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .table-custom thead th { font-size: 10px; padding: 8px 4px; }
+            .table-custom tbody td { font-size: 11px; padding: 8px 4px; }
+            .form-select-sm { min-width: 100px; font-size: 11px; padding: 5px 8px; }
+            .quick-btn { font-size: 11px; padding: 8px; }
+        }
     </style>
 </head>
 <body>
+    <!-- NAVBAR -->
     <nav class="navbar navbar-expand-lg navbar-custom">
         <div class="container">
             <a class="navbar-brand fw-bold" href="@Url.Action("Panel", "Antrenor")">
                 <i class="bi bi-trophy-fill me-2"></i>BEYLİKDÜZÜ BEYKENT SPOR
             </a>
-            <div class="collapse navbar-collapse">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="@Url.Action("Panel", "Antrenor")"><i class="bi bi-speedometer2 me-1"></i>Panel</a></li>
-                    <li class="nav-item"><a class="nav-link" href="@Url.Action("Cikis", "Antrenor")"><i class="bi bi-box-arrow-right me-1"></i>Çıkış</a></li>
-                </ul>
+            <div class="ms-auto">
+                <a class="nav-link d-inline-block" href="@Url.Action("Panel", "Antrenor")">
+                    <i class="bi bi-speedometer2 me-1"></i>Panel
+                </a>
+                <a class="nav-link d-inline-block ms-3" href="@Url.Action("Cikis", "Antrenor")">
+                    <i class="bi bi-box-arrow-right me-1"></i>Çıkış
+                </a>
             </div>
         </div>
     </nav>
 
     <div class="container mt-4">
         <!-- BAŞLIK KARTI -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card bg-gradient-primary text-white shadow-lg border-0">
-                    <div class="card-body p-4">
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-check2-circle display-4 me-4"></i>
-                            <div>
-                                <h2 class="fw-bold mb-2">Yoklama Alma Paneli</h2>
-                                <p class="lead mb-0">Toplam <strong>@sporcular.Count</strong> sporcu</p>
-                            </div>
-                        </div>
+        <div class="card-custom mb-4">
+            <div class="card-header-custom">
+                <div class="d-flex justify-content-between align-items-center flex-wrap">
+                    <div>
+                        <h3 class="fw-bold mb-1"><i class="bi bi-check2-circle me-2" style="color: #0B2A4A;"></i>Yoklama Alma Paneli</h3>
+                        <p class="text-muted mb-0">Antrenman yoklaması almak için sporcuların durumlarını işaretleyin</p>
+                    </div>
+                    <div class="mt-2 mt-sm-0">
+                        <span class="badge bg-primary fs-6 p-2"><i class="bi bi-people-fill me-1"></i>@sporcular.Count Sporcu</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- TARİH VE FİLTRE KARTI -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-white py-3">
-                        <h5 class="mb-0 fw-bold"><i class="bi bi-funnel me-2"></i>Filtreleme</h5>
-                    </div>
-                    <div class="card-body">
-                        <form method="get" action="@Url.Action("Yoklama", "Antrenor")" class="row g-3">
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Takım</label>
-                                <select name="takimId" class="form-select" id="takimFilter">
-                                    <option value="">Tüm Takımlar</option>
-                                    @if (ViewBag.TumTakimlar != null)
-                                    {
-                                        foreach (var item in ViewBag.TumTakimlar)
-                                        {
-                                            if (item.Value == takimId?.ToString())
-                                            {
-                                                <option value="@item.Value" selected>@item.Text</option>
-                                            }
-                                            else
-                                            {
-                                                <option value="@item.Value">@item.Text</option>
-                                            }
-                                        }
-                                    }
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Grup</label>
-                                <select name="grupId" class="form-select" id="grupFilter">
-                                    <option value="">Tüm Gruplar</option>
-                                    @if (ViewBag.TumGruplar != null)
-                                    {
-                                        foreach (var item in ViewBag.TumGruplar)
-                                        {
-                                            if (item.Value == grupId?.ToString())
-                                            {
-                                                <option value="@item.Value" selected>@item.Text</option>
-                                            }
-                                            else
-                                            {
-                                                <option value="@item.Value">@item.Text</option>
-                                            }
-                                        }
-                                    }
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Tarih</label>
-                                <input type="date" name="tarih" class="form-control" value="@ViewBag.Tarih?.ToString("yyyy-MM-dd")" />
-                            </div>
-                            <div class="col-12 text-end">
-                                <button type="submit" class="btn btn-primary px-4">Filtrele</button>
-                                <a href="@Url.Action("Yoklama", "Antrenor")" class="btn btn-secondary px-4">Temizle</a>
-                            </div>
-                        </form>
-                    </div>
+        <!-- FİLTRE BÖLÜMÜ -->
+        <div class="filter-section">
+            <form method="get" action="@Url.Action("Yoklama", "Antrenor")" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold"><i class="bi bi-grid-3x3 me-1"></i>Takım</label>
+                    <select name="takimId" class="form-select" id="takimFilter">
+                        <option value="">Tüm Takımlar</option>
+                        @if (ViewBag.TumTakimlar != null)
+                        {
+                            foreach (var item in ViewBag.TumTakimlar)
+                            {
+                                if (item.Value == takimId?.ToString())
+                                {
+                                    <option value="@item.Value" selected>@item.Text</option>
+                                }
+                                else
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            }
+                        }
+                    </select>
                 </div>
-            </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold"><i class="bi bi-diagram-3 me-1"></i>Grup</label>
+                    <select name="grupId" class="form-select" id="grupFilter">
+                        <option value="">Tüm Gruplar</option>
+                        @if (ViewBag.TumGruplar != null)
+                        {
+                            foreach (var item in ViewBag.TumGruplar)
+                            {
+                                if (item.Value == grupId?.ToString())
+                                {
+                                    <option value="@item.Value" selected>@item.Text</option>
+                                }
+                                else
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold"><i class="bi bi-calendar me-1"></i>Tarih</label>
+                    <input type="date" name="tarih" class="form-control" value="@ViewBag.Tarih?.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-primary px-4"><i class="bi bi-search me-1"></i>Filtrele</button>
+                    <a href="@Url.Action("Yoklama", "Antrenor")" class="btn btn-secondary px-4 ms-2"><i class="bi bi-arrow-repeat me-1"></i>Temizle</a>
+                </div>
+            </form>
         </div>
 
         <!-- YOKLAMA FORM KARTI -->
-        <div class="row">
-            <div class="col-12">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-white py-3">
-                        <h5 class="mb-0 fw-bold">
-                            <i class="bi bi-calendar-check me-2"></i>
-                            @ViewBag.Tarih?.ToString("dd MMMM yyyy") Tarihli Yoklama
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        @if (TempData["Basarili"] != null)
-                        {
-                            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                <i class="bi bi-check-circle-fill me-2"></i>@TempData["Basarili"]
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        }
+        <div class="card-custom">
+            <div class="card-header-custom">
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-calendar-check me-2" style="color: #0B2A4A;"></i>
+                    @ViewBag.Tarih?.ToString("dd MMMM yyyy") Tarihli Yoklama
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                @if (TempData["Basarili"] != null)
+                {
+                    <div class="alert alert-success m-3">@TempData["Basarili"]</div>
+                }
 
-                        @if (sporcular.Any())
-                        {
-                            <form method="post" action="@Url.Action("YoklamaKaydet", "Antrenor")" id="yoklamaForm">
-                                <input type="hidden" name="tarih" value="@ViewBag.Tarih?.ToString("yyyy-MM-dd")" />
-                                <input type="hidden" name="takimId" value="@takimId" />
-                                <input type="hidden" name="grupId" value="@grupId" />
-                                
-                                <div class="table-responsive">
-                                    <table class="table table-custom mb-0">
-                                        <thead>
-                                            <tr>
-                                                <th>#</th>
-                                                <th>Sporcu Adı</th>
-                                                <th>Takım/Grup</th>
-                                                <th>Durum</th>
-                                                <th>Not</th>
-                                                <th>Veli İletişim</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @for (int i = 0; i < sporcular.Count; i++)
-                                            {
-                                                var uye = sporcular[i];
-                                                var yoklamaVar = ViewBag.Yoklamalar != null && ViewBag.Yoklamalar.ContainsKey(uye.Id);
-                                                var kayitliDurum = "";
-                                                var kayitliNot = "";
-                                                if (yoklamaVar)
-                                                {
-                                                    kayitliDurum = ViewBag.Yoklamalar[uye.Id].Durum;
-                                                    kayitliNot = ViewBag.Yoklamalar[uye.Id].Not;
-                                                }
-                                                
-                                                <tr>
-                                                    <td class="fw-bold">@(i + 1)</td>
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-                                                            <i class="bi bi-person-circle me-2 text-primary"></i>
-                                                            <strong>@uye.AdSoyad</strong>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <span class="badge bg-info bg-opacity-10 text-info p-2">
-                                                            @(uye.Takim?.Ad ?? "-") / @(uye.Grup?.Ad ?? "-")
-                                                        </span>
-                                                    </td>
-                                                    <td>
-                                                        <select name="yoklamalar[@i].Durum" class="form-select form-select-sm yoklama-durum">
-                                                            @if (kayitliDurum == "Katıldı")
-                                                            {
-                                                                <option value="Katıldı" selected>✅ Katıldı</option>
-                                                            }
-                                                            else
-                                                            {
-                                                                <option value="Katıldı">✅ Katıldı</option>
-                                                            }
-                                                            @if (kayitliDurum == "Katılmadı")
-                                                            {
-                                                                <option value="Katılmadı" selected>❌ Katılmadı</option>
-                                                            }
-                                                            else
-                                                            {
-                                                                <option value="Katılmadı">❌ Katılmadı</option>
-                                                            }
-                                                            @if (kayitliDurum == "İzinli")
-                                                            {
-                                                                <option value="İzinli" selected>📝 İzinli</option>
-                                                            }
-                                                            else
-                                                            {
-                                                                <option value="İzinli">📝 İzinli</option>
-                                                            }
-                                                            @if (kayitliDurum == "Raporlu")
-                                                            {
-                                                                <option value="Raporlu" selected>🏥 Raporlu</option>
-                                                            }
-                                                            else
-                                                            {
-                                                                <option value="Raporlu">🏥 Raporlu</option>
-                                                            }
-                                                        </select>
-                                                        <input type="hidden" name="yoklamalar[@i].UyeId" value="@uye.Id" />
-                                                    </td>
-                                                    <td>
-                                                        <input type="text" name="yoklamalar[@i].Not" class="form-control form-control-sm" 
-                                                               value="@kayitliNot" 
-                                                               placeholder="Varsa not..." />
-                                                    </td>
-                                                    <td>
-                                                        <div class="btn-group">
-                                                            <a href="https://wa.me/@uye.VeliTelefon?.Replace(" ", "")" target="_blank" class="btn btn-sm btn-success" title="WhatsApp">
-                                                                <i class="bi bi-whatsapp"></i>
-                                                            </a>
-                                                            <a href="tel:@uye.VeliTelefon" class="btn btn-sm btn-primary" title="Ara">
-                                                                <i class="bi bi-telephone-fill"></i>
-                                                            </a>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                                
-                                <div class="row mt-4 align-items-center">
-                                    <div class="col-md-6">
-                                        <div class="btn-group">
-                                            <button type="button" class="btn btn-outline-success" id="markAllPresent">Tümünü Katıldı Yap</button>
-                                            <button type="button" class="btn btn-outline-warning" id="markAllPermitted">Tümünü İzinli Yap</button>
-                                            <button type="button" class="btn btn-outline-danger" id="markAllAbsent">Tümünü Katılmadı Yap</button>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 text-end">
-                                        <button type="submit" class="btn btn-success btn-lg px-5">
-                                            <i class="bi bi-save me-2"></i>Yoklamayı Kaydet
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-                        }
-                        else
-                        {
-                            <div class="text-center py-5">
-                                <i class="bi bi-inbox display-1 text-muted"></i>
-                                <h4 class="mt-3 text-muted">Bu filtrelerde sporcu bulunmuyor</h4>
-                                <p class="text-muted">Farklı takım veya grup seçerek tekrar deneyin.</p>
-                                <a href="@Url.Action("Yoklama", "Antrenor")" class="btn btn-primary mt-2">Filtreleri Temizle</a>
+                @if (sporcular.Any())
+                {
+                    <form method="post" action="@Url.Action("YoklamaKaydet", "Antrenor")" id="yoklamaForm">
+                        <input type="hidden" name="tarih" value="@ViewBag.Tarih?.ToString("yyyy-MM-dd")" />
+                        <input type="hidden" name="takimId" value="@takimId" />
+                        <input type="hidden" name="grupId" value="@grupId" />
+                        
+                        <!-- HIZLI İŞLEM BUTONLARI -->
+                        <div class="quick-actions px-3 pt-3">
+                            <div class="quick-btn quick-btn-success" id="markAllPresent">
+                                <i class="bi bi-check2-circle me-1"></i> Tümünü Katıldı Yap
                             </div>
-                        }
+                            <div class="quick-btn quick-btn-warning" id="markAllPermitted">
+                                <i class="bi bi-file-text me-1"></i> Tümünü İzinli Yap
+                            </div>
+                            <div class="quick-btn quick-btn-danger" id="markAllAbsent">
+                                <i class="bi bi-x-circle me-1"></i> Tümünü Katılmadı Yap
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-custom">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 5%">#</th>
+                                        <th style="width: 20%">Sporcu Adı</th>
+                                        <th style="width: 15%">Takım/Grup</th>
+                                        <th style="width: 20%">Durum</th>
+                                        <th style="width: 25%">Not</th>
+                                        <th style="width: 15%">İletişim</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (int i = 0; i < sporcular.Count; i++)
+                                    {
+                                        var uye = sporcular[i];
+                                        var yoklamaVar = ViewBag.Yoklamalar != null && ViewBag.Yoklamalar.ContainsKey(uye.Id);
+                                        var kayitliDurum = "";
+                                        var kayitliNot = "";
+                                        if (yoklamaVar)
+                                        {
+                                            kayitliDurum = ViewBag.Yoklamalar[uye.Id].Durum;
+                                            kayitliNot = ViewBag.Yoklamalar[uye.Id].Not;
+                                        }
+                                        
+                                        <tr>
+                                            <td class="fw-bold">@(i + 1)</td>
+                                            <td class="text-start">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar me-2" style="width: 32px; height: 32px; border-radius: 50%; background: #0B2A4A; color: white; display: inline-flex; align-items: center; justify-content: center; font-weight: bold;">
+                                                        @uye.AdSoyad.Substring(0, 1)
+                                                    </div>
+                                                    <strong>@uye.AdSoyad</strong>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge-custom badge-takim">
+                                                    <i class="bi bi-grid-3x3 me-1"></i>@(uye.Takim?.Ad ?? "-")
+                                                </span>
+                                                <br />
+                                                <span class="badge-custom badge-grup mt-1">
+                                                    <i class="bi bi-diagram-3 me-1"></i>@(uye.Grup?.Ad ?? "-")
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <select name="yoklamalar[@i].Durum" class="form-select form-select-sm yoklama-durum">
+                                                    @if (kayitliDurum == "Katıldı")
+                                                    {
+                                                        <option value="Katıldı" selected>✅ Katıldı</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="Katıldı">✅ Katıldı</option>
+                                                    }
+                                                    @if (kayitliDurum == "Katılmadı")
+                                                    {
+                                                        <option value="Katılmadı" selected>❌ Katılmadı</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="Katılmadı">❌ Katılmadı</option>
+                                                    }
+                                                    @if (kayitliDurum == "İzinli")
+                                                    {
+                                                        <option value="İzinli" selected>📝 İzinli</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="İzinli">📝 İzinli</option>
+                                                    }
+                                                    @if (kayitliDurum == "Raporlu")
+                                                    {
+                                                        <option value="Raporlu" selected>🏥 Raporlu</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="Raporlu">🏥 Raporlu</option>
+                                                    }
+                                                </select>
+                                                <input type="hidden" name="yoklamalar[@i].UyeId" value="@uye.Id" />
+                                            </td>
+                                            <td>
+                                                <input type="text" name="yoklamalar[@i].Not" class="form-control form-control-sm" 
+                                                       value="@kayitliNot" placeholder="Varsa not..." />
+                                            </td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <a href="https://wa.me/@uye.VeliTelefon?.Replace(" ", "")" target="_blank" class="btn btn-sm btn-success" title="WhatsApp">
+                                                        <i class="bi bi-whatsapp"></i>
+                                                    </a>
+                                                    <a href="tel:@uye.VeliTelefon" class="btn btn-sm btn-primary" title="Ara">
+                                                        <i class="bi bi-telephone-fill"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary copy-phone" data-phone="@uye.VeliTelefon" title="Kopyala">
+                                                        <i class="bi bi-files"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- KAYDET BUTONU -->
+                        <div class="p-3 bg-white border-top">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <div class="text-muted small">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        <span id="seciliSayi">0</span> sporcu için durum seçildi
+                                    </div>
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    <button type="submit" class="btn-custom" id="submitBtn">
+                                        <i class="bi bi-save me-2"></i>Yoklamayı Kaydet
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="bi bi-inbox display-1 text-muted"></i>
+                        <h4 class="mt-3 text-muted">Bu filtrelerde sporcu bulunmuyor</h4>
+                        <p class="text-muted">Farklı takım veya grup seçerek tekrar deneyin.</p>
+                        <a href="@Url.Action("Yoklama", "Antrenor")" class="btn btn-primary mt-2">Filtreleri Temizle</a>
                     </div>
-                </div>
+                }
             </div>
         </div>
 
-        <!-- GEÇMİŞ YOKLAMALAR VE PANELE DÖN LİNKLERİ -->
+        <!-- ALT LİNKLER -->
         <div class="text-center mt-4">
             <a href="@Url.Action("GecmisYoklamalar", "Antrenor")" class="btn btn-outline-secondary">
                 <i class="bi bi-clock-history me-2"></i>Geçmiş Yoklamalar
@@ -284,14 +342,51 @@
         </div>
     </div>
 
+    <footer>
+        <p class="mb-0 small">© @DateTime.Now.Year Beylikdüzü Beykent Spor Kulübü - Tüm hakları saklıdır.</p>
+    </footer>
+
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         $(document).ready(function() {
-            $('#markAllPresent').click(function() { $('.yoklama-durum').val('Katıldı'); });
-            $('#markAllPermitted').click(function() { $('.yoklama-durum').val('İzinli'); });
-            $('#markAllAbsent').click(function() { $('.yoklama-durum').val('Katılmadı'); });
+            // Seçili sporcu sayısını güncelle
+            function updateSelectedCount() {
+                var count = $('.yoklama-durum').length;
+                $('#seciliSayi').text(count);
+            }
+            updateSelectedCount();
 
+            // Tümünü katıldı yap
+            $('#markAllPresent').click(function() {
+                $('.yoklama-durum').val('Katıldı');
+                updateSelectedCount();
+            });
+
+            // Tümünü izinli yap
+            $('#markAllPermitted').click(function() {
+                $('.yoklama-durum').val('İzinli');
+                updateSelectedCount();
+            });
+
+            // Tümünü katılmadı yap
+            $('#markAllAbsent').click(function() {
+                $('.yoklama-durum').val('Katılmadı');
+                updateSelectedCount();
+            });
+
+            // Değişiklik olduğunda sayacı güncelle
+            $(document).on('change', '.yoklama-durum', updateSelectedCount);
+
+            // Telefon kopyalama
+            $('.copy-phone').click(function() {
+                var phone = $(this).data('phone');
+                navigator.clipboard.writeText(phone).then(function() {
+                    alert('Telefon numarası kopyalandı: ' + phone);
+                });
+            });
+
+            // Takım değişince grupları getir
             $('#takimFilter').change(function() {
                 var takimId = $(this).val();
                 if (takimId) {
@@ -307,6 +402,7 @@
                 }
             });
 
+            // Form submit onayı
             $('#yoklamaForm').submit(function(e) {
                 var sporcuSayisi = $('.yoklama-durum').length;
                 if (sporcuSayisi > 0) {
